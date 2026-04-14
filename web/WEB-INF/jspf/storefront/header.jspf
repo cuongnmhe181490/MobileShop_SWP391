@@ -1,0 +1,39 @@
+<%@page pageEncoding="UTF-8"%>
+<c:set var="cartSize" value="${empty sessionScope.size ? 0 : sessionScope.size}" />
+<div class="store-topbar">
+    <div class="mobile-shell store-topbar__inner">
+        <span>MobileShop</span>
+        <span>Mở cửa 08:00 - 22:00 | Hỗ trợ tại Hà Nội và TP.HCM</span>
+    </div>
+</div>
+<header class="store-header">
+    <div class="mobile-shell store-header__inner">
+        <a class="store-brand" href="${ctx}/home">
+            <span class="store-brand__title">MobileShop</span>
+            <span class="store-brand__caption">cửa hàng điện thoại</span>
+        </a>
+
+        <nav class="store-nav" aria-label="Điều hướng chính">
+            <a class="store-nav__link ${activePage == 'home' ? 'is-active' : ''}" href="${ctx}/home">Trang chủ</a>
+            <a class="store-nav__link ${activePage == 'catalog' ? 'is-active' : ''}" href="${ctx}/product">Cửa hàng</a>
+            <a class="store-nav__link ${activePage == 'tradein' ? 'is-active' : ''}" href="${ctx}/product#tradein">Thu cũ</a>
+            <a class="store-nav__link ${activePage == 'blog' ? 'is-active' : ''}" href="${ctx}/blog">Cẩm nang</a>
+            <a class="store-nav__link ${activePage == 'contact' ? 'is-active' : ''}" href="${ctx}/contact">Liên hệ</a>
+        </nav>
+
+        <div class="store-actions">
+            <a class="pill-link" href="${ctx}/product">Tìm</a>
+            <a class="pill-link" href="${ctx}/cartrole">Giỏ:  ${cartSize}</a>
+            <c:if test="${sessionScope.acc != null}">
+                <span class="pill-link">${sessionScope.acc.name}</span>
+                <a class="pill-link" href="${ctx}/logout">Đăng xuất</a>
+            </c:if>
+            <c:if test="${sessionScope.acc == null}">
+                <a class="pill-link" href="${ctx}/login.jsp">Đăng nhập</a>
+            </c:if>
+            <c:if test="${sessionScope.acc != null && sessionScope.acc.isAdmin > 0}">
+                <a class="pill-link pill-link--primary" href="${ctx}/manager">Quản trị</a>
+            </c:if>
+        </div>
+    </div>
+</header>
