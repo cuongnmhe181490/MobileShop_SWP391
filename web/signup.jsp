@@ -28,6 +28,13 @@
             .form-row > label {
                 flex: 1;
             }
+            
+            .required {
+                color: #ff0000; 
+                font-weight: bold;
+                margin-left: 4px;
+                display: inline-block;
+}
         </style>
     </head>
     <body>
@@ -53,29 +60,29 @@
                         <form class="auth-form__stack" action="signup" method="post" style="margin-top: 24px;" autocomplete="off">
     
                             <label>
-                                <span class="subtle-link">Tên đăng nhập</span>
+                                <span class="subtle-link">Tên đăng nhập</span><span class="required">*</span>
                                 <input class="auth-input" name="user" type="text" value="${param.user}" placeholder="Tên đăng nhập" required autofocus>
                             </label>
 
                             <div class="form-row">
                                 <label>
-                                    <span class="subtle-link">Mật khẩu</span>
+                                    <span class="subtle-link">Mật khẩu</span><span class="required">*</span>
                                     <input class="auth-input" name="pass" id="pass" type="password" placeholder="••••••••" required minlength="8">
                                 </label>
                                 <label>
-                                    <span class="subtle-link">Nhập lại mật khẩu</span>
+                                    <span class="subtle-link">Nhập lại mật khẩu</span><span class="required">*</span>
                                     <input class="auth-input" name="repass" id="repass" type="password" placeholder="••••••••" required minlength="8">
                                 </label>
                             </div>
 
                             <label>
-                                <span class="subtle-link">Họ và tên</span>
+                                <span class="subtle-link">Họ và tên</span><span class="required">*</span>
                                 <input class="auth-input" name="name" type="text" value="${param.name}" placeholder="Họ và tên" required>
                             </label>
 
                             <div class="form-row">
                                 <label>
-                                    <span class="subtle-link">Giới tính</span>
+                                    <span class="subtle-link">Giới tính</span><span class="required">*</span>
                                     <select class="auth-input" name="gender" required style="cursor: pointer;">
                                         <option value="" disabled ${empty param.gender ? 'selected' : ''}>Chọn giới tính</option>
                                         <option value="Male" ${param.gender == 'Male' ? 'selected' : ''}>Nam</option>
@@ -83,24 +90,24 @@
                                     </select>
                                 </label>
                                 <label>
-                                    <span class="subtle-link">Ngày sinh</span>
+                                    <span class="subtle-link">Ngày sinh</span><span class="required">*</span>
                                     <input class="auth-input" name="birthday" type="text" value="${param.birthday}" placeholder="YYYY-MM-DD" required>
                                 </label>
                             </div>
 
                             <div class="form-row">
                                 <label>
-                                    <span class="subtle-link">Email</span>
+                                    <span class="subtle-link">Email</span><span class="required">*</span>
                                     <input class="auth-input" name="email" id="email" type="email" value="${param.email}" placeholder="email@example.com" required>   <span class="error-text" id="email-error"></span>
                                 </label>
                                 <label>
-                                    <span class="subtle-link">Số điện thoại</span>
+                                    <span class="subtle-link">Số điện thoại</span><span class="required">*</span>
                                     <input class="auth-input" name="phone" id="phone" type="text" value="${param.phone}" placeholder="0123456789" required>
                                 </label>
                             </div>
 
                             <label>
-                                <span class="subtle-link">Địa chỉ</span>
+                                <span class="subtle-link">Địa chỉ</span><span class="required">*</span>
                                 <input class="auth-input" name="address" type="text" value="${param.address}" placeholder="Nhập địa chỉ của bạn" required>
                             </label>
 

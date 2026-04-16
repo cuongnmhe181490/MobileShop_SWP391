@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package control;
+package controller.auth;
 
 import dao.DAO;
 import entity.User;
@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
-
+import org.mindrot.jbcrypt.BCrypt;
 /**
  *
  * @author 84912
@@ -43,33 +43,31 @@ public class SignupControl extends HttpServlet {
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
         String birthday = request.getParameter("birthday");
-        // Biểu thức Regex kiểm tra Email chuẩn
-String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-// Biểu thức Regex kiểm tra Số điện thoại VN (Bắt đầu bằng 0, tổng cộng 10 số)
-String phoneRegex = "^0\\d{9}$";
+        
+        String hashedPassword = BCrypt.hashpw(pass, BCrypt.gensalt());
+        
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
-// Kiểm tra rỗng cho các trường bắt buộc
-if (name == null || name.trim().isEmpty()) {
-    request.setAttribute("mess", "Họ và tên không được để trống!");
-    request.getRequestDispatcher("signup.jsp").forward(request, response);
-    return;
-}
+        String phoneRegex = "^0\\d{9}$";
 
-// Kiểm tra định dạng Email
-if (email == null || !email.matches(emailRegex)) {
-    request.setAttribute("mess", "Email không đúng định dạng (VD: email@example.com)!");
-    request.getRequestDispatcher("signup.jsp").forward(request, response);
-    return;
-}
+        if (name == null || name.trim().isEmpty()) {
+            request.setAttribute("mess", "Họ và tên không được để trống!");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
 
-// Kiểm tra định dạng Số điện thoại
-if (phone == null || !phone.matches(phoneRegex)) {
-    request.setAttribute("mess", "Số điện thoại không hợp lệ (Phải gồm 10 số và bắt đầu bằng số 0)!");
-    request.getRequestDispatcher("signup.jsp").forward(request, response);
-    return;
-}
+        if (email == null || !email.matches(emailRegex)) {
+            request.setAttribute("mess", "Email không đúng định dạng (VD: email@example.com)!");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
 
-        // Kiểm tra định dạng Ngày sinh và tính hợp lệ (Ngày có thực)
+        if (phone == null || !phone.matches(phoneRegex)) {
+            request.setAttribute("mess", "Số điện thoại không hợp lệ (Phải gồm 10 số và bắt đầu bằng số 0)!");
+            request.getRequestDispatcher("signup.jsp").forward(request, response);
+            return;
+        }
+
         try {
             java.time.LocalDate parsedDate = java.time.LocalDate.parse(birthday);
             // Tùy chọn: Chặn người dùng chọn ngày sinh ở tương lai
@@ -94,12 +92,23 @@ if (phone == null || !phone.matches(phoneRegex)) {
         }else{
             DAO dao = new DAO();
             User a = dao.checkUserExist(user);
-            if(a==null){
-                dao.signup(user, gender,pass, address, email, phone, name, birthday);
-                response.sendRedirect("login.jsp");
-            }else{
+
+            if (a != null) {
+                // 1. Kiểm tra trùng Tên đăng nhập
                 request.setAttribute("mess", "Tên đăng nhập đã tồn tại!");
                 request.getRequestDispatcher("signup.jsp").forward(request, response);
+            } else if (dao.checkEmailExist(email)) {
+                // 2. Kiểm tra trùng Email
+                request.setAttribute("mess", "Email này đã được sử dụng!");
+                request.getRequestDispatcher("signup.jsp").forward(request, response);
+            } else if (dao.checkPhoneExist(phone)) {
+                // 3. Kiểm tra trùng Số điện thoại
+                request.setAttribute("mess", "Số điện thoại này đã được sử dụng!");
+                request.getRequestDispatcher("signup.jsp").forward(request, response);
+            } else {
+                // 4. Nếu tất cả đều không trùng thì mới cho đăng ký
+                dao.signup(user, gender, hashedPassword, address, email, phone, name, birthday);
+                response.sendRedirect("login.jsp");
             }
         }
     }

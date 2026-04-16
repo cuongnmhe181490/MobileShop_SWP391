@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  *
@@ -71,18 +72,28 @@ public class LoginControl extends HttpServlet {
 
     private void login(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String username = request.getParameter("user");
-        String password = request.getParameter("pass");
+        String user = request.getParameter("user");
+        String pass = request.getParameter("pass");
         DAO dao = new DAO();
-        User account = dao.login(username, password);
-        if (account == null) {
-            request.setAttribute("mess", "Sai tên đăng nhập hoặc mật khẩu");
+        User account = dao.checkLogin(user);
+        
+        if (account != null) {
+            // SO SÁNH: (Mật khẩu thô vừa nhập, Mật khẩu đã băm trong DB)
+            if (BCrypt.checkpw(pass, account.getPass())) {
+                // ĐÚNG MẬT KHẨU
+                HttpSession session = request.getSession();
+                session.setAttribute("acc", account);
+                response.sendRedirect("home"); 
+            } else {
+                // SAI MẬT KHẨU
+                request.setAttribute("mess", "Mật khẩu không chính xác!");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+            }
+        } else {
+            // SAI TÊN ĐĂNG NHẬP
+            request.setAttribute("mess", "Tài khoản không tồn tại!");
             request.getRequestDispatcher("login.jsp").forward(request, response);
-            return;
         }
-        HttpSession session = request.getSession();
-        session.setAttribute("acc", account);
-        response.sendRedirect("home");
     }
 
     /**
