@@ -4,6 +4,9 @@
  */
 package dao;
 import config.DBContext;
+import entity.Product;
+import entity.ProductReview;
+import java.sql.SQLException;
 import entity.User;
 import java.util.*;
 import java.lang.*;
@@ -19,50 +22,35 @@ import java.sql.ResultSet;
  * @author ADMIN
  */
 public class DAO {
-    Connection conn = null; // kết nối vs sql
-    PreparedStatement ps = null; // ném query sang sql
-    ResultSet rs = null; // nhận kết quả trả về
+    Connection conn = null; 
+    PreparedStatement ps = null; 
+    ResultSet rs = null; 
     
-    public User login(String user, String pass) {
-        String query = "SELECT * FROM [User]\n"
-                + "WHERE Username = ?\n"
-                + "AND [Password] = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
-            ps.setString(1, user);
-            ps.setString(2, pass);
-            rs = ps.executeQuery();
-            
-            // Dùng if thay vì while vì Username là duy nhất, chỉ trả về tối đa 1 kết quả
-            if (rs.next()) {
-                return new User(
-                        rs.getInt("UserId"),
-                        rs.getString("Username"),
-                        rs.getString("Gender"),
-                        rs.getString("Password"),
-                        rs.getString("Address"),
-                        rs.getString("Email"),
-                        rs.getString("PhoneNumber"),
-                        rs.getString("FullName"),
-                        rs.getDate("Birthday"), 
-                        rs.getInt("Role")
-                );
-            }
-        } catch (Exception e) {
-            e.printStackTrace(); // In lỗi ra log của Tomcat thay vì để trống (nuốt lỗi)
-        } finally {
-            // BEST PRACTICE: Bắt buộc đóng kết nối sau khi dùng xong để tránh sập Server
-            try {
-                if (rs != null) rs.close();
-                if (ps != null) ps.close();
-                if (conn != null) conn.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public User checkLogin(String user) {
+    String query = "SELECT * FROM [User] WHERE Username = ?";
+    try {
+        conn = new DBContext().getConnection();
+        ps = conn.prepareStatement(query);
+        ps.setString(1, user);
+        rs = ps.executeQuery();
+        if (rs.next()) {
+            // Nhớ map đúng các cột, đặc biệt là cột Password
+            return new User(rs.getInt(1), 
+                            rs.getString(2), 
+                            rs.getString(3), 
+                            rs.getString(4), // Cột Password (đã băm)
+                            rs.getString(5), 
+                            rs.getString(6), 
+                            rs.getString(7), 
+                            rs.getString(8), 
+                            rs.getDate(9), 
+                            rs.getInt(10));
         }
-        return null;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+    return null;
+}
     
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
     // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
@@ -109,6 +97,34 @@ public class DAO {
         } catch (Exception e) {
         }
         return null;
+    }
+    
+    public boolean checkEmailExist(String email) {
+        String query = "SELECT * FROM [User] WHERE Email = ?";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(query);
+            ps.setString(1, email);
+            rs = ps.executeQuery();
+            if (rs.next()) return true; // Có tồn tại
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean checkPhoneExist(String phone) {
+        String query = "SELECT * FROM [User] WHERE Phone = ?";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(query);
+            ps.setString(1, phone);
+            rs = ps.executeQuery();
+            if (rs.next()) return true; // Có tồn tại
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private Product mapProduct(ResultSet rs) throws SQLException {
