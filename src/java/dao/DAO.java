@@ -324,6 +324,26 @@ public class DAO {
         }
         return 0;
     }
+    
+    public Product getProductByBrandAndName(String brand, String modelName) {
+        String query = "SELECT TOP 1 * FROM ProductDetail WHERE IdSupplier = ? AND ProductName LIKE ? ORDER BY ReleaseDate DESC, Price DESC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, normalize(brand));
+            ps.setString(2, "%" + normalize(modelName) + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapProduct(rs);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+   private String normalize(String value) {
+        return value == null ? "" : value.trim();
+    }
 
     @FunctionalInterface
     private interface SqlConsumer<T> {
