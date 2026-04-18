@@ -7,6 +7,8 @@ import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.*;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 
 /**
@@ -15,7 +17,23 @@ import java.io.IOException;
  */
 public class SendGridEmailService {
     // THAY API KEY CỦA BẠN VÀO ĐÂY (Lấy từ trang chủ SendGrid)
-    private static final String API_KEY = "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"; 
+    private String getApiKey() {
+        Properties prop = new Properties();
+        // ClassLoader sẽ tìm file trong thư mục build/classes (nơi file properties được copy vào)
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
+            if (input == null) {
+                System.out.println("Lỗi: Không tìm thấy file config.properties!");
+                return null;
+            }
+            // Nạp dữ liệu từ file vào đối tượng prop
+            prop.load(input);
+            return prop.getProperty("SENDGRID_API_KEY");
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    } 
 
     // ĐÂY PHẢI LÀ EMAIL BẠN VỪA VERIFY TRÊN SENDGRID
     private static final String SYSTEM_EMAIL = "thanhaiphuc@gmail.com"; 
@@ -44,7 +62,17 @@ public class SendGridEmailService {
         Content content = new Content("text/html", htmlContent);
         Mail mail = new Mail(from, subject, to, content);
 
-        SendGrid sg = new SendGrid(API_KEY);
+        // 1. Gọi hàm lấy Key từ file config.properties
+        String apiKey = getApiKey();
+
+        // 2. Kiểm tra an toàn: Nếu không có Key thì dừng luôn việc gửi mail
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.err.println("Lỗi: Không tìm thấy API Key. Vui lòng kiểm tra file config.properties!");
+            return false; 
+        }
+
+        // 3. Truyền biến apiKey vào SendGrid
+        SendGrid sg = new SendGrid(apiKey);
         Request request = new Request();
         try {
             request.setMethod(Method.POST);

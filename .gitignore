@@ -11,6 +11,7 @@ nbproject/private/
 nbbuild/
 nbdist/
 .nb-gradle/
+config.properties
 
 # Bỏ qua các file hệ thống máy tính tự sinh ra
 .DS_Store
