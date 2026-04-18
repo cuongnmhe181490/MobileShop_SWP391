@@ -108,7 +108,7 @@ public class SignupControl extends HttpServlet {
             } else {
                 // 4. Nếu tất cả đều không trùng thì mới cho đăng ký
                 dao.signup(user, gender, hashedPassword, address, email, phone, name, birthday);
-                response.sendRedirect("login.jsp");
+                response.sendRedirect("login");
             }
         }
     }

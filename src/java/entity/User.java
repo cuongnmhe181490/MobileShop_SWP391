@@ -2,6 +2,7 @@ package entity;
 
 import java.sql.Date;
 
+
 /**
  * 
  */
@@ -15,12 +16,14 @@ public class User {
     private String phone;     // Tương ứng cột: PhoneNumber (VARCHAR)
     private String name;      // Tương ứng cột: FullName (NVARCHAR)
     private Date birthday;    // Tương ứng cột: Birthday (DATE)
-    private int role;         // Tương ứng cột: Role (INT) - 1: Admin, 0: User
+    private Role role;         
+    private String resetToken;
+    private Date resetTokenExpiry;
 
     public User() {
     }
 
-    public User(int id, String user, String gender, String pass, String address, String email, String phone, String name, Date birthday, int role) {
+    public User(int id, String user, String gender, String pass, String address, String email, String phone, String name, Date birthday, Role role) {
         this.id = id;
         this.user = user;
         this.gender = gender;
@@ -105,12 +108,28 @@ public class User {
         this.birthday = birthday;
     }
 
-    public int getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(int role) {
+    public void setRole(Role role) {
         this.role = role;
+    }
+    
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public Date getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(Date resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
     }
 
     @Override
