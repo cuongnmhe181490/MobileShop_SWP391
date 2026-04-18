@@ -14,6 +14,9 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import entity.Role;
 
 
 
@@ -26,36 +29,11 @@ public class DAO {
     PreparedStatement ps = null; 
     ResultSet rs = null; 
     
-    public User checkLogin(String user) {
-    String query = "SELECT * FROM [User] WHERE Username = ?";
-    try {
-        conn = new DBContext().getConnection();
-        ps = conn.prepareStatement(query);
-        ps.setString(1, user);
-        rs = ps.executeQuery();
-        if (rs.next()) {
-            // Nhớ map đúng các cột, đặc biệt là cột Password
-            return new User(rs.getInt(1), 
-                            rs.getString(2), 
-                            rs.getString(3), 
-                            rs.getString(4), // Cột Password (đã băm)
-                            rs.getString(5), 
-                            rs.getString(6), 
-                            rs.getString(7), 
-                            rs.getString(8), 
-                            rs.getDate(9), 
-                            rs.getInt(10));
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return null;
-}
     
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
     // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
     String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], "
-                 + "Email, PhoneNumber, FullName, Birthday, [Role]) \n"
+                 + "Email, PhoneNumber, FullName, Birthday, [RoleId]) \n"
                  + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)"; // 0 ở cuối là Role mặc định (Khách hàng)
     try {
         conn = new DBContext().getConnection();
@@ -75,29 +53,81 @@ public class DAO {
 }
     
     public User checkUserExist(String user) {
-        String query = "select * from [User]\n"
-                + "where Username = ?\n";
+        String query = "SELECT u.*, r.RoleName \n"
+                 + "FROM [User] u \n"
+                 + "INNER JOIN [Role] r ON u.RoleId = r.RoleId \n"
+                 + "WHERE u.Username = ?";
         try {
-            conn = new DBContext().getConnection();//mo ket noi voi sql
+            conn = new DBContext().getConnection();
             ps = conn.prepareStatement(query);
             ps.setString(1, user);
             rs = ps.executeQuery();
-            while (rs.next()) {
-                return new User(rs.getInt(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        rs.getString(4),
-                        rs.getString(5),
-                        rs.getString(6),
-                        rs.getString(7),
-                        rs.getString(8),
-                        rs.getDate(9),
-                        rs.getInt(10));
+            if (rs.next()) {
+                // 2. Khởi tạo Role
+                Role r = new Role();
+                r.setRoleId(rs.getInt("RoleId"));
+                r.setRoleName(rs.getString("RoleName"));
+                
+                User u = new User();
+                u.setId(rs.getInt("UserId"));
+                u.setUser(rs.getString("Username"));
+                u.setGender(rs.getString("Gender"));
+                u.setPass(rs.getString("Password"));
+                u.setAddress(rs.getString("Address"));
+                u.setEmail(rs.getString("Email"));
+                u.setPhone(rs.getString("PhoneNumber"));
+                u.setName(rs.getString("FullName"));
+                u.setBirthday(rs.getDate("Birthday"));
+
+                // 4. Gắn Role vào User
+                u.setRole(r);
+
+            return u;
             }
         } catch (Exception e) {
         }
         return null;
     }
+    
+    public User getUserByEmail(String email) {
+    // Truy vấn JOIN để lấy tên Role cùng lúc
+    String sql = "SELECT u.*, r.RoleName " +
+                 "FROM [User] u " +
+                 "INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
+                 "WHERE u.Email = ?";
+    try {
+        conn = new DBContext().getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, email);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            // 1. Khởi tạo đối tượng Role từ dữ liệu JOIN
+            Role role = new Role();
+            role.setRoleId(rs.getInt("RoleId"));
+            role.setRoleName(rs.getString("RoleName"));
+
+            // 2. Khởi tạo đối tượng User và gán các trường
+            User user = new User();
+            user.setId(rs.getInt("UserId"));
+            user.setEmail(rs.getString("Email"));
+            user.setPass(rs.getString("Password")); // Lấy pass đã mã hóa để check BCrypt
+            user.setName(rs.getNString("FullName"));
+            user.setPhone(rs.getString("PhoneNumber"));
+            user.setAddress(rs.getNString("Address"));
+            user.setGender(rs.getString("Gender"));
+            user.setBirthday(rs.getDate("Birthday"));
+            
+            // 3. GÁN ĐỐI TƯỢNG ROLE VÀO USER
+            user.setRole(role);
+
+            return user;
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
     
     public boolean checkEmailExist(String email) {
         String query = "SELECT * FROM [User] WHERE Email = ?";
@@ -313,5 +343,59 @@ public class DAO {
     @FunctionalInterface
     private interface SqlConsumer<T> {
         void accept(T value) throws Exception;
+    }
+    
+    // 1. Hàm tạo và lưu Token mới (Có hiệu lực 10 phút)
+    public void saveResetToken(String email, String token) {
+        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
+        String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
+        try {
+            conn = new DBContext().getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, token);
+            ps.setString(2, email);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 2. Hàm kiểm tra Token khi khách hàng click vào link
+    public User getUserByResetToken(String token) {
+        // Chỉ lấy User nếu Token khớp VÀ thời gian hiện tại vẫn nhỏ hơn thời gian hết hạn
+        // Sửa tạm để test
+        String sql = "SELECT * FROM [User] WHERE ResetToken = ?";
+        try {
+            conn = new DBContext().getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("UserId"));
+                u.setEmail(rs.getString("Email"));
+                u.setName(rs.getNString("FullName"));
+                // ... (bạn có thể set thêm các trường khác nếu cần)
+                return u;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // 3. Hàm lưu mật khẩu mới và Xóa Token (Chỉ dùng 1 lần)
+    public void updatePasswordAndClearToken(String email, String newHashedPassword) {
+        // Đổi pass xong thì đưa Token về NULL để vô hiệu hóa link cũ
+        String sql = "UPDATE [User] SET [Password] = ?, ResetToken = NULL, ResetTokenExpiry = NULL WHERE Email = ?";
+        try {
+            conn = new DBContext().getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, newHashedPassword);
+            ps.setString(2, email);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

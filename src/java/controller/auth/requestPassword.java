@@ -5,23 +5,23 @@
 package controller.auth;
 
 import dao.DAO;
-import dao.UserDAO;
 import entity.User;
 import java.io.IOException;
+import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import org.mindrot.jbcrypt.BCrypt;
+import controller.auth.SendGridEmailService;
+import java.util.UUID;
 
 /**
  *
- * @author 84912
+ * @author default
  */
-@WebServlet(name = "LoginControl", urlPatterns = {"/login"})
-public class LoginControl extends HttpServlet {
+@WebServlet(name="requestPassword", urlPatterns={"/requestPassword"})
+public class requestPassword extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -35,11 +35,18 @@ public class LoginControl extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        if ("GET".equalsIgnoreCase(request.getMethod())) {
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-            return;
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet ChangePassword</title>");            
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet ChangePassword at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
         }
-        login(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -54,7 +61,7 @@ public class LoginControl extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
     }
 
     /**
@@ -68,40 +75,29 @@ public class LoginControl extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        login(request, response);
-    }
-
-    private void login(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String user = request.getParameter("user");
-        String pass = request.getParameter("pass");
-        DAO dao = new DAO();
-        UserDAO udao = new UserDAO();
-        User loginUser = udao.getAccountByUser(user);
-        
-        // 3. Kiểm tra User có tồn tại và Mật khẩu có khớp không (Dùng BCrypt)
-        if (loginUser != null && BCrypt.checkpw(pass, loginUser.getPass())) {
-
-            // Đăng nhập thành công -> Lưu nguyên Object User vào Session
-            HttpSession session = request.getSession();
-            session.setAttribute("acc", loginUser);
-
-            // 4. PHÂN QUYỀN DỰA VÀO ROLE ID
-            // Gọi user.getRole() để lấy Object Role, sau đó lấy RoleId để so sánh
-            if (loginUser.getRole().getRoleId() == 1) {
-                // Nếu là Admin (1) -> Chuyển hướng sang trang quản trị
-                response.sendRedirect("home"); // Hoặc adminDashboard.jsp tùy project của bạn
-            } else {
-                // Nếu là Customer (0) -> Chuyển hướng về trang chủ mua sắm
-                response.sendRedirect("home"); 
-            }
-
-        } else {
-            // Đăng nhập thất bại -> Báo lỗi và quay lại trang login
-            request.setAttribute("mess", "Email hoặc mật khẩu không chính xác!");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+        DAO daoUser = new DAO();
+        String email= request.getParameter("email");
+        User user = daoUser.getUserByEmail(email);
+        if (user != null) {
+            // 1. Tạo chuỗi ngẫu nhiên
+            String token = UUID.randomUUID().toString();
+            
+            // 2. Lưu vào Database
+            daoUser.saveResetToken(email, token);
+            
+            // 3. Tạo link kèm Token
+            String resetLink = "http://localhost:9999/MobileShop/resetPassword?token=" + token;
+            
+            // 4. Gửi Mail bằng SendGrid
+            SendGridEmailService emailService = new SendGridEmailService();
+            emailService.sendResetPasswordEmail(email, resetLink, user.getName());
         }
+
+        // Báo thành công dù email có tồn tại hay không (Bảo mật chống rà quét tài khoản)
+        request.setAttribute("mess", "Nếu email hợp lệ, hệ thống đã gửi link đặt lại mật khẩu. Vui lòng kiểm tra hộp thư!");
+        request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
     }
+    
 
     /**
      * Returns a short description of the servlet.
