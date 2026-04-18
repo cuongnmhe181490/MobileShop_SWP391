@@ -7,9 +7,9 @@ public class TradeInQuote {
     private final String conditionKey;
     private final String conditionLabel;
     private final double estimatedValue;
-    private final Product matchedProduct;
+    private final ProductModel matchedProduct;
 
-    public TradeInQuote(String brand, String modelName, String conditionKey, String conditionLabel, double estimatedValue, Product matchedProduct) {
+    public TradeInQuote(String brand, String modelName, String conditionKey, String conditionLabel, double estimatedValue, ProductModel matchedProduct) {
         this.brand = brand;
         this.modelName = modelName;
         this.conditionKey = conditionKey;
@@ -38,7 +38,7 @@ public class TradeInQuote {
         return estimatedValue;
     }
 
-    public Product getMatchedProduct() {
+    public ProductModel getMatchedProduct() {
         return matchedProduct;
     }
 }

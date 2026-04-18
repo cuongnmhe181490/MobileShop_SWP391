@@ -5,6 +5,7 @@
 package dao;
 
 import config.DBContext;
+import entity.Role;
 import entity.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,31 +23,45 @@ public class UserDAO extends DBContext{
     PreparedStatement ps = null; // ném query sang sql
     ResultSet rs = null; // nhận kết quả trả về
 
-    public User getAccountByUser(String user, String pass) {
-        String query = "select * from [User] where Username = ? AND [Password] = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
-            ps.setString(1, user);
-            ps.setString(2, pass);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return new User(rs.getInt(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        rs.getString(4),
-                        rs.getString(5),
-                        rs.getString(6),
-                        rs.getString(7),
-                        rs.getString(8),
-                        rs.getDate(9),
-                        rs.getInt(10));
-            }
-        } catch (Exception e) {
-            System.out.println(e);
+    public User getAccountByUser(String user) {
+        String sql = "SELECT u.*, r.RoleName " +
+                 "FROM [User] u " +
+                 "INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
+                 "WHERE u.Username = ?";
+    try {
+        conn = new DBContext().getConnection();
+        ps = conn.prepareStatement(sql);
+        ps.setString(1, user);
+        rs = ps.executeQuery();
+
+        if (rs.next()) {
+            // 2. Tạo đối tượng Role trước
+            Role r = new Role();
+            r.setRoleId(rs.getInt("RoleId"));
+            r.setRoleName(rs.getString("RoleName"));
+            
+            User u = new User();
+            u.setId(rs.getInt("UserId"));
+            u.setUser(rs.getString("Username"));
+            u.setGender(rs.getString("Gender"));
+            u.setPass(rs.getString("Password")); // Lấy pass mã hóa lên
+            u.setAddress(rs.getString("Address"));
+            u.setEmail(rs.getString("Email"));
+            u.setPhone(rs.getString("PhoneNumber"));
+            u.setName(rs.getString("FullName"));
+            u.setBirthday(rs.getDate("Birthday"));
+            
+            // 4. Nhét cục Role vào trong User
+            u.setRole(r);
+
+            return u;
         }
-        return null;
+    } catch (Exception e) {
+        System.out.println("Lỗi tại getAccountByUser: " + e.getMessage());
     }
+    return null;
+    }
+ 
     public int getTotalUsers() {
         String query = "SELECT COUNT(*) FROM [User]";
         try (Connection conn = new DBContext().getConnection();
@@ -60,5 +75,4 @@ public class UserDAO extends DBContext{
         }
         return 0;
     }
- 
 }

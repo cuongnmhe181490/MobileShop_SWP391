@@ -4,17 +4,18 @@
  */
 package controller.storefront;
 
+import dao.BlogDAO;
 import dao.DAO;
+import entity.BlogPost;
+import entity.ProductModel;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import entity.Product;
-import entity.BlogPost;
-import dao.BlogDAO;
 import java.util.List;
+
 
 
 /**
@@ -37,15 +38,21 @@ public class HomeControl extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         DAO dao = new DAO();
+
         BlogDAO bdao = new BlogDAO();
-        List<Product> featuredProducts = dao.getFeaturedProducts(6);
-        List<Product> latestProducts = dao.getLatestProducts(4);
+        List<ProductModel> featuredProducts = dao.getFeaturedProducts(6);
+        List<ProductModel> latestProducts = dao.getLatestProducts(4);
         List<BlogPost> blogPosts = bdao.getAllBlogs(); // Lấy tất cả, ta sẽ sublist hoặc để JSP xử lý
         
         request.setAttribute("heroProduct", featuredProducts.isEmpty() ? null : featuredProducts.get(0));
         request.setAttribute("featuredProducts", featuredProducts);
         request.setAttribute("latestProducts", latestProducts);
         request.setAttribute("blogPosts", blogPosts);
+        request.setAttribute("heroProduct", featuredProducts.isEmpty() ? null : featuredProducts.get(0));
+        request.setAttribute("featuredProducts", featuredProducts);
+        request.setAttribute("latestProducts", latestProducts);
+  
+
         request.getRequestDispatcher("HomePage.jsp").forward(request, response);
     }
 

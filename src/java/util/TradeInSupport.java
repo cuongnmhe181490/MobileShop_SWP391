@@ -1,6 +1,6 @@
 package util;
 
-import entity.Product;
+import entity.ProductModel;
 import entity.TradeInQuote;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ public final class TradeInSupport {
         return CONDITION_LABELS;
     }
 
-    public static TradeInQuote buildQuote(String brand, String modelName, String conditionKey, Product matchedProduct) {
+    public static TradeInQuote buildQuote(String brand, String modelName, String conditionKey, ProductModel matchedProduct) {
         String normalizedCondition = CONDITION_LABELS.containsKey(conditionKey) ? conditionKey : "scratch";
         String conditionLabel = CONDITION_LABELS.get(normalizedCondition);
         double baseValue = matchedProduct != null ? matchedProduct.getPrice() : 0.0;

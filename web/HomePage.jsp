@@ -235,6 +235,7 @@
                     </div>
 
                     <div class="editorial-grid">
+
                         <c:forEach items="${blogPosts}" var="post" end="2">
                             <article class="editorial-card editorial-card--article">
                                 <a href="${ctx}/blog-detail?bid=${post.idPost}" class="editorial-card__image">

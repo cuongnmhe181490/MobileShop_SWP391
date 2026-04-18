@@ -35,5 +35,5 @@ public class DBContext {
         }
         return value == null || value.trim().isEmpty() ? defaultValue : value.trim();
     }
-    
+
 }
