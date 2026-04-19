@@ -1,0 +1,476 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<!DOCTYPE html>
+<html lang="vi">
+
+    <head>
+        <title>Thêm Top Product</title>
+        <link rel="stylesheet" href="${ctx}/css/bootstrap.min.css" type="text/css">
+        <style>
+            :root {
+                --page-bg: #f5f7ff;
+                --sidebar-bg: #27315f;
+                --sidebar-muted: #c8d0ee;
+                --heading: #24345f;
+                --text: #64748b;
+                --border-color: #e7ecfb;
+                --primary-blue: #5b74f1;
+                --danger-bg: #fff4f5;
+                --danger-border: #ff7b8f;
+                --danger-text: #ea4f68;
+            }
+
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                background: var(--page-bg);
+                font-family: 'Inter', 'Segoe UI', sans-serif;
+                color: var(--heading);
+            }
+
+            body {
+                padding: 18px;
+                overflow: hidden;
+            }
+
+            .dashboard-shell {
+                height: calc(99vh - 36px);
+                background: linear-gradient(180deg, #fcfdff 0%, #f7f9ff 100%);
+                border: 1px solid #eef2ff;
+                border-radius: 30px;
+                padding: 14px;
+                display: flex;
+                gap: 16px;
+                overflow: hidden;
+                box-shadow: 0 14px 34px rgba(110, 124, 180, 0.08);
+            }
+
+            .sidebar {
+                width: 140px;
+                flex: 0 0 140px;
+                background: var(--sidebar-bg);
+                color: white;
+                border-radius: 24px;
+                padding: 14px 10px;
+                display: flex;
+                flex-direction: column;
+                margin-top: 50px;
+                height: calc(80% - 10px);
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .sidebar h4 {
+                margin: 0 0 8px;
+                font-size: 20px;
+                line-height: 1.15;
+                font-weight: 800;
+            }
+
+            .brand-title {
+                font-size: 14px;
+                font-weight: 700;
+                margin-bottom: 6px;
+            }
+
+            .brand-subtitle {
+                font-size: 11px;
+                color: var(--sidebar-muted);
+                margin-bottom: 18px;
+            }
+
+            .nav-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .sidebar a {
+                display: block;
+                color: #f8faff;
+                padding: 8px 12px;
+                text-decoration: none;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 12px;
+                transition: 0.2s ease;
+                white-space: nowrap;
+            }
+
+            .sidebar a:not(.active) {
+                color: var(--sidebar-muted);
+            }
+
+            .sidebar a.active {
+                background: #ffffff;
+                color: #1f2a56;
+                box-shadow: 0 8px 18px rgba(7, 13, 32, 0.16);
+            }
+
+            .sidebar-footer {
+                margin-top: 26px;
+                background: #ffffff;
+                color: #1e2b57;
+                padding: 14px 12px;
+                border-radius: 18px;
+            }
+
+            .sidebar-footer strong {
+                display: block;
+                font-size: 12px;
+                margin-bottom: 2px;
+                line-height: 1.2;
+            }
+
+            .sidebar-footer span {
+                display: block;
+                font-size: 10px;
+                color: #7381a8;
+            }
+
+            .logout-link {
+                margin-top: 8px;
+                padding: 0 12px;
+                text-decoration: none;
+                color: #f8faff;
+                font-weight: 800;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            .content {
+                flex: 1;
+                min-width: 0;
+                padding: 4px 2px 8px;
+                overflow-y: auto;
+            }
+
+            .header-section {
+                margin-bottom: 18px;
+                padding-left: 6px;
+            }
+
+            .header-section h2 {
+                margin: 0 0 8px;
+                font-size: 18px;
+                font-weight: 800;
+                color: var(--heading);
+            }
+
+            .header-section p {
+                margin: 0;
+                max-width: 760px;
+                color: #7e8eb8;
+                font-size: 13px;
+                line-height: 1.55;
+            }
+
+            .form-card {
+                background: #ffffff;
+                border: 1px solid var(--border-color);
+                border-radius: 24px;
+                padding: 18px;
+                box-shadow: 0 10px 26px rgba(130, 145, 197, 0.06);
+            }
+
+            .form-grid-3 {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 16px;
+            }
+
+            .form-grid-1 {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .field label {
+                display: block;
+                font-size: 10px;
+                font-weight: 800;
+                color: #7e8eb8;
+                margin-bottom: 8px;
+            }
+
+            .input,
+            .textarea {
+                width: 100%;
+                border: 1px solid #eaf0ff;
+                background: #ffffff;
+                border-radius: 14px;
+                padding: 10px 12px;
+                font-size: 12px;
+                outline: none;
+            }
+
+            .input:focus,
+            .textarea:focus {
+                border-color: #c9d6ff;
+                box-shadow: 0 0 0 3px rgba(91, 116, 241, 0.12);
+            }
+
+            .textarea {
+                resize: vertical;
+                min-height: 44px;
+            }
+
+            /* Read-only live stats */
+            .input-readonly {
+                width: 100%;
+                border: 1px dashed #c9d6ff;
+                background: #f0f4ff;
+                border-radius: 14px;
+                padding: 10px 12px;
+                font-size: 12px;
+                color: #3b5bdb;
+                font-weight: 700;
+                cursor: not-allowed;
+            }
+
+            .auto-badge {
+                display: inline-block;
+                margin-top: 5px;
+                font-size: 9px;
+                font-weight: 700;
+                color: #6366f1;
+                background: #eef2ff;
+                border-radius: 999px;
+                padding: 2px 8px;
+            }
+
+            .stats-row {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 16px;
+                margin-top: 2px;
+            }
+
+            .actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                margin-top: 18px;
+            }
+
+            .btn-f {
+                padding: 8px 18px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 800;
+                text-decoration: none;
+                border: 1px solid transparent;
+                cursor: pointer;
+            }
+
+            .btn-save {
+                background: var(--primary-blue);
+                border-color: var(--primary-blue);
+                color: #ffffff;
+                box-shadow: 0 8px 18px rgba(91, 116, 241, 0.24);
+            }
+
+            .btn-cancel {
+                background: #ffffff;
+                border-color: #e2e8f0;
+                color: #1f2a56;
+            }
+
+            /* Flash error */
+            .flash-error {
+                background: var(--danger-bg);
+                border: 1px solid var(--danger-border);
+                color: var(--danger-text);
+                border-radius: 14px;
+                padding: 10px 14px;
+                font-size: 12px;
+                font-weight: 600;
+                margin-bottom: 14px;
+            }
+
+            /* Product Grid Styles */
+            .product-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 16px;
+            }
+
+            .product-card {
+                background: #ffffff;
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 12px;
+                transition: 0.2s ease;
+            }
+
+            .product-card:hover {
+                box-shadow: 0 8px 20px rgba(110, 124, 180, 0.12);
+                transform: translateY(-2px);
+            }
+
+            .product-image {
+                width: 100%;
+                height: 140px;
+                border-radius: 12px;
+                overflow: hidden;
+                background: #f8faff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+
+            .product-image img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+
+            .product-image .no-image {
+                color: #94a3b8;
+                font-size: 11px;
+            }
+
+            .product-info .product-name {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--heading);
+                margin: 0 0 6px;
+                line-height: 1.3;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .product-info .product-price {
+                font-size: 14px;
+                font-weight: 800;
+                color: #059669;
+                margin: 0 0 4px;
+            }
+
+            .product-info .product-stock {
+                font-size: 11px;
+                color: #7e8eb8;
+                margin: 0 0 8px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 40px;
+                color: #94a3b8;
+            }
+
+            @media (max-width: 991px) {
+                body {
+                    padding: 12px;
+                }
+
+                .dashboard-shell {
+                    flex-direction: column;
+                }
+
+                .sidebar {
+                    width: 100%;
+                    flex-basis: auto;
+                    height: auto;
+                    margin-top: 0;
+                }
+
+                .form-grid-3 {
+                    grid-template-columns: 1fr;
+                }
+
+                .stats-row {
+                    grid-template-columns: 1fr;
+                }
+
+                .actions {
+                    justify-content: center;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="dashboard-shell">
+            <div class="sidebar">
+            <h4>MobileShop</h4>
+            <div class="nav-list">
+                <a href="${ctx}/HeroListServlet">Biểu ngữ chính</a>
+                <a href="${ctx}/BrandListServlet">Thương hiệu</a>
+                <a href="${ctx}/TopProductListServlet" class="active">Sản phẩm bán chạy</a>
+                <a href="${ctx}/TradeInConfigServlet">Cấu hình Trade-in</a>
+            </div>
+        </div>
+
+            <div class="content">
+                <div class="header-section">
+                    <h2>Thêm sản phẩm vào Top</h2>
+                    <a href="${ctx}/TopProductListServlet" class="btn-f btn-cancel" style="padding: 8px 16px; font-size: 12px;">← Quay lại</a>
+                </div>
+
+                <div class="form-card">
+                    <%-- Hiển thị lỗi nếu có --%>
+                    <c:if test="${not empty error}">
+                        <div class="flash-error">${error}</div>
+                    </c:if>
+
+                    <%-- Danh sách sản phẩm có thể thêm vào Top (IsFeatured = 0) --%>
+                    <p style="font-size: 12px; color: #7e8eb8; margin-bottom: 16px;">
+                        Chọn sản phẩm từ kho để ghim lên trang chủ:
+                    </p>
+
+                    <c:choose>
+                        <c:when test="${not empty availableProductList}">
+                            <div class="product-grid">
+                                <c:forEach var="p" items="${availableProductList}">
+                                    <div class="product-card">
+                                        <div class="product-image">
+                                            <c:choose>
+                                                <c:when test="${not empty p.ImagePath}">
+                                                    <img src="${p.ImagePath}" alt="${p.ProductName}">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="no-image">No img</div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                        <div class="product-info">
+                                            <h4 class="product-name">${p.ProductName}</h4>
+                                            <p class="product-price">
+                                                <c:choose>
+                                                    <c:when test="${p.Price > 0}">
+                                                        ${String.format("%,.0f", p.Price)} ₫
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        Liên hệ
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </p>
+                                            <p class="product-stock">Tồn kho: ${p.CurrentQuantity}</p>
+                                            <form action="${ctx}/TopProductAddServlet" method="post" style="margin-top: 8px;">
+                                                <input type="hidden" name="productId" value="${p.IdProduct}">
+                                                <button type="submit" class="btn-f btn-save" style="width: 100%;">Ghim lên Top</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <p>Không có sản phẩm nào có thể thêm vào Top.</p>
+                                <p style="font-size: 11px; color: #94a3b8;">Tất cả sản phẩm đã được ghim hoặc chưa có sản phẩm trong kho.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+        </div>
+    </body>
+
+</html>
