@@ -11,4 +11,28 @@
         <servlet-name>CartRole</servlet-name>
         <url-pattern>/cartrole</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BlogManageController</servlet-name>
+        <servlet-class>controller.BlogManageController</servlet-class>
+        <multipart-config>
+            <location></location>
+            <max-file-size>512000</max-file-size> <!-- 500KB in bytes -->
+            <max-request-size>2097152</max-request-size> <!-- 2MB total request -->
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BlogManageController</servlet-name>
+        <url-pattern>/admin/blog</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminDashboardController</servlet-name>
+        <servlet-class>controller.AdminDashboardController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminDashboardController</servlet-name>
+        <url-pattern>/admin/dashboard</url-pattern>
+    </servlet-mapping>
 </web-app>

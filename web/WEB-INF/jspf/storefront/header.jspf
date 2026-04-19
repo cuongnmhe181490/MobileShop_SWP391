@@ -33,7 +33,7 @@
                 <a class="pill-link" href="${ctx}/login.jsp">Đăng nhập</a>
             </c:if>
             <c:if test="${sessionScope.acc != null && sessionScope.acc.role.roleId > 0}">
-                <a class="pill-link pill-link--primary" href="${ctx}/manager">Quản trị</a>
+                <a class="pill-link pill-link--primary" href="${ctx}/admin/dashboard">Quản trị</a>
             </c:if>
         </div>
     </div>

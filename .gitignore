@@ -9,10 +9,15 @@ target/
 # Bỏ qua các file cấu hình cá nhân của NetBeans (chỉ giữ lại cấu hình chung)
 nbproject/private/
 nbbuild/
+nbbuild.xml
 nbdist/
 .nb-gradle/
+<<<<<<< HEAD
+=======
 config.properties
+>>>>>>> 5f5d4c3d3fc7be8aac74457a53f2afdfec5de551
 
 # Bỏ qua các file hệ thống máy tính tự sinh ra
 .DS_Store
 Thumbs.db
+/MobileShop/nbproject/private/
