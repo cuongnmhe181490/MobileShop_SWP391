@@ -3,42 +3,11 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <c:set var="pageTitle" value="Chi tiết đánh giá" />
-<<<<<<< HEAD
-<c:set var="activePage" value="catalog" %>
-=======
 <c:set var="activePage" value="catalog" />
->>>>>>> 29e16c36384973902b60704acd8229c07109ec73
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
-<<<<<<< HEAD
-        <style>
-            .btn-edit-review {
-                padding: 6px 14px;
-                border-radius: 999px;
-                font-size: 11px;
-                font-weight: 700;
-                text-decoration: none;
-                background: #f0f9ff;
-                color: #0284c7;
-                border: 1px solid #bae6fd;
-                transition: 0.2s;
-            }
-            .btn-edit-review:hover { background: #e0f2fe; }
-            .admin-reply {
-                margin-top: 12px;
-                padding: 12px;
-                background: #f0fdf4;
-                border-radius: 12px;
-                border-left: 3px solid #16a34a;
-                font-size: 13px;
-                color: #166534;
-            }
-            .admin-reply strong { color: #16a34a; }
-        </style>
-=======
->>>>>>> 29e16c36384973902b60704acd8229c07109ec73
     </head>
     <body>
         <%@ include file="/WEB-INF/jspf/storefront/header.jspf" %>
@@ -99,23 +68,8 @@
                                             <span>Đã mua ${detailProduct.productName} · ${review.reviewDate}</span>
                                         </div>
                                     </div>
-<<<<<<< HEAD
-                                    <%-- Hiển thị nút sửa nếu review thuộc về user đang đăng nhập --%>
-                                    <c:if test="${sessionScope.acc != null && review.idAccount == sessionScope.acc.id}">
-                                        <a href="${ctx}/UserReviewEditServlet?id=${review.idReview}" class="btn-edit-review">Sửa</a>
-                                    </c:if>
                                 </div>
                                 <p>${review.review}</p>
-                                <%-- Hiển thị phản hồi của admin nếu có --%>
-                                <c:if test="${not empty review.replyContent}">
-                                    <div class="admin-reply">
-                                        <strong>Phản hồi:</strong> ${review.replyContent}
-                                    </div>
-                                </c:if>
-=======
-                                </div>
-                                <p>${review.review}</p>
->>>>>>> 29e16c36384973902b60704acd8229c07109ec73
                             </article>
                         </c:forEach>
                     </div>

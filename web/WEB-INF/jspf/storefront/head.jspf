@@ -5,8 +5,4 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<<<<<<< HEAD
 <link rel="stylesheet" href="${ctx}/css/mobileshop.css" type="text/css">
-=======
-<link rel="stylesheet" href="${ctx}/css/mobileshop.css" type="text/css">
->>>>>>> 29e16c36384973902b60704acd8229c07109ec73
