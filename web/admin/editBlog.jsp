@@ -5,240 +5,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chỉnh sửa bài viết - MobileShop</title>
-    
-    <!-- Google Fonts -->
+    <title>Chỉnh sửa bài viết - MobileShop Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
-    
-    <!-- Custom Admin Style -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-custom.css">
+    <style>
+        :root {
+            --primary-bg: #ffffff;
+            --input-bg: #fdfdfd;
+            --border-clr: #e5e7eb;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+        }
+        * { box-sizing: border-box; }
+        body { background-color: #f9fafb; font-family: 'Inter', sans-serif; margin: 0; }
+        
+        /* Cấu trúc Layout chính kế thừa từ admin-custom.css */
+        .main-content { margin-left: 260px; padding: 40px; background: #f9fafb; min-height: 100vh; }
+        
+        .form-container { background: var(--primary-bg); border-radius: 12px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; }
+        .form-group { margin-bottom: 20px; position: relative; }
+        .label-custom { display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem; }
+        .form-input-custom { 
+            width: 100%; border: 1px solid var(--border-clr); border-radius: 8px; 
+            padding: 12px; background: var(--input-bg); color: var(--text-main);
+            transition: border-color 0.2s; resize: none;
+        }
+        .form-input-custom:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        
+        /* Bộ đếm ký tự */
+        .counter-wrap { display: flex; justify-content: flex-end; margin-top: 4px; }
+        .counter-label { font-size: 0.75rem; color: var(--text-sub); }
+
+        /* Upload Ảnh */
+        .upload-zone {
+            border: 2px dashed var(--border-clr); border-radius: 12px;
+            padding: 30px 20px; text-align: center; cursor: pointer;
+            transition: all 0.2s; background: #fafafa; position: relative;
+        }
+        .upload-zone:hover { border-color: #4f46e5; background: #f5f3ff; }
+        .upload-icon { font-size: 1.8rem; color: #9ca3af; margin-bottom: 10px; }
+        .upload-text { font-size: 0.85rem; color: var(--text-sub); }
+        .upload-text span { color: #4f46e5; font-weight: 600; }
+        #thumbInput { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+
+        /* Nút bấm */
+        .action-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-clr); }
+        .btn-cancel { padding: 10px 24px; border-radius: 8px; background: #f3f4f6; color: var(--text-main); border: none; font-weight: 600; text-decoration: none; }
+        .btn-submit { padding: 10px 24px; border-radius: 8px; background: #111827; color: white; border: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    </style>
 </head>
 <body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <a href="#" class="sidebar-brand">
+                <h2>MobileShop</h2>
+                <p>Quản trị hệ thống</p>
+            </a>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="brand">MobileShop</div>
-        <nav>
-            <ul>
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/dashboard">
-                        <i class="fa-solid fa-house"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/accounts">
-                        <i class="fa-solid fa-users"></i>
-                        <span>Quản lý tài khoản</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/products">
-                        <i class="fa-solid fa-box-archive"></i>
-                        <span>Quản lý sản phẩm</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/blog" class="active">
-                        <i class="fa-solid fa-newspaper"></i>
-                        <span>Quản lý blog</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/home">
-                        <i class="fa-solid fa-arrow-left"></i>
-                        <span>Về trang chủ</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <div class="user-info">
-            <h4>Xin chào ${sessionScope.acc != null ? sessionScope.acc.name : "admin"}</h4>
-            <p>Quản lý dữ liệu hệ thống</p>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="header-flex">
-            <div>
-                <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">Chỉnh sửa bài viết</h1>
-                <p style="color: var(--text-muted);">Cập nhật thông tin bài viết ID: #${blog.idPost}</p>
+            <div class="nav-section">
+                <span class="nav-label">TỔNG QUAN</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                </ul>
             </div>
-            <a href="${pageContext.request.contextPath}/admin/blog" class="btn-action btn-edit">Quay lại</a>
-        </div>
 
-        <div class="info-card" style="max-width: 900px;">
-            <!-- Alert Messages -->
-            <c:if test="${not empty sessionScope.errorMessage}">
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fa-solid fa-circle-exclamation me-2"></i>
-                    ${sessionScope.errorMessage}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="nav-section">
+                <span class="nav-label">QUẢN LÝ</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-label">HỆ THỐNG</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                </ul>
+            </div>
+
+            <div style="margin-top: auto;">
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Chỉnh sửa bài viết</h2>
+                    <p class="text-secondary small">Cập nhật thông tin chi tiết bài viết ID: #${blog.blogId}</p>
                 </div>
-                <c:remove var="errorMessage" scope="session"/>
-            </c:if>
-            <c:if test="${not empty sessionScope.successMessage}">
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fa-solid fa-circle-check me-2"></i>
-                    ${sessionScope.successMessage}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <c:remove var="successMessage" scope="session"/>
-            </c:if>
+                <a href="${pageContext.request.contextPath}/admin/blog" class="btn btn-sm btn-light border">
+                    <i class="fas fa-arrow-left me-2"></i> Quay lại
+                </a>
+            </div>
 
-            <!-- Form points to service=updateBlog -->
-            <form id="blogForm" action="${pageContext.request.contextPath}/admin/blog?service=updateBlog" 
-                  method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-                <!-- Hidden Field for ID -->
-                <input type="hidden" name="idPost" value="${blog.idPost}">
-
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Tiêu đề bài viết <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control" value="${blog.title}" 
-                                   required maxlength="255" style="padding: 0.75rem; border-radius: 0.75rem;">
-                            <div class="invalid-feedback">Vui lòng nhập tiêu đề bài viết (không quá 255 ký tự).</div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Phụ đề (SubTitle)</label>
-                            <input type="text" name="subTitle" class="form-control" value="${blog.subTitle}" 
-                                   maxlength="255" style="padding: 0.75rem; border-radius: 0.75rem;">
-                            <div class="invalid-feedback">Phụ đề không được vượt quá 255 ký tự.</div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Mô tả ngắn (Summary) <span class="text-danger">*</span></label>
-                            <textarea name="summary" class="form-control" rows="3" required maxlength="500"
-                                      style="padding: 0.75rem; border-radius: 0.75rem;">${blog.summary}</textarea>
-                            <div class="invalid-feedback">Vui lòng nhập mô tả ngắn (không quá 500 ký tự).</div>
-                        </div>
-                    </div>
+            <div class="form-container">
+                <form action="${pageContext.request.contextPath}/admin/blog" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="service" value="updateBlog">
+                    <input type="hidden" name="blogId" value="${blog.blogId}">
                     
-                    <div class="col-md-4">
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Nhà cung cấp <span class="text-danger">*</span></label>
-                            <select name="idSupplier" class="form-select" required style="padding: 0.75rem; border-radius: 0.75rem;">
-                                <c:forEach items="${supList}" var="sup">
-                                    <option value="${sup}" ${sup == blog.idSupplier ? 'selected' : ''}>${sup}</option>
-                                </c:forEach>
-                            </select>
-                            <div class="invalid-feedback">Vui lòng chọn nhà cung cấp.</div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label class="label-custom">Tiêu đề bài viết <span class="text-danger">*</span></label>
+                                <input type="text" name="title" id="titleInput" class="form-input-custom" value="${blog.title}" required maxlength="255">
+                                <div class="counter-wrap"><span class="counter-label" id="titleCounter">0 / 255</span></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="label-custom">Phụ đề (SubTitle)</label>
+                                <input type="text" name="subTitle" id="subTitleInput" class="form-input-custom" value="${blog.subTitle}" maxlength="255">
+                                <div class="counter-wrap"><span class="counter-label" id="subTitleCounter">0 / 255</span></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="label-custom">Tóm tắt ngắn (Description) <span class="text-danger">*</span></label>
+                                <textarea name="description" id="descInput" class="form-input-custom" rows="3" required maxlength="255">${blog.description}</textarea>
+                                <div class="counter-wrap"><span class="counter-label" id="descCounter">0 / 255</span></div>
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <label class="label-custom">Nội dung chi tiết <span class="text-danger">*</span></label>
+                                <textarea name="content" id="blogContent" class="form-input-custom" rows="15" required maxlength="4000">${blog.content}</textarea>
+                                <div class="counter-wrap"><span class="counter-label" id="contentCounter">0 / 4000</span></div>
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Thay đổi ảnh đại diện</label>
-                            <div class="mb-2" id="currentThumbnail">
-                                <img src="${not empty blog.thumbnailPath ? blog.thumbnailPath : 'img/no-image.png'}" 
-                                     class="blog-thumb-sm rounded shadow-sm" style="width: 100px; height: 75px; object-fit: cover;">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="label-custom">Hãng / Category <span class="text-danger">*</span></label>
+                                <select name="idSupplier" class="form-select form-input-custom" required>
+                                    <c:forEach items="${supList}" var="sup">
+                                        <option value="${sup}" ${sup == blog.idSupplier ? 'selected' : ''}>${sup}</option>
+                                    </c:forEach>
+                                </select>
                             </div>
-                            <input type="file" name="thumbnail" id="thumbnailInput" class="form-control" accept="image/*" 
-                                   style="padding: 0.75rem; border-radius: 0.75rem;">
-                            <div id="imageFeedback" class="invalid-feedback">Vui lòng chọn ảnh định dạng: jpg, png, webp... và < 5MB.</div>
-                            <div class="form-text mt-2">Để trống nếu không muốn thay đổi ảnh.</div>
-                            
-                            <!-- Image Preview Workspace -->
-                            <div id="imagePreview" class="mt-3 d-none">
-                                <p class="small mb-1 fw-bold text-success">Ảnh mới chọn:</p>
-                                <img src="" id="imgPreview" class="rounded shadow-sm" style="max-width: 100%; height: auto; border: 1px solid #28a745;">
+
+                            <div class="form-group">
+                                <label class="label-custom">Ảnh đại diện bài viết</label>
+                                <div class="mb-2">
+                                    <p class="small text-secondary mb-1">Ảnh hiện tại:</p>
+                                    <img src="${not empty blog.imagePath ? blog.imagePath : 'img/no-image.png'}" class="rounded shadow-sm" style="width: 100%; height: 120px; object-fit: cover; border: 1px solid #e5e7eb;">
+                                </div>
+                                <div class="upload-zone" id="uploadZone">
+                                    <i class="fas fa-folder-open upload-icon"></i>
+                                    <div class="upload-text">Chọn ảnh mới hoặc <span>kéo thả</span></div>
+                                    <div class="text-muted small mt-1">PNG, JPG, GIF tối đa 500KB</div>
+                                    <input type="file" name="image" id="thumbInput" accept="image/*">
+                                </div>
+                                <div id="thumbPreview" class="mt-3 d-none">
+                                    <img src="" id="imgShow" class="rounded shadow-sm" style="width: 100% !important; aspect-ratio: 16/9; object-fit: cover; border: 1px solid #e5e7eb; display: block;">
+                                    <p class="text-center small text-muted mt-2">Xem trước ảnh bìa mới</p>
+                                </div>
+                                <p class="small text-muted mt-2">Để trống nếu không muốn thay đổi ảnh bìa.</p>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Nội dung chi tiết <span class="text-danger">*</span></label>
-                    <textarea name="content" class="form-control" rows="12" required 
-                              style="padding: 1rem; border-radius: 1rem;">${blog.content}</textarea>
-                    <div class="invalid-feedback">Nội dung bài viết không được để trống.</div>
-                </div>
-
-                <hr style="margin: 2rem 0; opacity: 0.1;">
-
-                <div class="d-flex justify-content-end gap-3">
-                    <a href="${pageContext.request.contextPath}/admin/blog" class="btn-action btn-edit">Hủy bỏ</a>
-                    <button type="submit" class="btn-action">Cập nhật bài viết</button>
-                </div>
-            </form>
-        </div>
+                    <div class="action-footer">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="btn-cancel">Hủy</a>
+                        <button type="submit" class="btn-submit">Cập nhật bài viết <i class="fas fa-check-circle ms-1"></i></button>
+                    </div>
+                </form>
+            </div>
+        </main>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // Form Validation Logic
-        (function () {
-            'use strict'
+        function updateCounter(inputId, counterId, maxLength) {
+            var input = document.getElementById(inputId);
+            var counter = document.getElementById(counterId);
+            if (!input || !counter) return;
             
-            const form = document.querySelector('#blogForm');
-            const thumbnailInput = document.querySelector('#thumbnailInput');
-            const imagePreview = document.querySelector('#imagePreview');
-            const imgPreview = document.querySelector('#imgPreview');
-            const imageFeedback = document.querySelector('#imageFeedback');
-            const currentThumbnail = document.querySelector('#currentThumbnail');
-
-            // Handle Image Preview and Validation (Optional in Edit)
-            thumbnailInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    // Check size (5MB limit)
-                    if (file.size > 5 * 1024 * 1024) {
-                        imageFeedback.textContent = "Kích thước ảnh quá lớn (Vui lòng chọn ảnh < 5MB).";
-                        this.setCustomValidity("Too large");
-                        imagePreview.classList.add('d-none');
-                        currentThumbnail.style.opacity = "1";
-                    } else if (!file.type.startsWith('image/')) {
-                        imageFeedback.textContent = "Vui lòng chọn đúng định dạng file ảnh.";
-                        this.setCustomValidity("Invalid type");
-                        imagePreview.classList.add('d-none');
-                        currentThumbnail.style.opacity = "1";
-                    } else {
-                        // Clear custom validity
-                        this.setCustomValidity("");
-                        
-                        // Show preview
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            imgPreview.src = e.target.result;
-                            imagePreview.classList.remove('d-none');
-                            currentThumbnail.style.opacity = "0.3"; // Dim current thumbnail
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                } else {
-                    imagePreview.classList.add('d-none');
-                    currentThumbnail.style.opacity = "1";
-                }
+            // Khởi tạo giá trị ban đầu
+            counter.textContent = input.value.length + " / " + maxLength;
+            
+            input.addEventListener('input', function() {
+                var len = input.value.length;
+                counter.textContent = len + " / " + maxLength;
             });
+        }
+        updateCounter('titleInput', 'titleCounter', 255);
+        updateCounter('subTitleInput', 'subTitleCounter', 255);
+        updateCounter('descInput', 'descCounter', 255);
+        updateCounter('blogContent', 'contentCounter', 4000);
 
-            // Prevent empty spaces validation
-            const textInputs = form.querySelectorAll('input[type="text"], textarea');
-            textInputs.forEach(input => {
-                input.addEventListener('blur', function() {
-                    if (this.value && this.value.trim() === "") {
-                        this.value = ""; // Force clear if only spaces
-                    }
-                });
-            });
-
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
+        document.getElementById('thumbInput').addEventListener('change', function() {
+            var file = this.files[0];
+            if (file) {
+                // Kiểm tra dung lượng ngay tại Client (500KB)
+                if (file.size > 500 * 1024) {
+                    alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB (Ảnh bạn chọn: " + (file.size/1024).toFixed(2) + "KB)");
+                    this.value = ""; // Xóa file
+                    document.getElementById('thumbPreview').classList.add('d-none');
+                    return;
                 }
-                
-                form.classList.add('was-validated');
-            }, false);
-        })();
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imgShow').src = e.target.result;
+                    document.getElementById('thumbPreview').classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     </script>
 </body>
 </html>

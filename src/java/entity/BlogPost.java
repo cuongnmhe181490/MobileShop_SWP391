@@ -3,35 +3,36 @@ package entity;
 import java.sql.Date;
 
 public class BlogPost {
-    private int idPost;
-    private String title;
-    private String subTitle;
-    private String summary;
-    private String content;
-    private String thumbnailPath;
-    private Date createdDate;
-    
-    // Các khóa ngoại
+    private int blogId;
     private int userId;
-    private String idSupplier;
+    private String title;
+    private String subTitle;    // Phụ đề (NVARCHAR(255))
+    private String description; // Tóm tắt ngắn (NVARCHAR(MAX))
+    private String content;     // Nội dung chi tiết (NVARCHAR(4000))
+    private String imagePath;   // Ảnh bìa
+    private String idSupplier;  // Hãng / Category
+    private Date createdDate;
 
     public BlogPost() {
     }
 
-    public BlogPost(int idPost, String title, String subTitle, String summary, String content, String thumbnailPath, Date createdDate, int userId, String idSupplier) {
-        this.idPost = idPost;
+    public BlogPost(int blogId, int userId, String title, String subTitle, String description, String content, String imagePath, String idSupplier, Date createdDate) {
+        this.blogId = blogId;
+        this.userId = userId;
         this.title = title;
         this.subTitle = subTitle;
-        this.summary = summary;
+        this.description = description;
         this.content = content;
-        this.thumbnailPath = thumbnailPath;
-        this.createdDate = createdDate;
-        this.userId = userId;
+        this.imagePath = imagePath;
         this.idSupplier = idSupplier;
+        this.createdDate = createdDate;
     }
 
-    public int getIdPost() { return idPost; }
-    public void setIdPost(int idPost) { this.idPost = idPost; }
+    public int getBlogId() { return blogId; }
+    public void setBlogId(int blogId) { this.blogId = blogId; }
+
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -39,21 +40,18 @@ public class BlogPost {
     public String getSubTitle() { return subTitle; }
     public void setSubTitle(String subTitle) { this.subTitle = subTitle; }
 
-    public String getSummary() { return summary; }
-    public void setSummary(String summary) { this.summary = summary; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
-    public String getThumbnailPath() { return thumbnailPath; }
-    public void setThumbnailPath(String thumbnailPath) { this.thumbnailPath = thumbnailPath; }
-
-    public Date getCreatedDate() { return createdDate; }
-    public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
-
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
     public String getIdSupplier() { return idSupplier; }
     public void setIdSupplier(String idSupplier) { this.idSupplier = idSupplier; }
+
+    public Date getCreatedDate() { return createdDate; }
+    public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
 }

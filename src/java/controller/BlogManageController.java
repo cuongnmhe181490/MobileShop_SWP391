@@ -15,8 +15,8 @@ import util.CloudinaryUtil;
 
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-    maxFileSize = 1024 * 1024 * 10,      // 10MB
-    maxRequestSize = 1024 * 1024 * 50     // 50MB
+    maxFileSize = 1024 * 500,           // 500KB
+    maxRequestSize = 1024 * 1024 * 2    // 2MB (Tăng lên một chút cho toàn bộ request)
 )
 @WebServlet(name = "BlogManageController", urlPatterns = {"/admin/blog"})
 public class BlogManageController extends HttpServlet {
@@ -46,32 +46,26 @@ public class BlogManageController extends HttpServlet {
                         try {
                             String title = request.getParameter("title");
                             String subTitle = request.getParameter("subTitle");
-                            String summary = request.getParameter("summary");
+                            String description = request.getParameter("description");
                             String content = request.getParameter("content");
                             String idSupplier = request.getParameter("idSupplier");
                             
-                            // XỬ LÝ CLOUDINARY: Nhận file từ Part "thumbnail"
-                            Part filePart = request.getPart("thumbnail");
+                            Part filePart = request.getPart("image");
                             String imageUrl = CloudinaryUtil.upload(filePart);
-                            
-                            if (imageUrl == null) {
-                                imageUrl = ""; 
-                            }
+                            if (imageUrl == null) imageUrl = "";
 
                             int userId = 1; 
                             entity.User acc = (entity.User) request.getSession().getAttribute("acc");
-                            if(acc != null) {
-                                userId = acc.getId();
-                            }
+                            if(acc != null) userId = acc.getId();
 
                             BlogPost blog = new BlogPost();
                             blog.setTitle(title);
                             blog.setSubTitle(subTitle);
-                            blog.setSummary(summary);
+                            blog.setDescription(description);
                             blog.setContent(content);
-                            blog.setThumbnailPath(imageUrl);
-                            blog.setUserId(userId);
+                            blog.setImagePath(imageUrl);
                             blog.setIdSupplier(idSupplier);
+                            blog.setUserId(userId);
                             
                             if(dao.insertBlog(blog)) {
                                 request.getSession().setAttribute("successMessage", "Thêm bài viết mới thành công!");
@@ -79,13 +73,12 @@ public class BlogManageController extends HttpServlet {
                                 request.getSession().setAttribute("errorMessage", "Thêm bài viết thất bại!");
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
-                            request.getSession().setAttribute("errorMessage", "Lỗi: " + e.getMessage());
+                            e.printStackTrace(); // In lỗi ra Console của NetBeans
+                            request.getSession().setAttribute("errorMessage", "Lỗi chi tiết: " + e.getMessage());
                         }
                         response.sendRedirect(request.getContextPath() + "/admin/blog");
                     } else {
-                        List<String> listSup = dao.getActiveSuppliers();
-                        request.setAttribute("supList", listSup);
+                        request.setAttribute("supList", dao.getActiveSuppliers());
                         request.getRequestDispatcher("/admin/addBlog.jsp").forward(request, response);
                     }
                     break;
@@ -93,27 +86,24 @@ public class BlogManageController extends HttpServlet {
                 case "updateBlog":
                     if ("POST".equals(request.getMethod())) {
                         try {
-                            int idPost = Integer.parseInt(request.getParameter("idPost"));
+                            int blogId = Integer.parseInt(request.getParameter("blogId"));
                             String title = request.getParameter("title");
                             String subTitle = request.getParameter("subTitle");
-                            String summary = request.getParameter("summary");
+                            String description = request.getParameter("description");
                             String content = request.getParameter("content");
                             String idSupplier = request.getParameter("idSupplier");
                             
-                            BlogPost blog = dao.getBlogById(idPost);
+                            BlogPost blog = dao.getBlogById(blogId);
                             if (blog != null) {
-                                // Xử lý upload ảnh mới
-                                Part filePart = request.getPart("thumbnail");
+                                Part filePart = request.getPart("image");
                                 if (filePart != null && filePart.getSize() > 0) {
                                     String newImageUrl = CloudinaryUtil.upload(filePart);
-                                    if (newImageUrl != null) {
-                                        blog.setThumbnailPath(newImageUrl);
-                                    }
+                                    if (newImageUrl != null) blog.setImagePath(newImageUrl);
                                 }
                                 
                                 blog.setTitle(title);
                                 blog.setSubTitle(subTitle);
-                                blog.setSummary(summary);
+                                blog.setDescription(description);
                                 blog.setContent(content);
                                 blog.setIdSupplier(idSupplier);
                                 
@@ -124,20 +114,17 @@ public class BlogManageController extends HttpServlet {
                                 }
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
                             request.getSession().setAttribute("errorMessage", "Lỗi: " + e.getMessage());
                         }
                         response.sendRedirect(request.getContextPath() + "/admin/blog");
                     } else {
-                        int idPost = Integer.parseInt(request.getParameter("idPost"));
-                        BlogPost blog = dao.getBlogById(idPost);
+                        int blogId = Integer.parseInt(request.getParameter("blogId"));
+                        BlogPost blog = dao.getBlogById(blogId);
                         if (blog != null) {
-                            List<String> listSup = dao.getActiveSuppliers();
-                            request.setAttribute("supList", listSup);
                             request.setAttribute("blog", blog);
+                            request.setAttribute("supList", dao.getActiveSuppliers());
                             request.getRequestDispatcher("/admin/editBlog.jsp").forward(request, response);
                         } else {
-                            request.getSession().setAttribute("errorMessage", "Không tìm thấy bài viết!");
                             response.sendRedirect(request.getContextPath() + "/admin/blog");
                         }
                     }
@@ -145,20 +132,11 @@ public class BlogManageController extends HttpServlet {
                     
                 case "deleteBlog":
                     try {
-                        int idPost = Integer.parseInt(request.getParameter("idPost"));
-                        if(dao.deleteBlog(idPost)) {
-                            request.getSession().setAttribute("successMessage", "Xóa bài viết thành công!");
-                        } else {
-                            request.getSession().setAttribute("errorMessage", "Xóa bài viết thất bại!");
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        request.getSession().setAttribute("errorMessage", "Lỗi: " + e.getMessage());
-                    }
+                        int blogId = Integer.parseInt(request.getParameter("blogId"));
+                        dao.deleteBlog(blogId);
+                    } catch (Exception e) {}
                     response.sendRedirect(request.getContextPath() + "/admin/blog");
                     break;
-                    
-            
                     
                 default:
                     response.sendRedirect(request.getContextPath() + "/admin/blog");
@@ -166,8 +144,7 @@ public class BlogManageController extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("errorMessage", "Lỗi hệ thống: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/admin/blog");
+            throw new ServletException("Lỗi hệ thống tại BlogManageController: " + e.getMessage(), e);
         }
     }
 

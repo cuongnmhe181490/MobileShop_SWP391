@@ -12,21 +12,22 @@ public class BlogDAO extends DBContext {
 
     // ================== C: CREATE ==================
     public boolean insertBlog(BlogPost blog) {
-        String query = "INSERT INTO Blog (Title, SubTitle, Summary, Content, ThumbnailPath, UserId, IdSupplier, CreatedDate) \n"
+        String query = "INSERT INTO Blog (UserId, Title, SubTitle, Summary, Content, ThumbnailPath, IdSupplier, CreatedDate) \n"
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
 
-            ps.setString(1, blog.getTitle().trim());
-            ps.setString(2, blog.getSubTitle() != null ? blog.getSubTitle().trim() : "");
-            ps.setString(3, blog.getSummary() != null ? blog.getSummary().trim() : "");
-            ps.setString(4, blog.getContent());
-            ps.setString(5, blog.getThumbnailPath());
-            ps.setInt(6, blog.getUserId());
-            ps.setString(7, blog.getIdSupplier().trim());
+            ps.setInt(1, blog.getUserId());
+            ps.setString(2, blog.getTitle());
+            ps.setString(3, blog.getSubTitle());
+            ps.setString(4, blog.getDescription());
+            ps.setString(5, blog.getContent());
+            ps.setString(6, blog.getImagePath());
+            ps.setString(7, blog.getIdSupplier());
             
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
+            System.err.println("Lỗi insertBlog: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
@@ -41,15 +42,107 @@ public class BlogDAO extends DBContext {
             while (rs.next()) {
                 list.add(new BlogPost(
                         rs.getInt("IdPost"),
+                        rs.getInt("UserId"),
                         rs.getString("Title"),
                         rs.getString("SubTitle"),
                         rs.getString("Summary"),
                         rs.getString("Content"),
                         rs.getString("ThumbnailPath"),
-                        rs.getDate("CreatedDate"),
-                        rs.getInt("UserId"),
-                        rs.getString("IdSupplier")
+                        rs.getString("IdSupplier"),
+                        rs.getDate("CreatedDate")
                 ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // ================== R: READ ONE ==================
+    public BlogPost getBlogById(int blogId) {
+        String query = "SELECT * FROM Blog WHERE IdPost = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, blogId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new BlogPost(
+                            rs.getInt("IdPost"),
+                            rs.getInt("UserId"),
+                            rs.getString("Title"),
+                            rs.getString("SubTitle"),
+                            rs.getString("Summary"),
+                            rs.getString("Content"),
+                            rs.getString("ThumbnailPath"),
+                            rs.getString("IdSupplier"),
+                            rs.getDate("CreatedDate")
+                    );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // ================== U: UPDATE ==================
+    public boolean updateBlog(BlogPost blog) {
+        String query = "UPDATE Blog SET Title = ?, SubTitle = ?, Summary = ?, Content = ?, ThumbnailPath = ?, \n"
+                + "IdSupplier = ?, UserId = ? WHERE IdPost = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, blog.getTitle());
+            ps.setString(2, blog.getSubTitle());
+            ps.setString(3, blog.getDescription());
+            ps.setString(4, blog.getContent());
+            ps.setString(5, blog.getImagePath());
+            ps.setString(6, blog.getIdSupplier());
+            ps.setInt(7, blog.getUserId());
+            ps.setInt(8, blog.getBlogId());
+            
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // ================== D: DELETE ==================
+    public boolean deleteBlog(int blogId) {
+        String query = "DELETE FROM Blog WHERE IdPost = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, blogId);
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int getTotalBlogs() {
+        String query = "SELECT COUNT(*) FROM Blog";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<String> getActiveSuppliers() {
+        List<String> list = new ArrayList<>();
+        String query = "SELECT DISTINCT IdSupplier FROM Supplier";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String id = rs.getString(1);
+                if (id != null) list.add(id.trim());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,14 +159,14 @@ public class BlogDAO extends DBContext {
                 while (rs.next()) {
                     list.add(new BlogPost(
                             rs.getInt("IdPost"),
+                            rs.getInt("UserId"),
                             rs.getString("Title"),
                             rs.getString("SubTitle"),
                             rs.getString("Summary"),
                             rs.getString("Content"),
                             rs.getString("ThumbnailPath"),
-                            rs.getDate("CreatedDate"),
-                            rs.getInt("UserId"),
-                            rs.getString("IdSupplier")
+                            rs.getString("IdSupplier"),
+                            rs.getDate("CreatedDate")
                     ));
                 }
             }
@@ -81,99 +174,5 @@ public class BlogDAO extends DBContext {
             e.printStackTrace();
         }
         return list;
-    }
-
-    // ================== R: READ ONE ==================
-    public BlogPost getBlogById(int idPost) {
-        String query = "SELECT * FROM Blog WHERE IdPost = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
-
-            ps.setInt(1, idPost);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new BlogPost(
-                            rs.getInt("IdPost"),
-                            rs.getString("Title"),
-                            rs.getString("SubTitle"),
-                            rs.getString("Summary"),
-                            rs.getString("Content"),
-                            rs.getString("ThumbnailPath"),
-                            rs.getDate("CreatedDate"),
-                            rs.getInt("UserId"),
-                            rs.getString("IdSupplier")
-                    );
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // ================== U: UPDATE ==================
-    public boolean updateBlog(BlogPost blog) {
-        String query = "UPDATE Blog SET Title = ?, SubTitle = ?, Summary = ?, Content = ?, ThumbnailPath = ?, \n"
-                + "UserId = ?, IdSupplier = ? WHERE IdPost = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
-
-            ps.setString(1, blog.getTitle().trim());
-            ps.setString(2, blog.getSubTitle() != null ? blog.getSubTitle().trim() : "");
-            ps.setString(3, blog.getSummary() != null ? blog.getSummary().trim() : "");
-            ps.setString(4, blog.getContent());
-            ps.setString(5, blog.getThumbnailPath());
-            ps.setInt(6, blog.getUserId());
-            ps.setString(7, blog.getIdSupplier().trim());
-            ps.setInt(8, blog.getIdPost());
-            
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    // ================== D: DELETE ==================
-    public boolean deleteBlog(int idPost) {
-        String query = "DELETE FROM Blog WHERE IdPost = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
-
-            ps.setInt(1, idPost);
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public List<String> getActiveSuppliers() {
-        List<String> list = new ArrayList<>();
-        String query = "SELECT DISTINCT IdSupplier FROM Supplier";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                String id = rs.getString(1);
-                if (id != null) {
-                    list.add(id.trim());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public int getTotalBlogs() {
-        String query = "SELECT COUNT(*) FROM Blog";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
     }
 }

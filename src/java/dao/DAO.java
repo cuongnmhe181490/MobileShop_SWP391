@@ -412,4 +412,74 @@ public class DAO {
         }
         return 0;
     }
+
+    public int getPendingOrdersCount() {
+        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Chờ xử lý'";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public String getMonthlyRevenue() {
+        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                double total = rs.getDouble(1);
+                if (total >= 1000000) return String.format("%.1fM", total / 1000000.0);
+                return String.format("%.0f", total);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return "0";
+    }
+
+    public List<Map<String, String>> getRecentOrders(int limit) {
+        List<Map<String, String>> list = new ArrayList<>();
+        String query = "SELECT TOP (?) o.IdOrder, u.FullName, o.OrderDate, o.TotalPrice, o.OrderStatus " +
+                      "FROM [Order] o JOIN [User] u ON o.UserId = u.UserId " +
+                      "ORDER BY o.IdOrder DESC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm dd/MM");
+                while (rs.next()) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("id", "#DH" + String.format("%04d", rs.getInt("IdOrder")));
+                    map.put("name", rs.getString("FullName"));
+                    map.put("time", sdf.format(rs.getTimestamp("OrderDate")));
+                    map.put("price", String.format("%.1fM", rs.getDouble("TotalPrice") / 1000000.0));
+                    map.put("status", rs.getString("OrderStatus"));
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Map<String, String>> getBestSellers(int limit) {
+        List<Map<String, String>> list = new ArrayList<>();
+        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, p.Quantity, SUM(od.Quantity) as Sold " +
+                      "FROM ProductDetail p JOIN OrderDetail od ON p.IdProduct = od.IdProduct " +
+                      "GROUP BY p.ProductName, p.IdSupplier, p.Quantity " +
+                      "ORDER BY Sold DESC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("name", rs.getString("ProductName"));
+                    map.put("brand", rs.getString("IdSupplier"));
+                    map.put("stock", "Còn " + rs.getInt("Quantity") + " máy");
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
 }

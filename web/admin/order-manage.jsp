@@ -19,52 +19,44 @@
     <div class="admin-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <a href="#" class="sidebar-brand">MobileShop</a>
-            
-            <ul class="sidebar-menu">
-                <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
-                        <span class="menu-dot"></span>
-                        Dashboard
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
-                        <span class="menu-dot"></span>
-                        Quản lý tài khoản
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/admin/orders" class="menu-link active">
-                        <span class="menu-dot"></span>
-                        Quản lý đơn hàng
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
-                        <span class="menu-dot"></span>
-                        Quản lý sản phẩm
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
-                        <span class="menu-dot"></span>
-                        Quản lý blog
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/home" class="menu-link">
-                        <span class="menu-dot"></span>
-                        Về trang chủ
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="${pageContext.request.contextPath}/logout" class="menu-link">
-                        <span class="menu-dot"></span>
-                        Đăng xuất
-                    </a>
-                </li>
-            </ul>
+            <a href="#" class="sidebar-brand">
+                <h2>MobileShop</h2>
+                <p>Quản trị hệ thống</p>
+            </a>
+
+            <div class="nav-section">
+                <span class="nav-label">TỔNG QUAN</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-label">QUẢN LÝ</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link active">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-label">HỆ THỐNG</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                </ul>
+            </div>
+
+            <div style="margin-top: auto;">
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                </ul>
+            </div>
         </aside>
 
         <!-- Main Content -->
