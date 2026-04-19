@@ -62,4 +62,17 @@ public class UserDAO extends DBContext{
     return null;
     }
  
+    public int getTotalUsers() {
+        String query = "SELECT COUNT(*) FROM [User]";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

@@ -1,25 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package entity;
 
-/**
- *
- * @author LENOVO
- */
-public class Product {
-
-    
+public class ProductModel {
     private String idProduct, productName;
     private double price, discount;
     private int quantity;
-    private String releaseDate, screen, operatingSystem, cpu, ram, camera, battery, description, idSupplier,imagePath;
+    private String releaseDate, screen, operatingSystem, cpu, ram, camera, battery, description, idSupplier, imagePath;
 
-    public Product(int aInt, String string, String string1, double aDouble, String string2, String string3) {
+    public ProductModel() {
     }
 
-    public Product(String idProduct, String productName, double price, int quantity, String releaseDate, String screen, String operatingSystem, String cpu, String ram, String camera, String battery, String description, double discount, String idSupplier, String imagePath) {
+    public ProductModel(String idProduct, String productName, double price, int quantity, String releaseDate, String screen, String operatingSystem, String cpu, String ram, String camera, String battery, String description, double discount, String idSupplier, String imagePath) {
         this.idProduct = idProduct;
         this.productName = productName;
         this.price = price;
@@ -159,9 +149,6 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" + "idProduct=" + idProduct + ", productName=" + productName + ", price=" + price + ", discount=" + discount + ", quantity=" + quantity + ", releaseDate=" + releaseDate + ", screen=" + screen + ", operatingSystem=" + operatingSystem + ", cpu=" + cpu + ", ram=" + ram + ", camera=" + camera + ", battery=" + battery + ", description=" + description + ", idSupplier=" + idSupplier + ", imagePath=" + imagePath + '}';
+        return "ProductModel{" + "idProduct=" + idProduct + ", productName=" + productName + ", price=" + price + ", discount=" + discount + ", quantity=" + quantity + ", releaseDate=" + releaseDate + ", screen=" + screen + ", operatingSystem=" + operatingSystem + ", cpu=" + cpu + ", ram=" + ram + ", camera=" + camera + ", battery=" + battery + ", description=" + description + ", idSupplier=" + idSupplier + ", imagePath=" + imagePath + '}';
     }
-
-    
-    
 }

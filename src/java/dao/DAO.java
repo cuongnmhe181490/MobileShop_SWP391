@@ -4,8 +4,9 @@
  */
 package dao;
 import config.DBContext;
-import entity.Product;
+import entity.ProductModel;
 import entity.ProductReview;
+import entity.Role;
 import java.sql.SQLException;
 import entity.User;
 import java.util.*;
@@ -16,7 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import entity.Role;
+
 
 
 
@@ -157,8 +158,8 @@ public class DAO {
         return false;
     }
 
-    private Product mapProduct(ResultSet rs) throws SQLException {
-        return new Product(
+    private ProductModel mapProduct(ResultSet rs) throws SQLException {
+        return new ProductModel(
                 rs.getString("IdProduct"),
                 rs.getString("ProductName"),
                 rs.getDouble("Price"),
@@ -189,8 +190,8 @@ public class DAO {
     }
 
 
-    private List<Product> queryProducts(String sql, SqlConsumer<PreparedStatement> binder) {
-        List<Product> list = new ArrayList<>();
+    private List<ProductModel> queryProducts(String sql, SqlConsumer<PreparedStatement> binder) {
+        List<ProductModel> list = new ArrayList<>();
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             binder.accept(ps);
@@ -205,18 +206,18 @@ public class DAO {
         return list;
     }
 
-    public List<Product> getFeaturedProducts(int limit) {
+    public List<ProductModel> getFeaturedProducts(int limit) {
         return queryProducts(
                 "SELECT * FROM ProductDetail ORDER BY ReleaseDate DESC, Price DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY",
                 ps -> ps.setInt(1, limit)
         );
     }
 
-    public List<Product> getLatestProducts(int limit) {
+    public List<ProductModel> getLatestProducts(int limit) {
         return getFeaturedProducts(limit);
     }
 
-    public Product getProductByID(String id) {
+    public ProductModel getProductByID(String id) {
         String query = "SELECT * FROM ProductDetail WHERE IdProduct = ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -397,5 +398,88 @@ public class DAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public int getTotalProducts() {
+        String query = "SELECT COUNT(*) FROM ProductDetail";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getPendingOrdersCount() {
+        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Chờ xử lý'";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public String getMonthlyRevenue() {
+        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                double total = rs.getDouble(1);
+                if (total >= 1000000) return String.format("%.1fM", total / 1000000.0);
+                return String.format("%.0f", total);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return "0";
+    }
+
+    public List<Map<String, String>> getRecentOrders(int limit) {
+        List<Map<String, String>> list = new ArrayList<>();
+        String query = "SELECT TOP (?) o.IdOrder, u.FullName, o.OrderDate, o.TotalPrice, o.OrderStatus " +
+                      "FROM [Order] o JOIN [User] u ON o.UserId = u.UserId " +
+                      "ORDER BY o.IdOrder DESC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm dd/MM");
+                while (rs.next()) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("id", "#DH" + String.format("%04d", rs.getInt("IdOrder")));
+                    map.put("name", rs.getString("FullName"));
+                    map.put("time", sdf.format(rs.getTimestamp("OrderDate")));
+                    map.put("price", String.format("%.1fM", rs.getDouble("TotalPrice") / 1000000.0));
+                    map.put("status", rs.getString("OrderStatus"));
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Map<String, String>> getBestSellers(int limit) {
+        List<Map<String, String>> list = new ArrayList<>();
+        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, p.Quantity, SUM(od.Quantity) as Sold " +
+                      "FROM ProductDetail p JOIN OrderDetail od ON p.IdProduct = od.IdProduct " +
+                      "GROUP BY p.ProductName, p.IdSupplier, p.Quantity " +
+                      "ORDER BY Sold DESC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("name", rs.getString("ProductName"));
+                    map.put("brand", rs.getString("IdSupplier"));
+                    map.put("stock", "Còn " + rs.getInt("Quantity") + " máy");
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
     }
 }

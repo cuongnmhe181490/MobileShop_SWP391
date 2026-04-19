@@ -86,16 +86,9 @@ public class LoginControl extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("acc", loginUser);
 
-            // 4. PHÂN QUYỀN DỰA VÀO ROLE ID
-            // Gọi user.getRole() để lấy Object Role, sau đó lấy RoleId để so sánh
-            if (loginUser.getRole().getRoleId() == 1) {
-                // Nếu là Admin (1) -> Chuyển hướng sang trang quản trị
-                response.sendRedirect("home"); // Hoặc adminDashboard.jsp tùy project của bạn
-            } else {
-                // Nếu là Customer (0) -> Chuyển hướng về trang chủ mua sắm
-                response.sendRedirect("home"); 
-            }
-
+            // 4. Đăng nhập xong -> Tất cả đều về trang chủ (Home)
+            // Admin sẽ thấy nút "Quản trị" ở Home để tự bấm vào sau
+            response.sendRedirect("home"); 
         } else {
             // Đăng nhập thất bại -> Báo lỗi và quay lại trang login
             request.setAttribute("mess", "Email hoặc mật khẩu không chính xác!");

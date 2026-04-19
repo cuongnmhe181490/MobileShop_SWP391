@@ -235,15 +235,16 @@
                     </div>
 
                     <div class="editorial-grid">
-                        <c:forEach items="${blogPosts}" var="post">
+
+                        <c:forEach items="${blogPosts}" var="post" end="2">
                             <article class="editorial-card editorial-card--article">
-                                <div class="editorial-card__image">
-                                    <img src="${post.imageUrl}" alt="${post.title}">
-                                </div>
+                                <a href="${ctx}/blog-detail?bid=${post.idPost}" class="editorial-card__image">
+                                    <img src="${not empty post.thumbnailPath ? post.thumbnailPath : 'img/no-image.png'}" alt="${post.title}">
+                                </a>
                                 <div class="editorial-card__body">
-                                    <span class="editorial-card__tag">${post.category}</span>
-                                    <h3>${post.title}</h3>
-                                    <p>${post.excerpt}</p>
+                                    <span class="editorial-card__tag">${post.idSupplier}</span>
+                                    <h3><a href="${ctx}/blog-detail?bid=${post.idPost}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
+                                    <p>${post.summary}</p>
                                 </div>
                             </article>
                         </c:forEach>
