@@ -3,8 +3,31 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/PRJ301/PROJECT_SANSIGROUP/web/index.html</file>
-            <file>file:/D:/PRJ301/PROJECT_SANSIGROUP/web/css/style.css</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/config-hero-delete.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/admin-hero-list.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/WEB-INF/web.xml</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/brand-list.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/dao/HeroBannerDAO.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/HeroEditServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/BrandListServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/HeroListServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/ReviewReplyServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/AdminHomeConfigServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/entity/Category.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/config-hero-edit.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/config-hero-add.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/dao/CartDao.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/HeroAddServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/HomePage.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/HomePageServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/config-brand-edit.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/UploadServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/admin-review-add.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/admin-home-config.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/web/config-brand-add.jsp</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/BrandAddServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/BrandEditServlet.java</file>
+            <file>file:/D:/PROJECT_MobileShops%20Copy%20-%20Copy/src/java/controller/HeroDeleteServlet.java</file>
         </group>
     </open-files>
 </project-private>

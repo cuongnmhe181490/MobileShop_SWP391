@@ -1,0 +1,29 @@
+<%@ page pageEncoding="UTF-8" %>
+<footer class="store-footer">
+    <div class="mobile-shell">
+        <div class="store-footer__card">
+            <div class="store-footer__brand">
+                <strong>MobileShop</strong>
+                <p>Chuyên điện thoại và phụ kiện theo hướng chọn nhanh, hiểu đúng nhu cầu và dễ nâng cấp.</p>
+            </div>
+            <div>
+                <h3>Cửa hàng</h3>
+                <p><a href="${ctx}/home">Trang chủ</a></p>
+                <p><a href="${ctx}/product">Sản phẩm</a></p>
+                <p><a href="${ctx}/tradein">Thu cũ</a></p>
+            </div>
+            <div>
+                <h3>Trải nghiệm</h3>
+                <p>Tư vấn chọn máy cùng ngày</p>
+                <p>Định giá thu cũ minh bạch</p>
+                <p>Đánh giá thật từ người mua</p>
+            </div>
+            <div>
+                <h3>Liên hệ</h3>
+                <p>mobileshop@example.com</p>
+                <p>0385 842 752</p>
+                <p>08:00 - 22:00</p>
+            </div>
+        </div>
+    </div>
+</footer>

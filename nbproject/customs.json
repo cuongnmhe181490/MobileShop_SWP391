@@ -1,0 +1,10 @@
+{
+    "elements": {
+        "c:if": {
+            "attributes": {
+                "test": {}
+            }
+        }
+    },
+    "attributes": {}
+}
