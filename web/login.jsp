@@ -3,14 +3,14 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <c:set var="pageTitle" value="Đăng nhập" />
 <c:set var="activePage" value="catalog" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
+        
     </head>
     <body>
-        
-
         <main class="page-section">
             <div class="mobile-shell">
                 <div class="auth-layout">
@@ -37,9 +37,19 @@
                             </label>
                             <label>
                                 <span class="subtle-link">Mật khẩu</span>
-                                <input class="auth-input" name="pass" type="password" placeholder="••••••••" required>
-                            </label>
-                            <c:if test="${not empty mess}">
+                                <div style="position: relative;">
+                                    <input class="auth-input" name="pass" id="passInput"
+                                           type="password" placeholder="••••••••" required
+                                           style="padding-right: 48px;">
+                                    <button type="button" onclick="togglePass()"
+                                            style="position: absolute; right: 14px; top: 50%;
+                                                   transform: translateY(-50%); background: none;
+                                                   border: none; cursor: pointer; color: #6b7280;
+                                                   font-size: 18px; padding: 0; line-height: 1;">
+                                        <i id="eyeIcon" class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </label>                            <c:if test="${not empty mess}">
                                 <p style="margin: 0; color: var(--danger); font-weight: 600;">${mess}</p>
                             </c:if>
 
@@ -52,6 +62,18 @@
                 </div>
             </div>
         </main>
-
+        <script>
+            function togglePass() {
+                const input = document.getElementById("passInput");
+                const icon  = document.getElementById("eyeIcon");
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.className = "fa fa-eye-slash";
+                } else {
+                    input.type = "password";
+                    icon.className = "fa fa-eye";
+                }
+            }
+        </script>
     </body>
 </html>

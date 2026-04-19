@@ -61,5 +61,43 @@ public class UserDAO extends DBContext{
     }
     return null;
     }
+    
+    public boolean updateProfile(int userId, String name, String phone, String address, String gender, String birthday) {
+        String sql = "UPDATE [User] SET FullName = ?, PhoneNumber = ?, Address = ?, Gender = ?, Birthday = ? WHERE UserId = ?";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, name);
+            ps.setString(2, phone);
+            ps.setString(3, address);
+            ps.setString(4, gender);
+            // Birthday có thể null nếu người dùng không điền
+            if (birthday != null && !birthday.isEmpty()) {
+                ps.setDate(5, java.sql.Date.valueOf(birthday));
+            } else {
+                ps.setNull(5, java.sql.Types.DATE);
+            }
+            ps.setInt(6, userId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public boolean changePassword(int userId, String newHashedPassword) {
+        String sql = "UPDATE [User] SET [Password] = ? WHERE UserId = ?";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, newHashedPassword);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
  
 }

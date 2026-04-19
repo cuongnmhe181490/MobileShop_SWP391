@@ -1,5 +1,7 @@
 <%@page pageEncoding="UTF-8"%>
 <c:set var="cartSize" value="${empty sessionScope.size ? 0 : sessionScope.size}" />
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="cartSize" value="${empty sessionScope.size ? 0 : sessionScope.size}" />
 <div class="store-topbar">
     <div class="mobile-shell store-topbar__inner">
         <span>MobileShop</span>
@@ -9,7 +11,7 @@
 <header class="store-header">
     <div class="mobile-shell store-header__inner">
         <a class="store-brand" href="${ctx}/home">
-            <span class="store-brand__title">MobileShop</span>
+            <span class="store-brand__title" style="font-size: 28px; font-weight: 800; color: #172544; letter-spacing: -0.04em; line-height: 1;">MobileShop</span>
             <span class="store-brand__caption">cửa hàng điện thoại</span>
         </a>
 
@@ -22,10 +24,9 @@
         </nav>
 
         <div class="store-actions">
-            <a class="pill-link" href="${ctx}/product">Tìm</a>
             <a class="pill-link" href="${ctx}/cartrole">Giỏ:  ${cartSize}</a>
             <c:if test="${sessionScope.acc != null}">
-                <span class="pill-link">${sessionScope.acc.name}</span>
+                <a class="pill-link" href="${ctx}/profile" style="text-decoration: none;">${sessionScope.acc.name}</a>
                 <a class="pill-link" href="${ctx}/logout">Đăng xuất</a>
             </c:if>
             <c:if test="${sessionScope.acc == null}">
@@ -37,3 +38,56 @@
         </div>
     </div>
 </header>
+            
+            <style>
+                .store-header__inner {
+                    display: grid !important;
+                    grid-template-columns: 200px 1fr auto !important;
+                    gap: 16px !important;
+                    align-items: center !important;
+                    min-height: 72px !important;
+                }
+                .store-nav {
+                    display: flex !important;
+                    flex-wrap: nowrap !important;
+                    gap: 2px !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                .store-nav__link {
+                    white-space: nowrap !important;
+                    font-size: 14px !important;
+                    padding: 8px 10px !important;
+                }
+                .store-actions {
+                    display: flex !important;
+                    flex-wrap: nowrap !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                    flex-shrink: 0 !important;
+                }
+                .store-brand:hover {
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    transform: none !important;
+                }
+
+                .store-nav__link:hover {
+                    background: var(--accent-soft) !important;
+                    box-shadow: none !important;
+                    transform: none !important;
+                }
+
+                .store-actions .pill-link:hover {
+                    background: rgba(0, 0, 0, 0.04) !important;
+                    box-shadow: none !important;
+                    transform: none !important;
+                    border-color: #d1d5db !important;
+                    color: var(--text) !important;
+                }
+
+                .store-actions .pill-link--primary:hover {
+                    background: #2d5fd4 !important;
+                    color: #fff !important;
+                }
+            </style>

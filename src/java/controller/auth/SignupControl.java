@@ -51,19 +51,16 @@ public class SignupControl extends HttpServlet {
         String phoneRegex = "^0\\d{9}$";
 
         if (name == null || name.trim().isEmpty()) {
-            request.setAttribute("mess", "Họ và tên không được để trống!");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
 
         if (email == null || !email.matches(emailRegex)) {
-            request.setAttribute("mess", "Email không đúng định dạng (VD: email@example.com)!");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
 
         if (phone == null || !phone.matches(phoneRegex)) {
-            request.setAttribute("mess", "Số điện thoại không hợp lệ (Phải gồm 10 số và bắt đầu bằng số 0)!");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
@@ -72,22 +69,18 @@ public class SignupControl extends HttpServlet {
             java.time.LocalDate parsedDate = java.time.LocalDate.parse(birthday);
             // Tùy chọn: Chặn người dùng chọn ngày sinh ở tương lai
             if (parsedDate.isAfter(java.time.LocalDate.now())) {
-                request.setAttribute("mess", "Ngày sinh không thể là ngày trong tương lai!");
                 request.getRequestDispatcher("signup.jsp").forward(request, response);
                 return;
             }
         } catch (Exception e) {
-            request.setAttribute("mess", "Ngày sinh không đúng định dạng YYYY-MM-DD hoặc không tồn tại!");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
         if (pass == null || pass.length() < 8) {
-            request.setAttribute("mess", "Mật khẩu phải có ít nhất 8 ký tự!");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
             return;
         }
         if(!pass.equals(re_pass)){
-            request.setAttribute("mess", "Mật khẩu nhập lại không khớp!");
             request.getRequestDispatcher("signup.jsp").forward(request, response);
         }else{
             DAO dao = new DAO();
@@ -95,15 +88,12 @@ public class SignupControl extends HttpServlet {
 
             if (a != null) {
                 // 1. Kiểm tra trùng Tên đăng nhập
-                request.setAttribute("mess", "Tên đăng nhập đã tồn tại!");
                 request.getRequestDispatcher("signup.jsp").forward(request, response);
             } else if (dao.checkEmailExist(email)) {
                 // 2. Kiểm tra trùng Email
-                request.setAttribute("mess", "Email này đã được sử dụng!");
                 request.getRequestDispatcher("signup.jsp").forward(request, response);
             } else if (dao.checkPhoneExist(phone)) {
                 // 3. Kiểm tra trùng Số điện thoại
-                request.setAttribute("mess", "Số điện thoại này đã được sử dụng!");
                 request.getRequestDispatcher("signup.jsp").forward(request, response);
             } else {
                 // 4. Nếu tất cả đều không trùng thì mới cho đăng ký
