@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name = "ReviewDetailControl", urlPatterns = {"/reviews"})
+@WebServlet(name = "ReviewDetailControl", urlPatterns = {"/reviews-v1"})
 public class ReviewDetailControl extends HttpServlet {
 
     private static final int PAGE_SIZE = 4;

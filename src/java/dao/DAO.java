@@ -180,14 +180,14 @@ public class DAO {
     }
     
     private ProductReview mapReview(ResultSet rs) throws SQLException {
-        return new ProductReview(
-                rs.getString("IdProduct"),
-                rs.getInt("UserId"),
-                rs.getString("ReviewerName"),
-                rs.getString("ReviewDate"),
-                rs.getString("Review"),
-                rs.getInt("Ranking")
-        );
+        ProductReview r = new ProductReview();
+        r.setIdProduct(rs.getString("IdProduct"));
+        r.setUserId(rs.getInt("UserId"));
+        r.setReviewerName(rs.getString("ReviewerName"));
+        r.setReviewDate(rs.getTimestamp("ReviewDate"));
+        r.setReviewContent(rs.getString("Review"));
+        r.setRanking(rs.getInt("Ranking"));
+        return r;
     }
 
 

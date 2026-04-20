@@ -1,13 +1,4 @@
 package entity;
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author Hai Vu
- */
 
 public class Supplier {
     private String idSupplier;
@@ -17,11 +8,9 @@ public class Supplier {
     private String phoneNumber;
     private String logoPath;
 
-    // 1. Constructor không đối số (Bắt buộc phải có)
     public Supplier() {
     }
 
-    // 2. Constructor đầy đủ đối số (Dùng khi lấy dữ liệu từ DB)
     public Supplier(String idSupplier, String name, String address, String email, String phoneNumber, String logoPath) {
         this.idSupplier = idSupplier;
         this.name = name;
@@ -31,7 +20,6 @@ public class Supplier {
         this.logoPath = logoPath;
     }
 
-    // 3. Getter và Setter (Để truy cập và cập nhật dữ liệu)
     public String getIdSupplier() {
         return idSupplier;
     }
@@ -80,11 +68,9 @@ public class Supplier {
         this.logoPath = logoPath;
     }
 
-    // 4. Override toString (Dùng để kiểm tra dữ liệu khi cần debug)
     @Override
     public String toString() {
-        return "Supplier{" + "idSupplier=" + idSupplier + ", name=" + name + ", email=" + email + '}';
+        return "Supplier{" + "idSupplier=" + idSupplier + ", name=" + name + ", address=" + address + ", email=" + email + ", phoneNumber=" + phoneNumber + ", logoPath=" + logoPath + '}';
     }
 }
-
 
