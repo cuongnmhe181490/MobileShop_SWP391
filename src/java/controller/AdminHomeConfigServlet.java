@@ -2,7 +2,9 @@ package controller;
 
 import config.DBContext;
 import dao.HeroBannerDAO;
+import dao.SupplierDAO;
 import entity.HeroBanner;
+import entity.Supplier;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,6 +28,8 @@ import java.util.List;
 public class AdminHomeConfigServlet extends HttpServlet {
 
     private final HeroBannerDAO heroDAO = new HeroBannerDAO();
+    private final SupplierDAO supplierDAO = new SupplierDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -41,12 +45,19 @@ public class AdminHomeConfigServlet extends HttpServlet {
             HeroBanner activeHero = heroDAO.getActiveBanner();
             request.setAttribute("activeHero", activeHero);
 
+            // Lấy thương hiệu mới nhất để link nút Sửa trên overview
+            List<Supplier> suppliers = supplierDAO.getAllSuppliersPaging(null, 1, 1);
+            if (!suppliers.isEmpty()) {
+                request.setAttribute("latestSupplier", suppliers.get(0));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("heroList", new ArrayList<>());
             request.setAttribute("heroCount", 0);
             request.setAttribute("activeHero", null);
         }
+
 
         // Điểm hài lòng: tính LIVE từ DB, không fix cứng
         request.setAttribute("satisfactionRate", getLiveSatisfactionRate());

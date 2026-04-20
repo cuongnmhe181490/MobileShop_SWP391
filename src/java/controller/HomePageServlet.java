@@ -2,7 +2,9 @@ package controller;
 
 import config.DBContext;
 import dao.HeroBannerDAO;
+import dao.SupplierDAO;
 import entity.HeroBanner;
+import entity.Supplier;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.List;
 
 /**
  * Servlet phục vụ trang chủ (HomePage.jsp). Cập nhật: Truy vấn LIVE mỗi lần
@@ -23,6 +26,7 @@ public class HomePageServlet extends HttpServlet {
 
     private final HeroBannerDAO heroBannerDAO = new HeroBannerDAO();
     private final dao.ProductDAO productDAO = new dao.ProductDAO();
+    private final dao.SupplierDAO supplierDAO = new dao.SupplierDAO();
     private final dao.TradeInConfigDAO tradeInDAO = new dao.TradeInConfigDAO();
 
     @Override
@@ -46,11 +50,9 @@ public class HomePageServlet extends HttpServlet {
         // ── 3. Đếm số mẫu máy LIVE ────────────────────────────────────
         // Thực hiện COUNT(*) trực tiếp từ bảng ProductDetail [cite: 16, 17]
         request.setAttribute("productCount", getLiveProductCount());
-         dao.CartDao brandDao = new dao.CartDao();
-        java.util.List<entity.Category> listBrands = brandDao.getAllCategories();
-    
-         // Gửi danh sách này sang JSP với tên "listCC"
-          request.setAttribute("listCC", listBrands);
+        // ── 3.1. Load danh sách Thương hiệu (Suppliers) cho slider ───
+        List<Supplier> listBrands = supplierDAO.getAllSuppliers();
+        request.setAttribute("listCC", listBrands);
 
         // ── 3.5. Lấy danh sách Top Product bán chạy ───────────────────
         try {

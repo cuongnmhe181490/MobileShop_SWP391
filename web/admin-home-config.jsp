@@ -11,8 +11,6 @@
             :root {
                 --page-bg: #f5f7ff;
                 --shell-bg: #fbfcff;
-                --sidebar-bg: #27315f;
-                --sidebar-muted: #c8d0ee;
                 --heading: #24345f;
                 --text: #64748b;
                 --border-color: #e7ecfb;
@@ -32,7 +30,7 @@
 
             body {
                 padding: 18px;
-                overflow: hidden;
+                overflow: auto;
             }
 
             .dashboard-shell {
@@ -43,7 +41,7 @@
                 padding: 14px;
                 display: flex;
                 gap: 16px;
-                overflow: hidden;
+                overflow: auto;
                 box-shadow: 0 14px 34px rgba(110, 124, 180, 0.08);
             }
 
@@ -237,34 +235,122 @@
                 border: 1px solid #ff7b8f;
                 color: #ea4f68;
             }
+
+        /* ===== SIDEBAR – Dashboard Design ===== */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 100;
+            color: white;
+            overflow-y: auto;
+        }
+        .sidebar .brand {
+            padding: 0 24px;
+            margin-bottom: 40px;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        .nav-section { margin-bottom: 32px; }
+        .nav-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+            padding: 0 24px;
+        }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .menu-link i { width: 20px; text-align: center; }
+        .menu-link:hover { background: rgba(175,242,47,0.05); color: #cbd5e1; }
+        .menu-link.active {
+            background: rgba(175,242,47,0.1);
+            color: #aff22f;
+            border-left-color: #aff22f;
+            font-weight: 600;
+        }
+        .sidebar-logout { margin-top: auto; }
+        /* ===== END SIDEBAR ===== */
+
         </style>
-    </head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
     <body>
 
         <div class="dashboard-shell">
           
-            <%@ include file="/WEB-INF/jspf/sidebar_config/sidebar_config.jspf" %>
+        <aside class="sidebar">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
+                <h2>MobileShop</h2>
+                <p>Quản trị hệ thống</p>
+            </a>
+            <div class="nav-section">
+                <span class="nav-label">TỔNG QUAN</span>
+                <ul class="sidebar-menu">
+                    <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <span class="nav-label">QUẢN LÝ</span>
+                <ul class="sidebar-menu">
+                    <li><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
+                    <li><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link active"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <ul class="sidebar-menu">
+                    <li><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
+                    <li><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
+                    <li><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
+                    <li><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <span class="nav-label">HỆ THỐNG</span>
+                <ul class="sidebar-menu">
+                    <li><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-logout">
+                <ul class="sidebar-menu">
+                    <li><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                </ul>
+            </div>
+        </aside>
 
-            <div class="content">
+            <div class="content" style="margin-left:260px;padding:32px 40px;min-height:100vh;box-sizing:border-box;">
                 <div class="header-section">
                     <h2>Cấu hình trang chủ</h2>
                 </div>
 
-                <%-- Flash messages từ session (sau redirect) --%>
-                <%
-                    String flashSuccess = (String) session.getAttribute("flashSuccess");
-                    String flashError   = (String) session.getAttribute("flashError");
-                    session.removeAttribute("flashSuccess");
-                    session.removeAttribute("flashError");
-                %>
-                <% if (flashSuccess != null) { %>
-                <div class="flash flash-success">✅ <%= flashSuccess %></div>
-                <% } %>
-                <% if (flashError != null) { %>
-                <div class="flash flash-error">❌ <%= flashError %></div>
-                <% } %>
-
                 <div class="grid-layout">
+
                     <div class="span-6">
                         <div class="card-box">
                             <span class="tag" style="background:#fff1f2; color:#e11d48;">Biểu ngữ</span>
@@ -273,7 +359,15 @@
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
                             <div class="btn-group-custom">
-                                <a href="${ctx}/HeroEditServlet" class="btn-f btn-edit">Sửa</a>
+                                <%-- Lấy id từ active banner hoặc mặc định --%>
+                                <c:choose>
+                                    <c:when test="${not empty activeHero}">
+                                        <a href="${ctx}/HeroEditServlet?id=${activeHero.id}" class="btn-f btn-edit">Sửa</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${ctx}/HeroListServlet" class="btn-f btn-edit">Sửa</a>
+                                    </c:otherwise>
+                                </c:choose>
                                 <a href="${ctx}/HeroAddServlet" class="btn-f btn-add">Thêm</a>
                                 <a href="${ctx}/HeroListServlet" class="btn-f btn-list">Danh sách</a>
                             </div>
@@ -287,14 +381,12 @@
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
                             <div class="btn-group-custom">
-                                <%-- Lấy brand mới nhất (id lớn nhất) --%>
                                 <c:choose>
-                                    <c:when test="${not empty brands}">
-                                        <c:set var="latestBrand" value="${brands[brands.size()-1]}" />
-                                        <a href="${ctx}/BrandEditServlet?id=${latestBrand.idCat}" class="btn-f btn-edit">Sửa</a>
+                                    <c:when test="${not empty latestSupplier}">
+                                        <a href="${ctx}/BrandEditServlet?id=${latestSupplier.idSupplier}" class="btn-f btn-edit">Sửa</a>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="${ctx}/BrandEditServlet" class="btn-f btn-edit">Sửa</a>
+                                        <a href="${ctx}/BrandListServlet" class="btn-f btn-edit">Sửa</a>
                                     </c:otherwise>
                                 </c:choose>
                                 <a href="${ctx}/BrandAddServlet" class="btn-f btn-add">Thêm</a>
@@ -305,12 +397,12 @@
                     <div class="span-6">
                         <div class="card-box">
                             <span class="tag" style="background:#fffbeb; color:#d97706;">Sản phẩm</span>
-                            <h5>Sản phẩm bán chạy</h5>
+                            <h5>Sản phẩm nổi bật</h5>
                             <div class="card-visual bg-product">
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
                             <div class="btn-group-custom">
-                                <a href="${ctx}/TopProductEditServlet" class="btn-f btn-edit">Sửa</a>
+                                <a href="${ctx}/TopProductListServlet" class="btn-f btn-edit">Quản lý</a>
                                 <a href="${ctx}/TopProductAddServlet" class="btn-f btn-add">Thêm</a>
                                 <a href="${ctx}/TopProductListServlet" class="btn-f btn-list">Danh sách</a>
                             </div>
@@ -319,7 +411,7 @@
                     <div class="span-6">
                         <div class="card-box">
                             <span class="tag" style="background:#f0fdf4; color:#16a34a;">Chương trình</span>
-                            <h5>Thu cũ</h5>
+                            <h5>Cấu hình Trade-in</h5>
                             <div class="card-visual bg-promo">
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
@@ -334,5 +426,58 @@
             </div>
         </div>
 
+        <!-- Toast Notifications System -->
+        <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+        <script>
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    min-width: 280px;
+                    padding: 16px 20px;
+                    margin-bottom: 12px;
+                    border-radius: 12px;
+                    background: \${type === 'success' ? '#4caf50' : '#f44336'};
+                    color: white;
+                    font-size: 13px;
+                    font-weight: 600;
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                    opacity: 0;
+                    transform: translateX(50px);
+                    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                `;
+                
+                const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+                toast.innerHTML = `<i class="fa-solid \${icon}"></i> <span>\${message}</span>`;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateX(0)';
+                }, 10);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(50px)';
+                    setTimeout(() => toast.remove(), 400);
+                }, 4000);
+            }
+
+            window.onload = function() {
+                <c:if test="${not empty sessionScope.flashSuccess}">
+                    showToast('${sessionScope.flashSuccess}', 'success');
+                    <% session.removeAttribute("flashSuccess"); %>
+                </c:if>
+                <c:if test="${not empty sessionScope.flashError}">
+                    showToast('${sessionScope.flashError}', 'error');
+                    <% session.removeAttribute("flashError"); %>
+                </c:if>
+            };
+        </script>
     </body>
-</html>
+</html>

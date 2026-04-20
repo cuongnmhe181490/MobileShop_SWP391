@@ -1,11 +1,7 @@
 package dao;
 
-import entity.HeroBanner;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import config.DBContext;
+import entity.HeroBanner;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
