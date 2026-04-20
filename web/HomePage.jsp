@@ -195,7 +195,7 @@
                         <h2 style="color: #fff3cd">Thu cũ Đổi mới: Lên đời Flagship tiết kiệm đến 80%.</h2>
                         <p>Đừng để chiếc điện thoại cũ trong ngăn kéo. Chúng tôi thu mua lại với giá cao nhất thị trường để bạn bù tiền lên đời máy mới một cách nhẹ nhàng và kinh tế nhất.</p>
                         <div class="hero-card__actions">
-                            <a class="pill-link pill-link--primary" href="${ctx}/trade-in">Định giá máy cũ ngay</a>
+                            <a class="pill-link pill-link--primary" href="${ctx}/tradein">Định giá máy cũ ngay</a>
                             <a class="pill-link" href="${ctx}/contact">Liên hệ tư vấn</a>
                         </div>
                     </div>
@@ -236,15 +236,15 @@
 
                     <div class="editorial-grid">
 
-                        <c:forEach items="${blogPosts}" var="post" end="2">
+                        <c:forEach items="${blogPosts}" var="post">
                             <article class="editorial-card editorial-card--article">
-                                <a href="${ctx}/blog-detail?bid=${post.idPost}" class="editorial-card__image">
-                                    <img src="${not empty post.thumbnailPath ? post.thumbnailPath : 'img/no-image.png'}" alt="${post.title}">
+                                <a href="${ctx}/blog-detail?bid=${post.blogId}" class="editorial-card__image">
+                                    <img src="${not empty post.imagePath ? post.imagePath : 'img/no-image.png'}" alt="${post.title}">
                                 </a>
                                 <div class="editorial-card__body">
-                                    <span class="editorial-card__tag">${post.idSupplier}</span>
-                                    <h3><a href="${ctx}/blog-detail?bid=${post.idPost}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
-                                    <p>${post.summary}</p>
+                                    <span class="editorial-card__tag">${post.categoryName}</span>
+                                    <h3><a href="${ctx}/blog-detail?bid=${post.blogId}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
+                                    <p>${post.description}</p>
                                 </div>
                             </article>
                         </c:forEach>
