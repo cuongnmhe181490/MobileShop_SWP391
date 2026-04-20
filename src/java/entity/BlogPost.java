@@ -10,13 +10,14 @@ public class BlogPost {
     private String description; // Tóm tắt ngắn (NVARCHAR(MAX))
     private String content;     // Nội dung chi tiết (NVARCHAR(4000))
     private String imagePath;   // Ảnh bìa
-    private String idSupplier;  // Hãng / Category
+    private int idBlogCat;      // Mã danh mục mới (FK to BlogCategory)
+    private String categoryName; // Tên danh mục (để hiển thị)
     private Date createdDate;
 
     public BlogPost() {
     }
 
-    public BlogPost(int blogId, int userId, String title, String subTitle, String description, String content, String imagePath, String idSupplier, Date createdDate) {
+    public BlogPost(int blogId, int userId, String title, String subTitle, String description, String content, String imagePath, int idBlogCat, Date createdDate) {
         this.blogId = blogId;
         this.userId = userId;
         this.title = title;
@@ -24,7 +25,7 @@ public class BlogPost {
         this.description = description;
         this.content = content;
         this.imagePath = imagePath;
-        this.idSupplier = idSupplier;
+        this.idBlogCat = idBlogCat;
         this.createdDate = createdDate;
     }
 
@@ -49,8 +50,11 @@ public class BlogPost {
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
-    public String getIdSupplier() { return idSupplier; }
-    public void setIdSupplier(String idSupplier) { this.idSupplier = idSupplier; }
+    public int getIdBlogCat() { return idBlogCat; }
+    public void setIdBlogCat(int idBlogCat) { this.idBlogCat = idBlogCat; }
+
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
 
     public Date getCreatedDate() { return createdDate; }
     public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }

@@ -81,14 +81,24 @@
 
             <section class="content-card">
                 <!-- Filters -->
-                <div class="filter-bar">
-                    <div style="position: relative; flex: 1; max-width: 400px;">
+                <form action="${pageContext.request.contextPath}/admin/blog" method="GET" class="filter-bar">
+                    <input type="hidden" name="service" value="listAll">
+                    
+                    <div style="position: relative; flex: 1; max-width: 300px;">
                         <i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #cbd5e1;"></i>
-                        <input type="text" class="form-input" placeholder="Tìm kiếm theo tiêu đề..." style="padding-left: 36px;">
+                        <input type="text" name="searchTitle" class="form-input" placeholder="Tìm kiếm theo tiêu đề..." value="${param.searchTitle}" style="padding-left: 36px;">
                     </div>
-                    <button class="btn-primary" style="background: #4e6af2; padding: 10px 20px;">Lọc</button>
-                    <button class="btn-outline">Đặt lại</button>
-                </div>
+
+                    <select name="filterCat" class="form-select" style="max-width: 200px; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <option value="">-- Tất cả danh mục --</option>
+                        <c:forEach items="${catList}" var="cat">
+                            <option value="${cat.idBlogCat}" ${cat.idBlogCat == selectedCat ? 'selected' : ''}>${cat.categoryName}</option>
+                        </c:forEach>
+                    </select>
+
+                    <button type="submit" class="btn-primary" style="background: #4e6af2; padding: 10px 20px;">Lọc</button>
+                    <a href="${pageContext.request.contextPath}/admin/blog?service=listAll" class="btn-outline" style="text-decoration: none; padding: 10px 20px;">Đặt lại</a>
+                </form>
 
                 <!-- Table -->
                 <table class="admin-table">
@@ -97,7 +107,7 @@
                             <th style="width: 80px;">ID</th>
                             <th style="width: 100px;">Ảnh</th>
                             <th>Tiêu đề bài viết</th>
-                            <th style="width: 150px;">Hãng/Tag</th>
+                            <th style="width: 150px;">Danh mục</th>
                             <th style="width: 130px;">Ngày đăng</th>
                             <th style="width: 180px;">Hành động</th>
                         </tr>
@@ -117,7 +127,7 @@
                                 </td>
                                 <td>
                                     <span class="status-badge" style="background: #f1f5f9; color: #475569; font-size: 0.8rem;">
-                                        ${not empty blog.idSupplier ? blog.idSupplier : 'N/A'}
+                                        ${not empty blog.categoryName ? blog.categoryName : 'N/A'}
                                     </span>
                                 </td>
                                 <td>
@@ -147,6 +157,32 @@
                         </c:if>
                     </tbody>
                 </table>
+
+                <!-- Pagination for Admin -->
+                <c:if test="${totalPages > 1}">
+                    <div style="margin-top: 24px; display: flex; justify-content: center; gap: 8px;">
+                        <a href="${pageContext.request.contextPath}/admin/blog?service=listAll&filterCat=${selectedCat}&searchTitle=${param.searchTitle}&page=${currentPage - 1}" 
+                           class="btn-outline ${currentPage == 1 ? 'disabled' : ''}" 
+                           style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; ${currentPage == 1 ? 'pointer-events: none; opacity: 0.5;' : ''}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="${pageContext.request.contextPath}/admin/blog?service=listAll&filterCat=${selectedCat}&searchTitle=${param.searchTitle}&page=${i}" 
+                               style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; text-decoration: none; font-weight: 600; 
+                                      ${currentPage == i ? 'background: #4e6af2; color: white; border: none;' : 'background: white; border: 1px solid #e5e7eb; color: #374151;'}"
+                               class="${currentPage == i ? 'active' : ''}">
+                                ${i}
+                            </a>
+                        </c:forEach>
+
+                        <a href="${pageContext.request.contextPath}/admin/blog?service=listAll&filterCat=${selectedCat}&searchTitle=${param.searchTitle}&page=${currentPage + 1}" 
+                           class="btn-outline ${currentPage == totalPages ? 'disabled' : ''}" 
+                           style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; ${currentPage == totalPages ? 'pointer-events: none; opacity: 0.5;' : ''}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </c:if>
             </section>
         </main>
     </div>

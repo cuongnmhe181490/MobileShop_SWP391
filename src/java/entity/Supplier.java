@@ -73,3 +73,4 @@ public class Supplier {
         return "Supplier{" + "idSupplier=" + idSupplier + ", name=" + name + ", address=" + address + ", email=" + email + ", phoneNumber=" + phoneNumber + ", logoPath=" + logoPath + '}';
     }
 }
+
