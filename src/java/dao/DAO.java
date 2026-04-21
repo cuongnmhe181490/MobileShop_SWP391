@@ -348,7 +348,7 @@ public class DAO {
     
     // 1. Hàm tạo và lưu Token mới (Có hiệu lực 10 phút)
     public void saveResetToken(String email, String token) {
-        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
+        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 10 phút từ giờ hiện tại
         String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
         try {
             conn = new DBContext().getConnection();
@@ -365,7 +365,7 @@ public class DAO {
     public User getUserByResetToken(String token) {
         // Chỉ lấy User nếu Token khớp VÀ thời gian hiện tại vẫn nhỏ hơn thời gian hết hạn
         // Sửa tạm để test
-        String sql = "SELECT * FROM [User] WHERE ResetToken = ?";
+        String sql = "SELECT * FROM [User] WHERE ResetToken = ? AND ResetTokenExpiry > GETDATE()";
         try {
             conn = new DBContext().getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);

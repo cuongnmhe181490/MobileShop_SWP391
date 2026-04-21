@@ -193,7 +193,15 @@
                         <span class="field-error" id="nameError">Họ và tên không được để trống!</span>
                         <span class="char-count" id="nameCount">0/50</span>
                     </div>
-
+<!--                      test       
+                     <div class="form-group">
+                        <label class="form-label">Role <span class="required">*</span></label>
+                        <select class="form-input" type="text" name="role" id="role">
+                            <option value="${sessionScope.acc.role.roleId}" selected>${sessionScope.acc.role.roleName}</option>
+                            <option value="2">Khách hàng</option>
+                        </select>    
+                    </div>
+                        test            -->
                     <div class="form-group">
                         <label class="form-label">Tên đăng nhập</label>
                         <input class="form-input" type="text"
