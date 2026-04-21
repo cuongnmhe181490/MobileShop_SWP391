@@ -289,7 +289,7 @@ public class ReviewDAO {
     public List<ProductReview> getByUser(int userId) throws Exception {
         List<ProductReview> list = new ArrayList<>();
         String sql =
-            "SELECT pr.ReviewId, pr.IdProduct, pr.ReviewDate, pr.ReviewContent, " +
+            "SELECT pr.ReviewId, pr.UserId, pr.IdProduct, pr.ReviewDate, pr.ReviewContent, " +
             "       pr.Ranking, pr.[Status], pr.ReplyContent, pr.ReplyDate, " +
             "       u.FullName, pd.ProductName, pd.ImagePath " +
             "FROM ProductReview pr " +
