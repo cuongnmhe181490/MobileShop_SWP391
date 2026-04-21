@@ -161,15 +161,15 @@ public class DAO {
 
     private ProductModel mapProduct(ResultSet rs) throws SQLException {
         return new ProductModel(
-                rs.getString("IdProduct"),
+                String.valueOf(rs.getInt("IdProduct")),
                 rs.getString("ProductName"),
                 rs.getDouble("Price"),
-                rs.getInt("Quantity"),
+                rs.getInt("CurrentQuantity"),
                 rs.getString("ReleaseDate"),
                 rs.getString("Screen"),
                 rs.getString("OperatingSystem"),
                 rs.getString("CPU"),
-                String.valueOf(rs.getInt("RAM")),
+                rs.getString("RAM"),
                 rs.getString("Camera"),
                 rs.getString("Battery"),
                 rs.getString("Description"),
@@ -202,7 +202,7 @@ public class DAO {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            throw new RuntimeException("Query Error: " + e.getMessage(), e);
         }
         return list;
     }
@@ -249,6 +249,13 @@ public class DAO {
             System.out.println(e);
         }
         return null;
+    }
+
+    public List<ProductModel> getProductsByBrand(String brandId) {
+        return queryProducts(
+                "SELECT * FROM ProductDetail WHERE UPPER(RTRIM(LTRIM(IdSupplier))) LIKE UPPER(RTRIM(LTRIM(?)))",
+                ps -> ps.setString(1, brandId)
+        );
     }
 
     
@@ -590,5 +597,18 @@ public class DAO {
             return ((curr - prev) / prev) * 100.0;
         } catch (Exception e) { e.printStackTrace(); }
         return 0.0;
+    }
+
+    public List<String> getActiveSuppliers() {
+        List<String> list = new ArrayList<>();
+        String query = "SELECT DISTINCT IdSupplier FROM ProductDetail";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString("IdSupplier"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

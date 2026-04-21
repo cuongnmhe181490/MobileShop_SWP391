@@ -10,18 +10,16 @@ import java.util.Map;
 
 public class CloudinaryUtil {
 
-    private static final config.DBContext db = new config.DBContext();
-
     private static final Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
-            "cloud_name", db.CLOUD_NAME,
-            "api_key", db.CLOUD_API_KEY,
-            "api_secret", db.CLOUD_API_SECRET,
+            "cloud_name", "dovcx8lxl",
+            "api_key", "686417178596178",
+            "api_secret", "wgqV0cS4ia7kjW8fNJ-n21216hc",
             "secure", true
     ));
 
     /**
      * Hàm xử lý upload file từ Servlet Part lên Cloudinary
-     * @param filePart Đối tượng Part nhận từ request.getPart()
+     * @param filePart Đối tượng Part nhận từ request.getPart()s
      * @return String URL của ảnh sau khi upload thành công, hoặc null nếu lỗi
      */
     public static String upload(Part filePart) {

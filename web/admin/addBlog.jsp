@@ -375,7 +375,14 @@
                 const name = newCatNameInput.value.trim();
                 if (!name) return;
                 fetch(`${pageContext.request.contextPath}/admin/blog?service=addCategory&name=` + encodeURIComponent(name))
-                    .then(r => r.text()).then(res => { if (res === 'success') { newCatNameInput.value = ''; loadCategories(); } });
+                    .then(r => r.text()).then(res => { 
+                        if (res === 'success') { 
+                            newCatNameInput.value = ''; 
+                            loadCategories(); 
+                        } else if (res === 'duplicate') {
+                            alert('Tên danh mục này đã tồn tại!');
+                        }
+                    });
             });
 
             window.deleteCategory = function(id) {

@@ -24,8 +24,10 @@ public class BlogCategoryManageController extends HttpServlet {
         if ("add".equals(action)) {
             String name = request.getParameter("name");
             if (name != null && !name.trim().isEmpty()) {
-                boolean success = dao.insertBlogCategory(name);
-                if (success) {
+                String catName = name.trim();
+                if (dao.checkBlogCategoryExist(catName)) {
+                    out.print("{\"status\":\"error\", \"message\":\"Tên danh mục đã tồn tại\"}");
+                } else if (dao.insertBlogCategory(catName)) {
                     out.print("{\"status\":\"success\"}");
                 } else {
                     out.print("{\"status\":\"error\", \"message\":\"Không thể thêm danh mục\"}");

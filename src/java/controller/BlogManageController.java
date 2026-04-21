@@ -183,7 +183,10 @@ public class BlogManageController extends HttpServlet {
                 case "addCategory":
                     String newCatName = request.getParameter("name");
                     if (newCatName != null && !newCatName.trim().isEmpty()) {
-                        if (dao.insertBlogCategory(newCatName.trim())) {
+                        String name = newCatName.trim();
+                        if (dao.checkBlogCategoryExist(name)) {
+                            response.getWriter().write("duplicate");
+                        } else if (dao.insertBlogCategory(name)) {
                             response.getWriter().write("success");
                         } else {
                             response.getWriter().write("fail");

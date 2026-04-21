@@ -320,4 +320,17 @@ public class BlogDAO extends DBContext {
         }
         return false;
     }
+
+    public boolean checkBlogCategoryExist(String name) {
+        String query = "SELECT * FROM BlogCategory WHERE CategoryName = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
