@@ -36,6 +36,11 @@ public class MyReviewServlet extends HttpServlet {
 
         try {
             List<ProductReview> reviews = dao.getByUser(acc.getId());
+            // Load ảnh cho từng review
+            for (ProductReview r : reviews) {
+                r.setImages(dao.getImages(r.getReviewId()));
+            }
+            
             req.setAttribute("reviews", reviews);
             req.setAttribute("successMsg", req.getParameter("success"));
 

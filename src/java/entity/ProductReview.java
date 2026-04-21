@@ -55,4 +55,8 @@ public class ProductReview {
 
     public String getProductImage() { return productImage; }
     public void setProductImage(String productImage) { this.productImage = productImage; }
+
+    private java.util.List<ReviewImage> images;
+    public java.util.List<ReviewImage> getImages() { return images; }
+    public void setImages(java.util.List<ReviewImage> images) { this.images = images; }
 }

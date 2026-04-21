@@ -304,6 +304,17 @@
                                     </div>
                                     <p class="rv-card__content">${rv.reviewContent}</p>
 
+                                    <%-- Ảnh review --%>
+                                    <c:if test="${not empty rv.images}">
+                                        <div class="rv-card__images" style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                                            <c:forEach items="${rv.images}" var="img">
+                                                <img src="${img.imageUrl}" 
+                                                     style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-border-primary);"
+                                                     alt="Review image">
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
+
                                     <%-- Phản hồi Admin --%>
                                     <c:if test="${not empty rv.replyContent}">
                                         <div class="rv-reply">

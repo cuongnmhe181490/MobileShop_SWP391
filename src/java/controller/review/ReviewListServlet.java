@@ -43,6 +43,9 @@ public class ReviewListServlet extends HttpServlet {
 
         try {
             List<ProductReview> reviews    = dao.getVisibleReviews(idProduct, star, page, PAGE_SIZE);
+            for (ProductReview r : reviews) {
+                r.setImages(dao.getImages(r.getReviewId()));
+            }
             int totalReviews               = dao.countVisibleReviews(idProduct, null);
             int filteredCount              = dao.countVisibleReviews(idProduct, star);
             int totalPages                 = (int) Math.ceil((double) filteredCount / PAGE_SIZE);
