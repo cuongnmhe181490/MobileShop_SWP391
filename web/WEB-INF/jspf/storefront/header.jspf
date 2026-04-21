@@ -18,7 +18,7 @@
         <nav class="store-nav" aria-label="Điều hướng chính">
             <a class="store-nav__link ${activePage == 'home' ? 'is-active' : ''}" href="${ctx}/home">Trang chủ</a>
             <a class="store-nav__link ${activePage == 'catalog' ? 'is-active' : ''}" href="${ctx}/product">Cửa hàng</a>
-            <a class="store-nav__link ${activePage == 'tradein' ? 'is-active' : ''}" href="${ctx}/product#tradein">Thu cũ</a>
+            <a class="store-nav__link ${activePage == 'tradein' ? 'is-active' : ''}" href="${ctx}/tradein">Thu cũ</a>
             <a class="store-nav__link ${activePage == 'blog' ? 'is-active' : ''}" href="${ctx}/blog">Cẩm nang</a>
             <a class="store-nav__link ${activePage == 'contact' ? 'is-active' : ''}" href="${ctx}/contact">Liên hệ</a>
         </nav>
@@ -38,56 +38,56 @@
         </div>
     </div>
 </header>
-            
-            <style>
-                .store-header__inner {
-                    display: grid !important;
-                    grid-template-columns: 200px 1fr auto !important;
-                    gap: 16px !important;
-                    align-items: center !important;
-                    min-height: 72px !important;
-                }
-                .store-nav {
-                    display: flex !important;
-                    flex-wrap: nowrap !important;
-                    gap: 2px !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                }
-                .store-nav__link {
-                    white-space: nowrap !important;
-                    font-size: 14px !important;
-                    padding: 8px 10px !important;
-                }
-                .store-actions {
-                    display: flex !important;
-                    flex-wrap: nowrap !important;
-                    align-items: center !important;
-                    gap: 6px !important;
-                    flex-shrink: 0 !important;
-                }
-                .store-brand:hover {
-                    background: transparent !important;
-                    box-shadow: none !important;
-                    transform: none !important;
-                }
 
-                .store-nav__link:hover {
-                    background: var(--accent-soft) !important;
-                    box-shadow: none !important;
-                    transform: none !important;
-                }
+<style>
+    .store-header__inner {
+        display: grid !important;
+        grid-template-columns: 200px 1fr auto !important;
+        gap: 16px !important;
+        align-items: center !important;
+        min-height: 72px !important;
+    }
+    .store-nav {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 2px !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .store-nav__link {
+        white-space: nowrap !important;
+        font-size: 14px !important;
+        padding: 8px 10px !important;
+    }
+    .store-actions {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+    }
+    .store-brand:hover {
+        background: transparent !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
 
-                .store-actions .pill-link:hover {
-                    background: rgba(0, 0, 0, 0.04) !important;
-                    box-shadow: none !important;
-                    transform: none !important;
-                    border-color: #d1d5db !important;
-                    color: var(--text) !important;
-                }
+    .store-nav__link:hover {
+        background: var(--accent-soft) !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
 
-                .store-actions .pill-link--primary:hover {
-                    background: #2d5fd4 !important;
-                    color: #fff !important;
-                }
-            </style>
+    .store-actions .pill-link:hover {
+        background: rgba(0, 0, 0, 0.04) !important;
+        box-shadow: none !important;
+        transform: none !important;
+        border-color: #d1d5db !important;
+        color: var(--text) !important;
+    }
+
+    .store-actions .pill-link--primary:hover {
+        background: #2d5fd4 !important;
+        color: #fff !important;
+    }
+</style>

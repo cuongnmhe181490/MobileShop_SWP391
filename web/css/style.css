@@ -830,28 +830,44 @@ ol {
 -----------------------*/
 
 .categories__item {
-    height: 270px;
+    height: 180px;
     position: relative;
+    background-size: contain !important;
+    background-color: #ffffff;
+    border: 1px solid #eef2ff;
+    border-radius: 20px;
+    margin: 10px 5px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.04);
+    transition: all 0.3s;
+}
+
+.categories__item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(91, 116, 241, 0.12);
 }
 
 .categories__item h5 {
     position: absolute;
     left: 0;
     width: 100%;
-    padding: 0 20px;
-    bottom: 20px;
+    padding: 0;
+    bottom: -15px;
     text-align: center;
+    z-index: 10;
 }
 
 .categories__item h5 a {
-    font-size: 18px;
-    color: #1c1c1c;
-    font-weight: 700;
+    font-size: 11px;
+    color: #475569;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    padding: 12px 0 10px;
+    letter-spacing: 1px;
+    padding: 6px 12px;
     background: #ffffff;
-    display: block;
+    display: inline-block;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    border: 1px solid #f1f5f9;
 }
 
 .categories__slider .col-lg-3 {

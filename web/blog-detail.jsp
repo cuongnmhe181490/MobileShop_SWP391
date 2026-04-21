@@ -12,10 +12,17 @@
     <link rel="stylesheet" href="css/mobileshop.css" type="text/css">
     <title>${blog.title} - MobileShop Cẩm nang</title>
     <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
         .blog-hero {
-            padding: 80px 0 40px;
+            display: block !important; /* Phá vỡ grid 2 cột từ mobileshop.css */
+            padding: 40px 0 60px;
             background: #fff;
             text-align: center;
+            width: 100%;
         }
         .blog-tag {
             display: inline-block;
@@ -30,20 +37,26 @@
             letter-spacing: 0.05em;
         }
         .blog-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 24px;
+            display: block;
+            width: 100%;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
             color: #0f172a;
-            max-width: 900px;
+            max-width: 1000px;
             margin-left: auto;
             margin-right: auto;
+            letter-spacing: -0.02em;
         }
         .blog-subtitle {
+            display: block;
+            width: 100%;
             font-size: 1.25rem;
-            color: #64748b;
-            max-width: 700px;
-            margin: 0 auto 40px;
+            color: #475569;
+            max-width: 800px;
+            margin: 0 auto 30px;
             line-height: 1.6;
         }
         .blog-meta {
@@ -60,7 +73,7 @@
             aspect-ratio: 16/9;
             object-fit: cover;
             border-radius: 32px;
-            margin: 60px auto;
+            margin: 0 auto 60px;
             display: block;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
         }
@@ -69,7 +82,7 @@
             margin: 0 auto 100px;
             font-size: 1.15rem;
             line-height: 1.8;
-            color: #334155;
+            color: #1e293b; /* Darker for sharpness */
             text-align: left !important;
         }
         .blog-content-wrapper p {
@@ -98,8 +111,8 @@
             padding: 32px;
             border-radius: 0 16px 16px 0;
             margin-bottom: 48px;
-            font-style: italic;
-            color: #475569;
+            color: #334155; /* Higher contrast */
+            font-weight: 500;
         }
     </style>
 </head>
@@ -110,7 +123,6 @@
     <main>
         <div class="mobile-shell">
             <header class="blog-hero">
-                <span class="blog-tag">${blog.idSupplier}</span>
                 <h1 class="blog-title">${blog.title}</h1>
                 <p class="blog-subtitle">${blog.subTitle}</p>
                 <div class="blog-meta">
@@ -120,26 +132,19 @@
                 </div>
             </header>
 
-            <img src="${not empty blog.thumbnailPath ? blog.thumbnailPath : 'img/no-image.png'}" class="blog-featured-image" alt="${blog.title}">
+            <img src="${not empty blog.imagePath ? blog.imagePath : 'img/no-image.png'}" class="blog-featured-image" alt="${blog.title}">
 
             <div class="blog-content-wrapper">
                 <div class="summary-box">
-                    ${blog.summary}
+                    ${blog.description}
                 </div>
                 
                 <div class="main-body-text">
                     ${blog.content}
                 </div>
                 
-                <hr style="margin: 60px 0; opacity: 0.1;">
-                
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-center align-items-center">
                     <a href="${ctx}/home" class="pill-link pill-link--dark"> Quay lại trang chủ</a>
-                    <div class="share-links d-flex gap-3">
-                        <span style="color: #94a3b8; font-size: 0.9rem;">Chia sẻ bài viết:</span>
-                        <a href="#" style="color: #64748b;"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a href="#" style="color: #64748b;"><i class="fa-brands fa-twitter"></i></a>
-                    </div>
                 </div>
             </div>
         </div>

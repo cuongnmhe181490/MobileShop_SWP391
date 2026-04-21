@@ -1,3 +1,4 @@
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="java.util.*" %>
@@ -14,6 +15,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-body: #f4f7fe;
@@ -359,6 +361,8 @@
                     </li>
                     <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link"><i class="fa-solid fa-home"></i>Trang chủ</a></li>
                 </ul>
             </div>
 
@@ -401,21 +405,37 @@
                 <div class="stat-card">
                     <div class="stat-label">Tổng sản phẩm</div>
                     <div class="stat-value">${totalProducts}</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fa-solid fa-caret-up"></i>
+                        <span>+${newProductsMonth} sản phẩm mới tháng này</span>
+                    </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-label">Tổng người dùng</div>
                     <div class="stat-value">${totalUsers}</div>
+                    <div class="stat-trend trend-up">
+                        <i class="fa-solid fa-caret-up"></i>
+                        <span>+${newUsersMonth} khách hàng mới tháng này</span>
+                    </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-label">Đơn hàng chờ</div>
                     <div class="stat-value">${pendingOrders}</div>
+                    <div class="stat-trend trend-neutral">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>+${newOrdersMonth} đơn hàng mới trong 30 ngày</span>
+                    </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-label">Doanh thu tháng</div>
                     <div class="stat-value">${monthlyRevenue}</div>
+                    <div class="stat-trend ${revenueGrowth >= 0 ? 'trend-up' : 'trend-down'}">
+                        <i class="fa-solid ${revenueGrowth >= 0 ? 'fa-caret-up' : 'fa-caret-down'}"></i>
+                        <span><fmt:formatNumber value="${revenueGrowth}" maxFractionDigits="1"/>% so với tháng trước</span>
+                    </div>
                 </div>
             </div>
 
@@ -455,33 +475,105 @@
                     </div>
                 </div>
 
-                <!-- Best Sellers -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Sản phẩm bán chạy</h3>
-                        <i class="fa-solid fa-ellipsis-vertical" style="color: var(--text-muted); cursor: pointer;"></i>
+                        <h3>Đơn hàng theo trạng thái</h3>
+                        <i class="fa-solid fa-chart-pie" style="color: var(--text-muted);"></i>
                     </div>
-                    <div class="product-list">
-                        <c:forEach items="${bestSellers}" var="product">
-                            <div class="product-item">
-                                <div class="product-img">
-                                    <i class="fa-solid fa-laptop-code" style="color: var(--primary);"></i>
-                                </div>
-                                <div class="product-info">
-                                    <h4>${product.name}</h4>
-                                    <p>${product.brand} &bull; ${product.stock}</p>
-                                </div>
+                    <div style="height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                    <div style="margin-top: 24px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600;">
+                                <span style="width: 12px; height: 12px; border-radius: 3px; background: #05cd99;"></span>
+                                <span style="color: var(--text-muted);">Hoàn thành:</span>
+                                <span>${orderStats['Hoàn thành'] != null ? orderStats['Hoàn thành'] : 0}</span>
                             </div>
-                        </c:forEach>
-                        <c:if test="${empty bestSellers}">
-                            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                <i class="fa-solid fa-box-archive" style="font-size: 2rem; margin-bottom: 12px; display: block; opacity: 0.3;"></i>
-                                <p>Chưa có dữ liệu bán hàng</p>
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600;">
+                                <span style="width: 12px; height: 12px; border-radius: 3px; background: #ffb81c;"></span>
+                                <span style="color: var(--text-muted);">Chờ xử lý:</span>
+                                <span>${orderStats['Chờ xử lý'] != null ? orderStats['Chờ xử lý'] : 0}</span>
                             </div>
-                        </c:if>
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600;">
+                                <span style="width: 12px; height: 12px; border-radius: 3px; background: #ee5d50;"></span>
+                                <span style="color: var(--text-muted);">Đã hủy:</span>
+                                <span>${orderStats['Đã hủy'] != null ? orderStats['Đã hủy'] : 0}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <script>
+                // Initialize Order Status Chart
+                const ctx = document.getElementById('orderStatusChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Hoàn thành', 'Chờ xử lý', 'Đã hủy'],
+                        datasets: [{
+                            data: [
+                                ${orderStats['Hoàn thành'] != null ? orderStats['Hoàn thành'] : 0}, 
+                                ${orderStats['Chờ xử lý'] != null ? orderStats['Chờ xử lý'] : 0}, 
+                                ${orderStats['Đã hủy'] != null ? orderStats['Đã hủy'] : 0}
+                            ],
+                            backgroundColor: ['#05cd99', '#ffb81c', '#ee5d50'],
+                            borderWidth: 0,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            // Add a plugin to draw "No Data" if all values are 0
+                            tooltip: {
+                                enabled: (${orderStats['Hoàn thành'] + orderStats['Chờ xử lý'] + orderStats['Đã hủy']} > 0)
+                            }
+                        },
+                        cutout: '70%',
+                        // Show placeholder circle if no data
+                        elements: {
+                            arc: {
+                                backgroundColor: ctx => {
+                                    const total = ${orderStats['Hoàn thành'] != null ? orderStats['Hoàn thành'] : 0} + 
+                                                  ${orderStats['Chờ xử lý'] != null ? orderStats['Chờ xử lý'] : 0} + 
+                                                  ${orderStats['Đã hủy'] != null ? orderStats['Đã hủy'] : 0};
+                                    return total === 0 ? '#f4f7fe' : undefined;
+                                }
+                            }
+                        }
+                    },
+                    plugins: [{
+                        id: 'emptyDoughnut',
+                        afterDraw(chart) {
+                            const { datasets } = chart.data;
+                            const total = datasets[0].data.reduce((a, b) => a + b, 0);
+                            if (total === 0) {
+                                const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.arc(left + width / 2, top + height / 2, (Math.min(width, height) / 2) * 0.9, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#f4f7fe';
+                                ctx.fill();
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = '#e2e8f0';
+                                ctx.stroke();
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillStyle = '#a3aed0';
+                                ctx.font = 'bold 0.9rem Inter';
+                                ctx.fillText('Chưa có đơn hàng', left + width / 2, top + height / 2);
+                                ctx.restore();
+                            }
+                        }
+                    }]
+                });
+            </script>
         </main>
     </div>
 

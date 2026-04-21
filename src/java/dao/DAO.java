@@ -17,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import entity.Supplier;
 
 
 
@@ -179,14 +180,14 @@ public class DAO {
     }
     
     private ProductReview mapReview(ResultSet rs) throws SQLException {
-        return new ProductReview(
-                rs.getString("IdProduct"),
-                rs.getInt("UserId"),
-                rs.getString("ReviewerName"),
-                rs.getString("ReviewDate"),
-                rs.getString("Review"),
-                rs.getInt("Ranking")
-        );
+        ProductReview r = new ProductReview();
+        r.setIdProduct(rs.getString("IdProduct"));
+        r.setUserId(rs.getInt("UserId"));
+        r.setReviewerName(rs.getString("ReviewerName"));
+        r.setReviewDate(rs.getTimestamp("ReviewDate"));
+        r.setReviewContent(rs.getString("Review"));
+        r.setRanking(rs.getInt("Ranking"));
+        return r;
     }
 
 
@@ -232,6 +233,24 @@ public class DAO {
         }
         return null;
     }
+
+    public ProductModel getProductByBrandAndName(String brand, String modelName) {
+        String query = "SELECT TOP 1 * FROM ProductDetail WHERE IdSupplier = ? AND ProductName LIKE ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, brand);
+            ps.setString(2, "%" + modelName + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapProduct(rs);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
     
     public int countProductReviews(String productId, Integer ranking) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS Total FROM ProductReview WHERE IdProduct = ? ");
@@ -481,5 +500,95 @@ public class DAO {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
+    }
+
+    public List<Supplier> getAllSuppliers() throws SQLException, Exception{
+        List<Supplier> list = new ArrayList<>();
+        String query = "SELECT* FROM SUPPLIER";
+        try {
+            conn = new DBContext().getConnection();
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                Supplier s = new Supplier(
+                rs.getString("IdSupplier"),
+                rs.getString("Name"),
+                rs.getString("Address"),
+                rs.getString("Email"),
+                rs.getString("PhoneNumber"),
+                rs.getString("LogoPath")
+                );
+                list.add(s);
+            }
+        }catch (Exception e){
+           e.printStackTrace();
+        }
+        return list;
+    }
+    
+    public int getNewProductsThisMonthCount() {
+        // Đếm sản phẩm trong 30 ngày gần nhất để con số "nhảy" linh hoạt hơn
+        String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= DATEADD(day, -30, GETDATE())";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public Map<String, Integer> getOrderStatusStatistics() {
+        Map<String, Integer> stats = new HashMap<>();
+        // Khởi tạo các trạng thái mặc định
+        stats.put("Hoàn thành", 0);
+        stats.put("Chờ xử lý", 0);
+        stats.put("Đã hủy", 0);
+        
+        String query = "SELECT OrderStatus, COUNT(*) as Total FROM [Order] GROUP BY OrderStatus";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                stats.put(rs.getString("OrderStatus"), rs.getInt("Total"));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return stats;
+    }
+
+    public int getNewUsersThisMonthCount() {
+        String query = "SELECT COUNT(*) FROM [User] WHERE MONTH(Birthday) = MONTH(GETDATE())"; 
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public int getNewOrdersThisMonthCount() {
+        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= DATEADD(day, -30, GETDATE())";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public double getRevenueGrowth() {
+        String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'Hoàn thành'";
+        String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+        try (Connection conn = new DBContext().getConnection()) {
+            double prev = 0, curr = 0;
+            try (PreparedStatement ps = conn.prepareStatement(sqlPrev); ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) prev = rs.getDouble(1);
+            }
+            try (PreparedStatement ps = conn.prepareStatement(sqlCurr); ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) curr = rs.getDouble(1);
+            }
+            if (prev == 0) return curr > 0 ? 100.0 : 0.0;
+            return ((curr - prev) / prev) * 100.0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0.0;
     }
 }

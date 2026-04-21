@@ -10,6 +10,8 @@ import java.util.Map;
 
 public class CloudinaryUtil {
 
+    private static final config.DBContext db = new config.DBContext();
+
     private static final Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
             "cloud_name", "dovcx8lxl",
             "api_key", "686417178596178",

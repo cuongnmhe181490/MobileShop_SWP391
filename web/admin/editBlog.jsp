@@ -29,15 +29,15 @@
         .label-custom { display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem; }
         .form-input-custom { 
             width: 100%; border: 1px solid var(--border-clr); border-radius: 8px; 
-            padding: 12px; background: var(--input-bg); color: var(--text-main);
-            transition: border-color 0.2s; resize: none;
+            padding: 8px 12px; background: var(--input-bg); color: var(--text-main);
+            transition: border-color 0.2s; resize: none; font-size: 0.9rem;
         }
         .form-input-custom:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
         
         /* Bộ đếm ký tự */
         .counter-wrap { display: flex; justify-content: flex-end; margin-top: 4px; }
         .counter-label { font-size: 0.75rem; color: var(--text-sub); }
-
+        
         /* Upload Ảnh */
         .upload-zone {
             border: 2px dashed var(--border-clr); border-radius: 12px;
@@ -54,6 +54,29 @@
         .action-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-clr); }
         .btn-cancel { padding: 10px 24px; border-radius: 8px; background: #f3f4f6; color: var(--text-main); border: none; font-weight: 600; text-decoration: none; }
         .btn-submit { padding: 10px 24px; border-radius: 8px; background: #111827; color: white; border: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        
+        /* Modal Quản lý danh mục - Light Theme */
+        .modal-content-custom { background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); padding: 0; overflow: hidden; }
+        .modal-header-custom { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
+        .modal-title-custom { font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; }
+        .modal-body-custom { padding: 24px; }
+        .modal-footer-custom { padding: 16px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; background: #f9fafb; }
+        .cat-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .cat-list { max-height: 300px; overflow-y: auto; border: 1px solid #f3f4f6; border-radius: 8px; background: #fdfdfd; }
+        .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; transition: background 0.2s; }
+        .cat-item:last-child { border-bottom: none; }
+        .cat-item:hover { background: #f9fafb; }
+        .cat-name-wrapper { flex: 1; display: flex; align-items: center; gap: 8px; }
+        .cat-name { font-weight: 500; color: #374151; }
+        .btn-edit-cat { color: #6366f1; background: transparent; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; opacity: 0.6; transition: opacity 0.2s; }
+        .btn-edit-cat:hover { opacity: 1; color: #4f46e5; }
+        .btn-delete-cat { color: #ef4444; background: transparent; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; opacity: 0.6; transition: opacity 0.2s; }
+        .btn-delete-cat:hover { opacity: 1; color: #dc2626; }
+        .btn-manage-cat { padding: 8px 14px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; color: #374151; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
+        .btn-manage-cat:hover { background: #f9fafb; border-color: #d1d5db; }
+        .btn-add-cat { padding: 0 20px; background: #111827; color: white; border: none; border-radius: 8px; font-weight: 600; }
+        .close-modal-btn { background: #f3f4f6; border: none; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #6b7280; cursor: pointer; }
+        .empty-cats { padding: 40px; text-align: center; color: #9ca3af; font-style: italic; }
     </style>
 </head>
 <body>
@@ -144,12 +167,17 @@
 
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label class="label-custom">Hãng / Category <span class="text-danger">*</span></label>
-                                <select name="idSupplier" class="form-select form-input-custom" required>
-                                    <c:forEach items="${supList}" var="sup">
-                                        <option value="${sup}" ${sup == blog.idSupplier ? 'selected' : ''}>${sup}</option>
-                                    </c:forEach>
-                                </select>
+                                <label class="label-custom">Danh mục bài viết <span class="text-danger">*</span></label>
+                                <div class="d-flex gap-2">
+                                    <select name="idBlogCat" id="categorySelect" class="form-select form-input-custom" required>
+                                        <c:forEach items="${catList}" var="cat">
+                                            <option value="${cat.idBlogCat}" ${cat.idBlogCat == blog.idBlogCat ? 'selected' : ''}>${cat.categoryName}</option>
+                                        </c:forEach>
+                                    </select>
+                                    <button type="button" class="btn-manage-cat" data-bs-toggle="modal" data-bs-target="#manageCatModal">
+                                        <i class="fa-solid fa-square-pen"></i> Quản lý
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -182,6 +210,27 @@
         </main>
     </div>
 
+    <div class="modal fade" id="manageCatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header-custom">
+                    <h5 class="modal-title-custom">Quản lý danh mục</h5>
+                    <button type="button" class="close-modal-btn" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body-custom">
+                    <div class="cat-input-group">
+                        <input type="text" id="newCatName" class="form-input-custom" placeholder="Tên danh mục mới...">
+                        <button type="button" id="btnAddCat" class="btn-add-cat">+ Thêm</button>
+                    </div>
+                    <div class="cat-list" id="catListContainer"><div class="empty-cats">Đang tải danh mục...</div></div>
+                </div>
+                <div class="modal-footer-custom">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal" style="padding: 8px 20px; text-decoration: none;">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function updateCounter(inputId, counterId, maxLength) {
@@ -205,22 +254,129 @@
         document.getElementById('thumbInput').addEventListener('change', function() {
             var file = this.files[0];
             if (file) {
-                // Kiểm tra dung lượng ngay tại Client (500KB)
+                // dump check size
                 if (file.size > 500 * 1024) {
-                    alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB (Ảnh bạn chọn: " + (file.size/1024).toFixed(2) + "KB)");
-                    this.value = ""; // Xóa file
+                    alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB.");
+                    this.value = "";
                     document.getElementById('thumbPreview').classList.add('d-none');
                     return;
                 }
 
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('imgShow').src = e.target.result;
-                    document.getElementById('thumbPreview').classList.remove('d-none');
+                    var img = new Image();
+                    img.onload = function() {
+                        if (this.width < 800 || this.height < 450) {
+                            alert("Ảnh độ phân giải thấp. Vui lòng chọn ảnh có chiều ngang tối thiểu 800px.");
+                            document.getElementById('thumbInput').value = "";
+                            document.getElementById('thumbPreview').classList.add('d-none');
+                            return;
+                        }
+                        document.getElementById('imgShow').src = e.target.result;
+                        document.getElementById('thumbPreview').classList.remove('d-none');
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
         });
+
+        // Safe AJAX for Category Management
+        try {
+            const categoryModal = document.getElementById('manageCatModal');
+            const catListContainer = document.getElementById('catListContainer');
+            const btnAddCat = document.getElementById('btnAddCat');
+            const newCatNameInput = document.getElementById('newCatName');
+            const categorySelect = document.getElementById('categorySelect');
+
+            function loadCategories() {
+                fetch('${pageContext.request.contextPath}/admin/blog?service=listCategories')
+                    .then(response => response.json())
+                    .then(data => {
+                        renderCatList(data);
+                        updateSelectOptions(data);
+                    });
+            }
+
+            function renderCatList(cats) {
+                if (cats.length === 0) {
+                    catListContainer.innerHTML = '<div class="empty-cats">Chưa có danh mục nào</div>';
+                    return;
+                }
+                let html = '';
+                cats.forEach(cat => {
+                    html += `
+                        <div class="cat-item">
+                            <div class="cat-name-wrapper" id="cat-display-\${cat.id}">
+                                <span class="cat-name">\${cat.name}</span>
+                                <button type="button" class="btn-edit-cat" onclick="showEditInput(\${cat.id}, '\${cat.name.replace(/'/g, "\\'")}')">
+                                    <i class="fas fa-pen-to-square"></i>
+                                </button>
+                            </div>
+                            <div class="cat-edit-wrapper d-none" id="cat-edit-\${cat.id}" style="flex: 1; display: flex; gap: 5px;">
+                                <input type="text" class="form-input-custom" value="\${cat.name}" id="input-edit-\${cat.id}" style="padding: 4px 8px; height: 32px;">
+                                <button type="button" class="btn-add-cat" style="padding: 0 10px; height: 32px; font-size: 0.75rem;" onclick="saveCategory(\${cat.id})">Lưu</button>
+                                <button type="button" class="btn-cancel" style="padding: 0 10px; height: 32px; font-size: 0.75rem;" onclick="cancelEdit(\${cat.id})">Hủy</button>
+                            </div>
+                            <button type="button" class="btn-delete-cat" onclick="deleteCategory(\${cat.id})">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                catListContainer.innerHTML = html;
+            }
+
+            window.showEditInput = function(id, currentName) {
+                document.getElementById('cat-display-' + id).classList.add('d-none');
+                document.getElementById('cat-edit-' + id).classList.remove('d-none');
+                const input = document.getElementById('input-edit-' + id);
+                input.focus();
+                input.select();
+            };
+
+            window.cancelEdit = function(id) {
+                document.getElementById('cat-display-' + id).classList.remove('d-none');
+                document.getElementById('cat-edit-' + id).classList.add('d-none');
+            };
+
+            window.saveCategory = function(id) {
+                const newName = document.getElementById('input-edit-' + id).value.trim();
+                if (!newName) return;
+                fetch(`${pageContext.request.contextPath}/admin/blog?service=updateCategory&id=\${id}&name=` + encodeURIComponent(newName))
+                    .then(r => r.text()).then(res => {
+                        if (res === 'success') {
+                            loadCategories();
+                        } else {
+                            alert('Lỗi cập nhật danh mục!');
+                        }
+                    });
+            };
+
+            function updateSelectOptions(cats) {
+                const currentValue = categorySelect.value;
+                let html = '';
+                cats.forEach(cat => {
+                    html += `<option value="\${cat.id}" \${currentValue == cat.id ? 'selected' : ''}>\${cat.name}</option>`;
+                });
+                categorySelect.innerHTML = html;
+            }
+
+            btnAddCat.addEventListener('click', function() {
+                const name = newCatNameInput.value.trim();
+                if (!name) return;
+                fetch(`${pageContext.request.contextPath}/admin/blog?service=addCategory&name=` + encodeURIComponent(name))
+                    .then(r => r.text()).then(res => { if (res === 'success') { newCatNameInput.value = ''; loadCategories(); } });
+            });
+
+            window.deleteCategory = function(id) {
+                if (!confirm('Xóa danh mục này? Bạn có chắc không?')) return;
+                fetch(`${pageContext.request.contextPath}/admin/blog?service=deleteCategory&id=` + id)
+                    .then(r => r.text()).then(res => { if (res === 'success') loadCategories(); else alert('Lỗi xóa danh mục! Có thể danh mục đang được sử dụng.'); });
+            };
+
+            categoryModal.addEventListener('show.bs.modal', function () { loadCategories(); });
+        } catch (e) { console.error("Cat Manage JS Error: ", e); }
     </script>
 </body>
 </html>

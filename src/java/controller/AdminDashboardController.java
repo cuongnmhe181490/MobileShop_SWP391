@@ -39,6 +39,14 @@ public class AdminDashboardController extends HttpServlet {
         request.setAttribute("monthlyRevenue", monthlyRevenue);
         request.setAttribute("recentOrders", recentOrders);
         request.setAttribute("bestSellers", bestSellers);
+        request.setAttribute("newProductsMonth", dao.getNewProductsThisMonthCount());
+        request.setAttribute("newUsersMonth", dao.getNewUsersThisMonthCount());
+        request.setAttribute("newOrdersMonth", dao.getNewOrdersThisMonthCount());
+        request.setAttribute("revenueGrowth", dao.getRevenueGrowth());
+        
+        // Pass order status statistics as JSON-like structure for Chart.js
+        Map<String, Integer> orderStats = dao.getOrderStatusStatistics();
+        request.setAttribute("orderStats", orderStats);
         
         // Add current date for dashboard
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
