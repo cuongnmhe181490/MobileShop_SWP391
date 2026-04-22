@@ -73,7 +73,6 @@
                 </div>
                 <div class="header-actions">
                     <a href="${ctx}/admin/products" class="btn-outline" style="text-decoration: none;">Quay lại</a>
-                    <div class="notification"><i class="fa-regular fa-bell"></i></div>
                     <div class="user-profile">
                         <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
                         <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>

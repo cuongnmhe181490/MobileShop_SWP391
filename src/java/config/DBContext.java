@@ -12,7 +12,7 @@ public class DBContext {
     if (instance == null || instance.trim().isEmpty()) {
         url = "jdbc:sqlserver://" + serverName + ":" + portNumber + ";databaseName=" + dbName;
     } else {
-        url = "jdbc:sqlserver://" + serverName + ":" + portNumber + "\\" + instance + ";databaseName=" + dbName;
+        url = "jdbc:sqlserver://" + serverName + "\\" + instance + ":" + portNumber + ";databaseName=" + dbName;
     }
     // Thêm dấu ; đảm bảo ngăn cách các tham số
     url += ";encrypt=true;trustServerCertificate=true;loginTimeout=30;";
@@ -22,12 +22,12 @@ public class DBContext {
 }
 
     private final String serverName = readSetting("DB_SERVER", "localhost");
-    private final String dbName = readSetting("DB_NAME", "MOBILESHOP_DEM08"
+    private final String dbName = readSetting("DB_NAME", "MOBILESHOP_DEM05"
             + "");
     private final String portNumber = readSetting("DB_PORT", "1433");
     private final String instance = readSetting("DB_INSTANCE", "");
     private final String userID = readSetting("DB_USER", "sa");
-    private final String password = readSetting("DB_PASSWORD", "diep1611");
+    private final String password = readSetting("DB_PASSWORD", "sa");
 
     private String readSetting(String key, String defaultValue) {
         String value = System.getenv(key);
