@@ -39,10 +39,9 @@ public class DAO {
     
     
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
-    // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
-    String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], "
-                 + "Email, PhoneNumber, FullName, Birthday, [RoleId]) \n"
-                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)"; // 0 ở cuối là Role mặc định (Khách hàng)
+    String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], Email, "
+             + "PhoneNumber, FullName, Birthday, [RoleId], [Status], [CreatedDate], [LockReason]) \n"
+             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, N'Hoạt động', GETDATE(), NULL)";
     try {
         conn = new DBContext().getConnection();
         ps = conn.prepareStatement(query);
@@ -56,7 +55,7 @@ public class DAO {
         ps.setString(8, birthday);
         ps.executeUpdate();
     } catch (Exception e) {
-        e.printStackTrace(); // Rất quan trọng: In lỗi ra để biết nếu SQL bị sai
+        e.printStackTrace();
     }
 }
     
@@ -71,7 +70,6 @@ public class DAO {
             ps.setString(1, user);
             rs = ps.executeQuery();
             if (rs.next()) {
-                // 2. Khởi tạo Role
                 Role r = new Role();
                 r.setRoleId(rs.getInt("RoleId"));
                 r.setRoleName(rs.getString("RoleName"));
@@ -86,8 +84,9 @@ public class DAO {
                 u.setPhone(rs.getString("PhoneNumber"));
                 u.setName(rs.getString("FullName"));
                 u.setBirthday(rs.getDate("Birthday"));
-
-                // 4. Gắn Role vào User
+                u.setStatus(rs.getString("Status"));
+                u.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                u.setLockReason(rs.getString("LockReason"));
                 u.setRole(r);
 
             return u;
@@ -98,7 +97,6 @@ public class DAO {
     }
     
     public User getUserByEmail(String email) {
-    // Truy vấn JOIN để lấy tên Role cùng lúc
     String sql = "SELECT u.*, r.RoleName " +
                  "FROM [User] u " +
                  "INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
@@ -110,23 +108,22 @@ public class DAO {
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
-            // 1. Khởi tạo đối tượng Role từ dữ liệu JOIN
             Role role = new Role();
             role.setRoleId(rs.getInt("RoleId"));
             role.setRoleName(rs.getString("RoleName"));
 
-            // 2. Khởi tạo đối tượng User và gán các trường
             User user = new User();
             user.setId(rs.getInt("UserId"));
             user.setEmail(rs.getString("Email"));
-            user.setPass(rs.getString("Password")); // Lấy pass đã mã hóa để check BCrypt
+            user.setPass(rs.getString("Password")); 
             user.setName(rs.getNString("FullName"));
             user.setPhone(rs.getString("PhoneNumber"));
             user.setAddress(rs.getNString("Address"));
             user.setGender(rs.getString("Gender"));
             user.setBirthday(rs.getDate("Birthday"));
-            
-            // 3. GÁN ĐỐI TƯỢNG ROLE VÀO USER
+            user.setStatus(rs.getString("Status"));
+            user.setCreatedDate(rs.getTimestamp("CreatedDate"));
+            user.setLockReason(rs.getString("LockReason"));
             user.setRole(role);
 
             return user;
@@ -941,7 +938,7 @@ public class DAO {
     
     // 1. Hàm tạo và lưu Token mới (Có hiệu lực 10 phút)
     public void saveResetToken(String email, String token) {
-        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
+        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 10 phút từ giờ hiện tại
         String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
         try {
             conn = new DBContext().getConnection();
@@ -954,11 +951,9 @@ public class DAO {
         }
     }
 
-    // 2. Hàm kiểm tra Token khi khách hàng click vào link
     public User getUserByResetToken(String token) {
-        // Chỉ lấy User nếu Token khớp VÀ thời gian hiện tại vẫn nhỏ hơn thời gian hết hạn
-        // Sửa tạm để test
-        String sql = "SELECT * FROM [User] WHERE ResetToken = ?";
+
+        String sql = "SELECT * FROM [User] WHERE ResetToken = ? AND ResetTokenExpiry > GETDATE()";
         try {
             conn = new DBContext().getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -969,7 +964,9 @@ public class DAO {
                 u.setId(rs.getInt("UserId"));
                 u.setEmail(rs.getString("Email"));
                 u.setName(rs.getNString("FullName"));
-                // ... (bạn có thể set thêm các trường khác nếu cần)
+                u.setStatus(rs.getString("Status"));
+                u.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                u.setLockReason(rs.getString("LockReason"));
                 return u;
             }
         } catch (Exception e) {
@@ -978,7 +975,7 @@ public class DAO {
         return null;
     }
 
-    // 3. Hàm lưu mật khẩu mới và Xóa Token (Chỉ dùng 1 lần)
+
     public void updatePasswordAndClearToken(String email, String newHashedPassword) {
         // Đổi pass xong thì đưa Token về NULL để vô hiệu hóa link cũ
         String sql = "UPDATE [User] SET [Password] = ?, ResetToken = NULL, ResetTokenExpiry = NULL WHERE Email = ?";
@@ -1164,5 +1161,20 @@ public class DAO {
             return ((curr - prev) / prev) * 100.0;
         } catch (Exception e) { e.printStackTrace(); }
         return 0.0;
+    }
+    
+    public List<String> getActiveSuppliers() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT DISTINCT IdSupplier FROM ProductDetail WHERE IdSupplier IS NOT NULL ORDER BY IdSupplier";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString(1));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

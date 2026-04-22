@@ -1,6 +1,7 @@
 package entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 
 /**
@@ -19,6 +20,9 @@ public class User {
     private Role role;         
     private String resetToken;
     private Date resetTokenExpiry;
+    private String status;
+    private Timestamp createdDate;
+    private String lockReason;
 
     public User() {
     }
@@ -34,6 +38,8 @@ public class User {
         this.name = name;
         this.birthday = birthday;
         this.role = role;
+        this.status = status;
+        this.createdDate = createdDate;
     }
 
     public int getId() {
@@ -130,6 +136,30 @@ public class User {
 
     public void setResetTokenExpiry(Date resetTokenExpiry) {
         this.resetTokenExpiry = resetTokenExpiry;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
+    }
+    
+    public String getLockReason() {
+        return lockReason; 
+    }
+    
+    public void setLockReason(String lockReason) { 
+        this.lockReason = lockReason; 
     }
 
     @Override
