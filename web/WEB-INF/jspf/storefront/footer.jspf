@@ -10,7 +10,7 @@
                 <h3>Cửa hàng</h3>
                 <p><a href="${ctx}/home">Trang chủ</a></p>
                 <p><a href="${ctx}/product">Cửa hàng</a></p>
-                <p><a href="${ctx}/cartrole">Giỏ hàng</a></p>
+                <p><a href="${ctx}/cart">Giỏ hàng</a></p>
             </div>
             <div>
                 <h3>Hỗ trợ</h3>

@@ -19,7 +19,7 @@ public class CloudinaryUtil {
 
     /**
      * Hàm xử lý upload file từ Servlet Part lên Cloudinary
-     * @param filePart Đối tượng Part nhận từ request.getPart()s
+     * @param filePart Đối tượng Part nhận từ request.getPart()
      * @return String URL của ảnh sau khi upload thành công, hoặc null nếu lỗi
      */
     public static String upload(Part filePart) {

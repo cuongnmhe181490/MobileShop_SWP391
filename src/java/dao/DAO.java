@@ -4,6 +4,7 @@
  */
 package dao;
 import config.DBContext;
+import entity.Product;
 import entity.ProductModel;
 import entity.ProductReview;
 import entity.Role;
@@ -13,8 +14,11 @@ import java.util.*;
 import java.lang.*;
 import java.io.*;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import entity.Supplier;
@@ -27,11 +31,16 @@ import entity.Supplier;
  * @author ADMIN
  */
 public class DAO {
+    private static final Pattern RELEASE_YEAR_PATTERN = Pattern.compile("(19|20)\\d{2}");
+
     Connection conn = null; 
     PreparedStatement ps = null; 
     ResultSet rs = null; 
     
     
+    /**
+     * Đăng ký tài khoản người dùng mới
+     */
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
     // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
     String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], "
@@ -54,6 +63,9 @@ public class DAO {
     }
 }
     
+    /**
+     * Kiểm tra xem Username đã tồn tại chưa, nếu có thì trả về đối tượng User đầy đủ kèm Role
+     */
     public User checkUserExist(String user) {
         String query = "SELECT u.*, r.RoleName \n"
                  + "FROM [User] u \n"
@@ -91,6 +103,9 @@ public class DAO {
         return null;
     }
     
+    /**
+     * Lấy thông tin người dùng dựa trên Email (dùng cho Login/Reset Pass)
+     */
     public User getUserByEmail(String email) {
     // Truy vấn JOIN để lấy tên Role cùng lúc
     String sql = "SELECT u.*, r.RoleName " +
@@ -131,6 +146,9 @@ public class DAO {
     return null;
 }
     
+    /**
+     * Kiểm tra xem Email đã có người sử dụng chưa
+     */
     public boolean checkEmailExist(String email) {
         String query = "SELECT * FROM [User] WHERE Email = ?";
         try {
@@ -145,6 +163,9 @@ public class DAO {
         return false;
     }
 
+    /**
+     * Kiểm tra xem Số điện thoại đã có người sử dụng chưa
+     */
     public boolean checkPhoneExist(String phone) {
         String query = "SELECT * FROM [User] WHERE Phone = ?";
         try {
@@ -159,26 +180,35 @@ public class DAO {
         return false;
     }
 
-    private ProductModel mapProduct(ResultSet rs) throws SQLException {
-        return new ProductModel(
-                String.valueOf(rs.getInt("IdProduct")),
+    /**
+     * Chuyển đổi dữ liệu từ ResultSet sang đối tượng Product
+     */
+    private Product mapProduct(ResultSet rs) throws SQLException {
+        return new Product(
+                rs.getString("IdProduct"),
                 rs.getString("ProductName"),
                 rs.getDouble("Price"),
-                rs.getInt("CurrentQuantity"),
+                readQuantity(rs, "OriginalQuantity", "Quantity"),
+                readQuantity(rs, "CurrentQuantity", "Quantity"),
                 rs.getString("ReleaseDate"),
                 rs.getString("Screen"),
                 rs.getString("OperatingSystem"),
                 rs.getString("CPU"),
-                rs.getString("RAM"),
+                rs.getObject("RAM") == null ? "" : String.valueOf(rs.getInt("RAM")),
                 rs.getString("Camera"),
                 rs.getString("Battery"),
                 rs.getString("Description"),
-                rs.getDouble("Discount"),
+                readDouble(rs, "Discount"),
                 rs.getString("IdSupplier"),
-                rs.getString("ImagePath")
+                rs.getString("ImagePath"),
+                readQuantity(rs, "idCat"),
+                readQuantity(rs, "IsFeatured")
         );
     }
     
+    /**
+     * Chuyển đổi dữ liệu từ ResultSet sang đối tượng ProductReview (Đánh giá)
+     */
     private ProductReview mapReview(ResultSet rs) throws SQLException {
         ProductReview r = new ProductReview();
         r.setIdProduct(rs.getString("IdProduct"));
@@ -191,8 +221,11 @@ public class DAO {
     }
 
 
-    private List<ProductModel> queryProducts(String sql, SqlConsumer<PreparedStatement> binder) {
-        List<ProductModel> list = new ArrayList<>();
+    /**
+     * Hàm chung để thực thi các câu lệnh SELECT và trả về danh sách sản phẩm
+     */
+    private List<Product> queryProducts(String sql, SqlConsumer<PreparedStatement> binder) {
+        List<Product> list = new ArrayList<>();
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             binder.accept(ps);
@@ -202,23 +235,32 @@ public class DAO {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Query Error: " + e.getMessage(), e);
+            System.out.println(e);
         }
         return list;
     }
 
+    /**
+     * Lấy danh sách sản phẩm nổi bật (theo ngày phát hành và giá)
+     */
     public List<ProductModel> getFeaturedProducts(int limit) {
-        return queryProducts(
+        return new ArrayList<>(queryProducts(
                 "SELECT * FROM ProductDetail ORDER BY ReleaseDate DESC, Price DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY",
                 ps -> ps.setInt(1, limit)
-        );
+        ));
     }
 
+    /**
+     * Lấy danh sách sản phẩm mới nhất
+     */
     public List<ProductModel> getLatestProducts(int limit) {
         return getFeaturedProducts(limit);
     }
 
-    public ProductModel getProductByID(String id) {
+    /**
+     * Tìm sản phẩm theo ID
+     */
+    public Product getProductByID(String id) {
         String query = "SELECT * FROM ProductDetail WHERE IdProduct = ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -234,7 +276,10 @@ public class DAO {
         return null;
     }
 
-    public ProductModel getProductByBrandAndName(String brand, String modelName) {
+    /**
+     * Tìm sản phẩm theo hãng và tên (Dùng cho Trade-in hoặc gợi ý)
+     */
+    public Product getProductByBrandAndName(String brand, String modelName) {
         String query = "SELECT TOP 1 * FROM ProductDetail WHERE IdSupplier = ? AND ProductName LIKE ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -251,14 +296,430 @@ public class DAO {
         return null;
     }
 
-    public List<ProductModel> getProductsByBrand(String brandId) {
+    /**
+     * Lấy danh sách tất cả các hãng hiện có trong hệ thống
+     */
+    public List<String> getAvailableBrands() {
+        List<String> brands = new ArrayList<>();
+        String query = "SELECT DISTINCT IdSupplier FROM ProductDetail "
+                + "WHERE IdSupplier IS NOT NULL AND LTRIM(RTRIM(IdSupplier)) <> '' ORDER BY IdSupplier";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                brands.add(rs.getString("IdSupplier"));
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return brands;
+    }
+
+    /**
+     * Lấy các tùy chọn RAM hiện có (để làm bộ lọc)
+     */
+    public List<Integer> getAvailableRamOptions() {
+        List<Integer> ramOptions = new ArrayList<>();
+        String query = "SELECT DISTINCT RAM FROM ProductDetail WHERE RAM IS NOT NULL";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int ramValue = parseMemoryValue(rs.getString("RAM"));
+                if (ramValue > 0 && !ramOptions.contains(ramValue)) {
+                    ramOptions.add(ramValue);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        Collections.sort(ramOptions);
+        return ramOptions;
+    }
+
+    /**
+     * Lấy các năm phát hành hiện có (để làm bộ lọc)
+     */
+    public List<Integer> getAvailableReleaseYears(int limit) {
+        Set<Integer> yearSet = new TreeSet<>(Comparator.reverseOrder());
+        String query = "SELECT ReleaseDate FROM ProductDetail WHERE ReleaseDate IS NOT NULL";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int releaseYear = parseReleaseYear(rs.getString("ReleaseDate"));
+                if (releaseYear > 0) {
+                    yearSet.add(releaseYear);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        List<Integer> years = new ArrayList<>(yearSet);
+        if (limit > 0 && years.size() > limit) {
+            return new ArrayList<>(years.subList(0, limit));
+        }
+        return years;
+    }
+
+    /**
+     * Hàm tìm kiếm và lọc sản phẩm tổng hợp (keyword, brand, ram, year, price, sort)
+     */
+    public List<Product> getCatalogProducts(String keyword, String brand, String storage, String year, String minPrice, String maxPrice, String sort) {
+        List<Product> products = new ArrayList<>();
+        String normalizedKeyword = normalizeKeyword(keyword);
+        String normalizedBrand = normalizeIdentifier(brand);
+        int storageValue = parseMemoryValue(storage);
+        int releaseYear = parseReleaseYear(year);
+        Double minPriceValue = parsePriceValue(minPrice);
+        Double maxPriceValue = parsePriceValue(maxPrice);
+        if (minPriceValue != null && maxPriceValue != null && minPriceValue > maxPriceValue) {
+            double temp = minPriceValue;
+            minPriceValue = maxPriceValue;
+            maxPriceValue = temp;
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM ProductDetail WHERE 1 = 1");
+        List<Object> parameters = new ArrayList<>();
+
+        if (!normalizedKeyword.isEmpty()) {
+            String sqlKeyword = toSqlLikeKeyword(normalizedKeyword);
+            sql.append(" AND (");
+            sql.append("REPLACE(REPLACE(LOWER(ProductName), ' ', ''), '-', '') LIKE ? ");
+            sql.append("OR REPLACE(REPLACE(LOWER(IdSupplier), ' ', ''), '-', '') LIKE ? ");
+            sql.append("OR REPLACE(REPLACE(LOWER(CONCAT(IdSupplier, ProductName)), ' ', ''), '-', '') LIKE ? ");
+            sql.append("OR REPLACE(REPLACE(LOWER(ProductName), ' ', ''), '-', '') LIKE ?");
+            sql.append(")");
+            parameters.add("%" + sqlKeyword + "%");
+            parameters.add("%" + sqlKeyword + "%");
+            parameters.add("%" + sqlKeyword + "%");
+            parameters.add("%" + sqlKeyword + "%");
+        }
+
+        if (!normalizedBrand.isEmpty()) {
+            sql.append(" AND IdSupplier = ?");
+            parameters.add(normalizedBrand);
+        }
+
+        if (storageValue > 0) {
+            sql.append(" AND RAM = ?");
+            parameters.add(storageValue);
+        }
+
+        if (releaseYear > 0) {
+            sql.append(" AND ReleaseDate LIKE ?");
+            parameters.add("%" + releaseYear + "%");
+        }
+
+        if (minPriceValue != null) {
+            sql.append(" AND Price >= ?");
+            parameters.add(minPriceValue);
+        }
+
+        if (maxPriceValue != null) {
+            sql.append(" AND Price <= ?");
+            parameters.add(maxPriceValue);
+        }
+
+        sql.append(" ORDER BY ");
+        switch (normalizeIdentifier(sort)) {
+            case "price-asc":
+                sql.append("Price ASC, ReleaseDate DESC");
+                break;
+            case "price-desc":
+                sql.append("Price DESC, ReleaseDate DESC");
+                break;
+            case "year-asc":
+                sql.append("YEAR(ReleaseDate) ASC, Price DESC");
+                break;
+            case "year-desc":
+                sql.append("YEAR(ReleaseDate) DESC, Price DESC");
+                break;
+            default:
+                sql.append("ReleaseDate DESC, Price DESC");
+                break;
+        }
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            bindParams(ps, parameters);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    products.add(mapProduct(rs));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return products;
+    }
+
+    /**
+     * Lấy danh sách sản phẩm liên quan (cùng hãng)
+     */
+    public List<Product> getRelatedProducts(String supplier, String excludeId, int limit) {
         return queryProducts(
-                "SELECT * FROM ProductDetail WHERE UPPER(RTRIM(LTRIM(IdSupplier))) LIKE UPPER(RTRIM(LTRIM(?)))",
-                ps -> ps.setString(1, brandId)
+                "SELECT * FROM ProductDetail WHERE IdSupplier = ? AND IdProduct <> ? "
+                + "ORDER BY ReleaseDate DESC, Price DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY",
+                ps -> {
+                    ps.setString(1, supplier);
+                    ps.setString(2, excludeId);
+                    ps.setInt(3, limit);
+                }
         );
     }
 
+    /**
+     * Kiểm tra xem database có dữ liệu sản phẩm không
+     */
+    public boolean canAccessProductData() {
+        String query = "SELECT TOP 1 1 FROM ProductDetail";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Lấy danh sách sản phẩm có phân trang (dùng cho trang quản lý)
+     */
+    public List<Product> getProducts(String keyword, String supplierId, String sortBy, int offset, int pageSize) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM ProductDetail WHERE 1 = 1");
+        List<Object> params = new ArrayList<>();
+        appendProductFilters(sql, params, keyword, supplierId);
+        sql.append(" ORDER BY ").append(resolveSortClause(sortBy)).append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add(offset);
+        params.add(pageSize);
+
+        List<Product> list = new ArrayList<>();
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            bindParams(ps, params);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapProduct(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Đếm tổng số sản phẩm dựa trên bộ lọc (dùng để tính số trang)
+     */
+    public int countProducts(String keyword, String supplierId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ProductDetail WHERE 1 = 1");
+        List<Object> params = new ArrayList<>();
+        appendProductFilters(sql, params, keyword, supplierId);
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            bindParams(ps, params);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Thêm sản phẩm mới vào database
+     */
+    public boolean addProduct(Product product) {
+        boolean splitQuantitySchema = hasProductDetailColumn("OriginalQuantity") && hasProductDetailColumn("CurrentQuantity");
+        boolean hasFeaturedColumn = hasProductDetailColumn("IsFeatured");
+        String query;
+        if (splitQuantitySchema) {
+            query = "INSERT INTO ProductDetail (IdProduct, ProductName, Price, OriginalQuantity, CurrentQuantity, ReleaseDate, Screen, OperatingSystem, CPU, RAM, Camera, Battery, Description, Discount, ImagePath, IdSupplier, idCat"
+                    + (hasFeaturedColumn ? ", IsFeatured" : "")
+                    + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+                    + (hasFeaturedColumn ? ", ?" : "")
+                    + ")";
+        } else {
+            query = "INSERT INTO ProductDetail (IdProduct, ProductName, Price, Quantity, ReleaseDate, Screen, OperatingSystem, CPU, RAM, Camera, Battery, Description, Discount, ImagePath, IdSupplier, idCat) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        }
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            bindProduct(ps, product, false, splitQuantitySchema, hasFeaturedColumn);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Cập nhật thông tin sản phẩm hiện có
+     */
+    public boolean updateProduct(Product product) {
+        Product existing = getProductByID(product.getIdProduct());
+        if (existing != null) {
+            if (product.getOriginalQuantity() < 0) {
+                product.setOriginalQuantity(existing.getOriginalQuantity());
+            }
+            if (product.getCurrentQuantity() < 0) {
+                product.setCurrentQuantity(existing.getCurrentQuantity());
+            }
+            if (product.getIsFeatured() < 0) {
+                product.setIsFeatured(existing.getIsFeatured());
+            }
+        }
+        boolean splitQuantitySchema = hasProductDetailColumn("OriginalQuantity") && hasProductDetailColumn("CurrentQuantity");
+        boolean hasFeaturedColumn = hasProductDetailColumn("IsFeatured");
+        String query;
+        if (splitQuantitySchema) {
+            query = "UPDATE ProductDetail SET ProductName = ?, Price = ?, OriginalQuantity = ?, CurrentQuantity = ?, ReleaseDate = ?, Screen = ?, OperatingSystem = ?, CPU = ?, RAM = ?, Camera = ?, Battery = ?, Description = ?, Discount = ?, ImagePath = ?, IdSupplier = ?, idCat = ?"
+                    + (hasFeaturedColumn ? ", IsFeatured = ?" : "")
+                    + " WHERE IdProduct = ?";
+        } else {
+            query = "UPDATE ProductDetail SET ProductName = ?, Price = ?, Quantity = ?, ReleaseDate = ?, Screen = ?, OperatingSystem = ?, CPU = ?, RAM = ?, Camera = ?, Battery = ?, Description = ?, Discount = ?, ImagePath = ?, IdSupplier = ?, idCat = ? WHERE IdProduct = ?";
+        }
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            bindProduct(ps, product, true, splitQuantitySchema, hasFeaturedColumn);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Xóa sản phẩm khỏi database
+     */
+    public boolean deleteProduct(String idProduct) {
+        String query = "DELETE FROM ProductDetail WHERE IdProduct = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, idProduct);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Kiểm tra xem sản phẩm đã tồn tại theo tên và hãng chưa
+     */
+    public boolean productExistsByNameAndSupplier(String productName, String supplierId) {
+        String query = "SELECT 1 FROM ProductDetail WHERE ProductName = ? AND IdSupplier = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, productName);
+            ps.setString(2, supplierId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Cập nhật số lượng tồn kho (Restock) cho sản phẩm đã có
+     */
+    public boolean restockExistingProduct(String productName, String supplierId, int delta) {
+        boolean splitQuantitySchema = hasProductDetailColumn("OriginalQuantity") && hasProductDetailColumn("CurrentQuantity");
+        String query = splitQuantitySchema
+                ? "UPDATE ProductDetail SET OriginalQuantity = OriginalQuantity + ?, CurrentQuantity = CurrentQuantity + ? WHERE ProductName = ? AND IdSupplier = ?"
+                : "UPDATE ProductDetail SET Quantity = Quantity + ? WHERE ProductName = ? AND IdSupplier = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, delta);
+            if (splitQuantitySchema) {
+                ps.setInt(2, delta);
+                ps.setString(3, productName);
+                ps.setString(4, supplierId);
+            } else {
+                ps.setString(2, productName);
+                ps.setString(3, supplierId);
+            }
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Ánh xạ tên hãng sang ID danh mục (Hardcoded)
+     */
+    public Integer getCategoryIdBySupplier(String supplierId) {
+        if (supplierId == null) {
+            return null;
+        }
+        switch (supplierId.trim()) {
+            case "Apple":
+                return 1;
+            case "Samsung":
+                return 2;
+            case "Oppo":
+                return 3;
+            case "Huawei":
+                return 4;
+            case "Xiaomi":
+                return 5;
+            case "Realme":
+                return 6;
+            case "Google":
+                return 7;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Lấy danh sách ID các nhà cung cấp
+     */
+    public List<String> getSupplierIds() {
+        List<String> suppliers = new ArrayList<>();
+        String query = "SELECT IdSupplier FROM Supplier ORDER BY IdSupplier";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                suppliers.add(rs.getString("IdSupplier"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return suppliers;
+    }
+
+    /**
+     * Sinh ID tiếp theo cho sản phẩm mới (ví dụ: 0005)
+     */
+    public String getNextProductId() {
+        String query = "SELECT RIGHT('0000' + CAST(ISNULL(MAX(TRY_CAST(IdProduct AS INT)), 0) + 1 AS VARCHAR), 4) AS NextId FROM ProductDetail";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("NextId");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "0001";
+    }
+
     
+    /**
+     * Đếm số lượng đánh giá của một sản phẩm (có thể lọc theo số sao)
+     */
     public int countProductReviews(String productId, Integer ranking) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS Total FROM ProductReview WHERE IdProduct = ? ");
         if (ranking != null) {
@@ -282,6 +743,9 @@ public class DAO {
         return 0;
     }
     
+    /**
+     * Lấy danh sách đánh giá của sản phẩm có phân trang
+     */
     public List<ProductReview> getProductReviews(String productId, Integer ranking, int offset, int pageSize) {
         List<ProductReview> reviews = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
@@ -315,6 +779,9 @@ public class DAO {
         return reviews;
     }
 
+    /**
+     * Thống kê số lượng đánh giá theo từng mức sao (1-5 sao)
+     */
     public Map<Integer, Integer> getReviewCountsByRating(String productId) {
         Map<Integer, Integer> counts = new LinkedHashMap<>();
         for (int star = 5; star >= 1; star--) {
@@ -336,6 +803,9 @@ public class DAO {
         return counts;
     }
     
+    /**
+     * Tính điểm đánh giá trung bình của sản phẩm
+     */
     public double getAverageRating(String productId) {
         String query = "SELECT COALESCE(AVG(CAST(Ranking AS FLOAT)), 0) AS AverageRating FROM ProductReview WHERE IdProduct = ?";
         try (Connection conn = new DBContext().getConnection();
@@ -352,6 +822,9 @@ public class DAO {
         return 0d;
     }
     
+    /**
+     * Tổng số lượng đánh giá của một sản phẩm
+     */
     public int getReviewCount(String productId) {
         String query = "SELECT COUNT(*) AS TotalReview FROM ProductReview WHERE IdProduct = ?";
         try (Connection conn = new DBContext().getConnection();
@@ -367,12 +840,247 @@ public class DAO {
         }
         return 0;
     }
+
+    /**
+     * Gán dữ liệu sản phẩm vào PreparedStatement để thực thi SQL
+     */
+    private void bindProduct(PreparedStatement ps, Product product, boolean updateMode, boolean splitQuantitySchema, boolean hasFeaturedColumn) throws Exception {
+        int index = 1;
+        int originalQuantity = product.getOriginalQuantity() >= 0 ? product.getOriginalQuantity() : Math.max(0, product.getCurrentQuantity());
+        int currentQuantity = Math.max(0, product.getCurrentQuantity());
+        double discount = Double.isNaN(product.getDiscount()) ? 0d : Math.max(0d, product.getDiscount());
+        int isFeatured = Math.max(0, product.getIsFeatured());
+
+        if (!updateMode) {
+            ps.setString(index++, product.getIdProduct());
+        }
+        ps.setString(index++, product.getProductName());
+        ps.setDouble(index++, product.getPrice());
+        ps.setInt(index++, splitQuantitySchema ? originalQuantity : currentQuantity);
+        if (splitQuantitySchema) {
+            ps.setInt(index++, currentQuantity);
+        }
+        ps.setDate(index++, product.getReleaseDate() == null || product.getReleaseDate().isBlank() ? null : Date.valueOf(product.getReleaseDate()));
+        ps.setString(index++, product.getScreen());
+        ps.setString(index++, product.getOperatingSystem());
+        ps.setString(index++, product.getCpu());
+        if (product.getRam() == null || product.getRam().isBlank()) {
+            ps.setNull(index++, java.sql.Types.INTEGER);
+        } else {
+            ps.setInt(index++, Integer.parseInt(product.getRam()));
+        }
+        ps.setString(index++, product.getCamera());
+        ps.setString(index++, product.getBattery());
+        ps.setString(index++, product.getDescription());
+        ps.setDouble(index++, discount);
+        ps.setString(index++, product.getImagePath());
+        ps.setString(index++, product.getIdSupplier());
+        if (product.getIdCat() <= 0) {
+            ps.setNull(index++, java.sql.Types.INTEGER);
+        } else {
+            ps.setInt(index++, product.getIdCat());
+        }
+        if (splitQuantitySchema && hasFeaturedColumn) {
+            ps.setInt(index++, isFeatured);
+        }
+        if (updateMode) {
+            ps.setString(index, product.getIdProduct());
+        }
+    }
+
+    /**
+     * Thêm các điều kiện lọc SQL cho sản phẩm
+     */
+    private void appendProductFilters(StringBuilder sql, List<Object> params, String keyword, String supplierId) {
+        String safeKeyword = normalizeKeyword(keyword);
+        String safeSupplier = normalizeIdentifier(supplierId);
+
+        if (!safeKeyword.isEmpty()) {
+            sql.append(" AND REPLACE(REPLACE(LOWER(ProductName), ' ', ''), '-', '') LIKE ?");
+            params.add("%" + toSqlLikeKeyword(safeKeyword) + "%");
+        }
+        if (!safeSupplier.isEmpty()) {
+            sql.append(" AND IdSupplier = ?");
+            params.add(safeSupplier);
+        }
+    }
+
+    /**
+     * Gán các tham số vào PreparedStatement theo kiểu dữ liệu tương ứng
+     */
+    private void bindParams(PreparedStatement ps, List<Object> params) throws SQLException {
+        for (int i = 0; i < params.size(); i++) {
+            Object value = params.get(i);
+            int index = i + 1;
+            if (value instanceof Integer) {
+                ps.setInt(index, (Integer) value);
+            } else if (value instanceof Double) {
+                ps.setDouble(index, (Double) value);
+            } else {
+                ps.setString(index, String.valueOf(value));
+            }
+        }
+    }
+
+    /**
+     * Xử lý chuỗi ORDER BY cho SQL dựa trên lựa chọn sắp xếp
+     */
+    private String resolveSortClause(String sortBy) {
+        String quantityColumn = hasProductDetailColumn("CurrentQuantity") ? "CurrentQuantity" : "Quantity";
+        if (sortBy == null) {
+            return "COALESCE(TRY_CAST(IdProduct AS INT), 2147483647) ASC, IdProduct ASC";
+        }
+        switch (sortBy.trim()) {
+            case "priceAsc":
+                return "Price ASC, COALESCE(TRY_CAST(IdProduct AS INT), 2147483647) ASC, IdProduct ASC";
+            case "priceDesc":
+                return "Price DESC, COALESCE(TRY_CAST(IdProduct AS INT), 2147483647) ASC, IdProduct ASC";
+            case "quantityAsc":
+                return quantityColumn + " ASC, COALESCE(TRY_CAST(IdProduct AS INT), 2147483647) ASC, IdProduct ASC";
+            case "quantityDesc":
+                return quantityColumn + " DESC, COALESCE(TRY_CAST(IdProduct AS INT), 2147483647) ASC, IdProduct ASC";
+            default:
+                return "COALESCE(TRY_CAST(IdProduct AS INT), 2147483647) ASC, IdProduct ASC";
+        }
+    }
+
+    /**
+     * Kiểm tra xem bảng ProductDetail có cột cụ thể nào không (để xử lý linh hoạt các version DB)
+     */
+    private boolean hasProductDetailColumn(String columnName) {
+        try (Connection conn = new DBContext().getConnection();
+             ResultSet rs = conn.getMetaData().getColumns(null, null, "ProductDetail", columnName)) {
+            return rs.next();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Chuẩn hóa chuỗi (xóa khoảng trắng thừa)
+     */
+    private String normalizeIdentifier(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    /**
+     * Chuẩn hóa từ khóa tìm kiếm (lowercase, xóa dấu cách thừa, xử lý từ viết liền)
+     */
+    private String normalizeKeyword(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalized = value.toLowerCase(Locale.ROOT).trim().replaceAll("\\s+", " ");
+        if (normalized.isBlank()) {
+            return "";
+        }
+        normalized = normalized
+                .replace("promax", "pro max")
+                .replace("plusmax", "plus max")
+                .replace("ultra5g", "ultra 5g")
+                .replace("samsunggalaxy", "samsung galaxy");
+        return normalized.replaceAll("\\s+", " ").trim();
+    }
+
+    /**
+     * Chuyển đổi từ khóa sang định dạng phù hợp với câu lệnh LIKE trong SQL
+     */
+    private String toSqlLikeKeyword(String value) {
+        return normalizeKeyword(value).replace(" ", "").replace("-", "");
+    }
+
+    /**
+     * Chuyển đổi chuỗi dung lượng (ví dụ "128GB") sang số nguyên (128)
+     */
+    private int parseMemoryValue(String value) {
+        String normalized = normalizeIdentifier(value);
+        if (normalized.isEmpty()) {
+            return -1;
+        }
+        String digits = normalized.replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    /**
+     * Trích xuất năm phát hành từ chuỗi văn bản bằng Regex
+     */
+    private int parseReleaseYear(String value) {
+        String normalized = normalizeIdentifier(value);
+        if (normalized.isEmpty()) {
+            return -1;
+        }
+        Matcher matcher = RELEASE_YEAR_PATTERN.matcher(normalized);
+        if (!matcher.find()) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(matcher.group());
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    /**
+     * Chuyển đổi chuỗi giá tiền sang kiểu Double
+     */
+    private Double parsePriceValue(String value) {
+        String normalized = normalizeIdentifier(value);
+        if (normalized.isEmpty()) {
+            return null;
+        }
+        String digits = normalized.replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) {
+            return null;
+        }
+        try {
+            double parsed = Double.parseDouble(digits);
+            return parsed < 0 ? null : parsed;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Đọc giá trị số lượng từ ResultSet (hỗ trợ nhiều tên cột khác nhau)
+     */
+    private int readQuantity(ResultSet rs, String... columnNames) throws SQLException {
+        for (String columnName : columnNames) {
+            try {
+                return rs.getInt(columnName);
+            } catch (SQLException ex) {
+                // Try the next alias if the current column does not exist.
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Đọc giá trị kiểu Double từ ResultSet an toàn
+     */
+    private double readDouble(ResultSet rs, String columnName) throws SQLException {
+        try {
+            return rs.getDouble(columnName);
+        } catch (SQLException ex) {
+            return 0d;
+        }
+    }
+
     @FunctionalInterface
     private interface SqlConsumer<T> {
         void accept(T value) throws Exception;
     }
     
     // 1. Hàm tạo và lưu Token mới (Có hiệu lực 10 phút)
+    /**
+     * Lưu mã Token khôi phục mật khẩu và thời gian hết hạn (10 phút)
+     */
     public void saveResetToken(String email, String token) {
         // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
         String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
@@ -388,6 +1096,9 @@ public class DAO {
     }
 
     // 2. Hàm kiểm tra Token khi khách hàng click vào link
+    /**
+     * Tìm người dùng dựa trên Reset Token (để xác thực link đổi pass)
+     */
     public User getUserByResetToken(String token) {
         // Chỉ lấy User nếu Token khớp VÀ thời gian hiện tại vẫn nhỏ hơn thời gian hết hạn
         // Sửa tạm để test
@@ -412,6 +1123,9 @@ public class DAO {
     }
 
     // 3. Hàm lưu mật khẩu mới và Xóa Token (Chỉ dùng 1 lần)
+    /**
+     * Cập nhật mật khẩu mới và xóa Token khôi phục
+     */
     public void updatePasswordAndClearToken(String email, String newHashedPassword) {
         // Đổi pass xong thì đưa Token về NULL để vô hiệu hóa link cũ
         String sql = "UPDATE [User] SET [Password] = ?, ResetToken = NULL, ResetTokenExpiry = NULL WHERE Email = ?";
@@ -425,6 +1139,9 @@ public class DAO {
             e.printStackTrace();
         }
     }
+    /**
+     * Đếm tổng số lượng sản phẩm trong kho
+     */
     public int getTotalProducts() {
         String query = "SELECT COUNT(*) FROM ProductDetail";
         try (Connection conn = new DBContext().getConnection();
@@ -439,6 +1156,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * Đếm số lượng đơn hàng đang chờ xử lý
+     */
     public int getPendingOrdersCount() {
         String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Chờ xử lý'";
         try (Connection conn = new DBContext().getConnection();
@@ -449,6 +1169,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * Tính tổng doanh thu của tháng hiện tại (chỉ tính đơn Hoàn thành)
+     */
     public String getMonthlyRevenue() {
         String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
         try (Connection conn = new DBContext().getConnection();
@@ -463,6 +1186,9 @@ public class DAO {
         return "0";
     }
 
+    /**
+     * Lấy danh sách các đơn hàng gần đây để hiển thị Dashboard
+     */
     public List<Map<String, String>> getRecentOrders(int limit) {
         List<Map<String, String>> list = new ArrayList<>();
         String query = "SELECT TOP (?) o.IdOrder, u.FullName, o.OrderDate, o.TotalPrice, o.OrderStatus " +
@@ -487,6 +1213,9 @@ public class DAO {
         return list;
     }
 
+    /**
+     * Lấy danh sách sản phẩm bán chạy nhất
+     */
     public List<Map<String, String>> getBestSellers(int limit) {
         List<Map<String, String>> list = new ArrayList<>();
         String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, p.Quantity, SUM(od.Quantity) as Sold " +
@@ -509,6 +1238,9 @@ public class DAO {
         return list;
     }
 
+    /**
+     * Lấy toàn bộ danh sách nhà cung cấp (Supplier)
+     */
     public List<Supplier> getAllSuppliers() throws SQLException, Exception{
         List<Supplier> list = new ArrayList<>();
         String query = "SELECT* FROM SUPPLIER";
@@ -533,6 +1265,9 @@ public class DAO {
         return list;
     }
     
+    /**
+     * Đếm số sản phẩm mới được thêm trong 30 ngày qua
+     */
     public int getNewProductsThisMonthCount() {
         // Đếm sản phẩm trong 30 ngày gần nhất để con số "nhảy" linh hoạt hơn
         String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= DATEADD(day, -30, GETDATE())";
@@ -544,6 +1279,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * Lấy thống kê số lượng đơn hàng theo từng trạng thái
+     */
     public Map<String, Integer> getOrderStatusStatistics() {
         Map<String, Integer> stats = new HashMap<>();
         // Khởi tạo các trạng thái mặc định
@@ -562,6 +1300,9 @@ public class DAO {
         return stats;
     }
 
+    /**
+     * Đếm số người dùng mới đăng ký trong tháng này
+     */
     public int getNewUsersThisMonthCount() {
         String query = "SELECT COUNT(*) FROM [User] WHERE MONTH(Birthday) = MONTH(GETDATE())"; 
         try (Connection conn = new DBContext().getConnection();
@@ -572,6 +1313,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * Đếm số đơn hàng mới trong 30 ngày qua
+     */
     public int getNewOrdersThisMonthCount() {
         String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= DATEADD(day, -30, GETDATE())";
         try (Connection conn = new DBContext().getConnection();
@@ -582,6 +1326,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * Tính toán tỷ lệ tăng trưởng doanh thu so với tháng trước
+     */
     public double getRevenueGrowth() {
         String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'Hoàn thành'";
         String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
@@ -599,12 +1346,43 @@ public class DAO {
         return 0.0;
     }
 
+    /**
+     * Lấy danh sách tên các thương hiệu (Supplier) đang có sản phẩm
+     */
     public List<String> getActiveSuppliers() {
         List<String> list = new ArrayList<>();
-        String query = "SELECT DISTINCT IdSupplier FROM ProductDetail";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
+        String sql = "SELECT DISTINCT IdSupplier FROM ProductDetail WHERE IdSupplier IS NOT NULL ORDER BY IdSupplier";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(rs.getString("IdSupplier"));
+                list.add(rs.getString(1));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Lấy danh sách sản phẩm theo thương hiệu
+     */
+    public List<ProductModel> getProductsByBrand(String brandId) {
+        List<ProductModel> list = new ArrayList<>();
+        String sql = "SELECT * FROM ProductDetail WHERE IdSupplier = ? ORDER BY ProductName";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, brandId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductModel pm = new ProductModel();
+                    pm.setIdProduct(rs.getString("IdProduct"));
+                    pm.setProductName(rs.getString("ProductName"));
+                    pm.setPrice(rs.getDouble("Price"));
+                    pm.setImagePath(rs.getString("ImagePath"));
+                    pm.setIdSupplier(rs.getString("IdSupplier"));
+                    list.add(pm);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
