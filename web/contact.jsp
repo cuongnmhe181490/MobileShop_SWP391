@@ -159,6 +159,55 @@
                 transform: translateY(-2px);
             }
 
+            /* Error markers */
+            .error-text {
+                color: #ef4444;
+                font-size: 12px;
+                font-weight: 600;
+                margin-top: 4px;
+                display: none;
+                animation: fadeIn 0.2s ease;
+            }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+            .input-field.is-invalid { border-color: #ef4444; background: #fff1f2; }
+
+            /* Service Review Section */
+            .service-review-cta {
+                margin-top: 40px;
+                padding: 32px;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                border-radius: 24px;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 24px;
+            }
+            .service-review-cta h3 { margin: 0; font-size: 20px; font-weight: 700; }
+            .service-review-cta p { margin: 8px 0 0; font-size: 14px; opacity: 0.8; }
+            .btn-review {
+                background: #9fcdff;
+                color: #0f172a;
+                padding: 12px 28px;
+                border-radius: 999px;
+                font-weight: 800;
+                font-size: 14px;
+                text-decoration: none;
+                transition: 0.3s;
+                white-space: nowrap;
+            }
+            .btn-review:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(175, 242, 47, 0.3);}
+
+            .alert-success {
+                padding: 16px;
+                background: #f0fdf4;
+                color: #166534;
+                border: 1px solid #bbf7d0;
+                border-radius: 12px;
+                margin-bottom: 24px;
+                font-weight: 600;
+            }
+
             .clearfix::after {
                 content: "";
                 clear: both;
@@ -206,31 +255,103 @@
 
                 <section class="form-section">
                     <h2>Gửi yêu cầu tư vấn</h2>
-                    <form action="${pageContext.request.contextPath}/contact" method="post" class="clearfix">
+
+                    <c:if test="${param.success eq 'true'}">
+                        <div class="alert-success">Cảm ơn bạn! Yêu cầu của bạn đã được gửi thành công.</div>
+                    </c:if>
+
+                    <form action="${pageContext.request.contextPath}/contact" method="post" class="clearfix" id="contactForm">
                         <div class="row">
                             <div class="col-md-4 mb-4">
                                 <label class="input-label">Họ và tên</label>
-                                <input type="text" name="name" class="input-field" placeholder="Nhập tên của bạn">
+                                <input type="text" name="name" id="name" class="input-field" placeholder="Nhập tên của bạn">
+                                <div id="err-name" class="error-text">Họ tên không được để trống.</div>
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label class="input-label">Email</label>
-                                <input type="email" name="email" class="input-field" placeholder="example@gmail.com">
+                                <input type="email" name="email" id="email" class="input-field" placeholder="example@gmail.com">
+                                <div id="err-email" class="error-text">Vui lòng nhập email hợp lệ.</div>
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label class="input-label">Số điện thoại</label>
-                                <input type="tel" name="phone" class="input-field" placeholder="0xxx ...">
+                                <input type="tel" name="phone" id="phone" class="input-field" placeholder="0xxx ...">
+                                <div id="err-phone" class="error-text">Số điện thoại không đúng định dạng.</div>
                             </div>
                         </div>
                         <div class="mb-4">
                             <label class="input-label">Nội dung</label>
-                            <textarea name="message" class="input-field" placeholder="Bạn cần hỗ trợ điều gì?"></textarea>
+                            <textarea name="message" id="message" class="input-field" placeholder="Bạn cần hỗ trợ điều gì?"></textarea>
+                            <div id="err-message" class="error-text">Nội dung phải có ít nhất 10 ký tự.</div>
                         </div>
                         <button type="submit" class="btn-submit">Gửi liên hệ</button>
                     </form>
                 </section>
+
+                <div class="service-review-cta">
+                    <div>
+                        <h3 style="color : #fff3cd">Bạn thấy dịch vụ của chúng tôi thế nào?</h3>
+                        <p  style="color : #fff8e6">Ý kiến của bạn giúp chúng tôi cải thiện chất lượng mỗi ngày.</p>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/review/write?type=SERVICE" class="btn-review">Đánh giá dịch vụ</a>
+                </div>
             </div>
         </main>
 
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
+
+        <script>
+            const form = document.getElementById('contactForm');
+            const inputs = {
+                name: document.getElementById('name'),
+                email: document.getElementById('email'),
+                phone: document.getElementById('phone'),
+                message: document.getElementById('message')
+            };
+
+            // Validation rules
+            const validate = {
+                name: (val) => val.trim().length > 0,
+                email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+                phone: (val) => /^0[0-9]{9}$/.test(val.replace(/\s/g, '')),
+                message: (val) => val.trim().length >= 10
+            };
+
+            function checkField(id) {
+                const val = inputs[id].value;
+                const isValid = validate[id](val);
+                const errEl = document.getElementById('err-' + id);
+                
+                if (!isValid) {
+                    inputs[id].classList.add('is-invalid');
+                    errEl.style.display = 'block';
+                } else {
+                    inputs[id].classList.remove('is-invalid');
+                    errEl.style.display = 'none';
+                }
+                return isValid;
+            }
+
+            // Real-time listeners
+            Object.keys(inputs).forEach(id => {
+                inputs[id].addEventListener('input', () => checkField(id));
+                inputs[id].addEventListener('blur', () => checkField(id));
+            });
+
+            form.addEventListener('submit', (e) => {
+                let isFormValid = true;
+                Object.keys(inputs).forEach(id => {
+                    if (!checkField(id)) {
+                        isFormValid = false;
+                        inputs[id].classList.add('is-invalid');
+                        document.getElementById('err-' + id).style.display = 'block';
+                    }
+                });
+
+                if (!isFormValid) {
+                    e.preventDefault();
+                    // Shake effect or scroll to first error?
+                }
+            });
+        </script>
     </body>
 </html>

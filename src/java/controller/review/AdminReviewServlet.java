@@ -1,7 +1,7 @@
 package controller.review;
 
 import dao.ReviewDAO;
-import entity.ProductReview;
+import entity.Review;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * GET  /admin/reviews              → Màn 4: Danh sách
- * POST /admin/reviews?action=reply → Màn 5: Phản hồi
- * POST /admin/reviews?action=toggle→ Màn 5: Đổi status
+ * Admin logic for managing GeneralReview (Product & Service).
  */
 @WebServlet("/admin/reviews")
 public class AdminReviewServlet extends HttpServlet {
@@ -28,13 +26,15 @@ public class AdminReviewServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String statusFilter = req.getParameter("status"); // "VISIBLE"|"HIDDEN"|null
+        String typeFilter   = req.getParameter("type");   // "PRODUCT"|"SERVICE"|null
+        
         int page = 1;
         try { page = Math.max(1, Integer.parseInt(req.getParameter("page"))); }
         catch (Exception ignored) {}
 
         try {
-            List<ProductReview> reviews = dao.adminGetAll(statusFilter, page, PAGE_SIZE);
-            int total      = dao.adminCount(statusFilter);
+            List<Review> reviews = dao.adminGetAll(statusFilter, typeFilter, page, PAGE_SIZE);
+            int total      = dao.adminCount(statusFilter, typeFilter);
             int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
 
             req.setAttribute("reviews",      reviews);
@@ -42,9 +42,9 @@ public class AdminReviewServlet extends HttpServlet {
             req.setAttribute("totalPages",   totalPages);
             req.setAttribute("currentPage",  page);
             req.setAttribute("statusFilter", statusFilter);
+            req.setAttribute("typeFilter",   typeFilter);
 
-            req.getRequestDispatcher("/admin/adminReviews.jsp")
-               .forward(req, resp);
+            req.getRequestDispatcher("/admin/adminReviews.jsp").forward(req, resp);
 
         } catch (Exception e) {
             throw new ServletException(e);
@@ -61,8 +61,7 @@ public class AdminReviewServlet extends HttpServlet {
 
         try {
             if ("toggle".equals(action)) {
-                // Đổi VISIBLE ↔ HIDDEN
-                ProductReview current = dao.getById(reviewId);
+                Review current = dao.getById(reviewId);
                 String newStatus = "VISIBLE".equals(current.getStatus()) ? "HIDDEN" : "VISIBLE";
                 dao.updateStatus(reviewId, newStatus);
 
@@ -73,14 +72,18 @@ public class AdminReviewServlet extends HttpServlet {
                 }
             }
 
-            // Redirect về trang admin, giữ lại filter & page
+            // Redirect back with filters
             String redirect = req.getContextPath() + "/admin/reviews";
             String page   = req.getParameter("page");
             String status = req.getParameter("statusFilter");
-            if (page != null)   redirect += "?page="   + page;
-            if (status != null) redirect += (redirect.contains("?") ? "&" : "?") + "status=" + status;
+            String type   = req.getParameter("typeFilter");
+            
+            StringBuilder sb = new StringBuilder(redirect);
+            sb.append("?page=").append(page != null ? page : "1");
+            if (status != null && !status.isEmpty()) sb.append("&status=").append(status);
+            if (type != null && !type.isEmpty())     sb.append("&type=").append(type);
 
-            resp.sendRedirect(redirect);
+            resp.sendRedirect(sb.toString());
 
         } catch (Exception e) {
             throw new ServletException(e);

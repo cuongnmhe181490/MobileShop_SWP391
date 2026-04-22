@@ -49,29 +49,30 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
+        /* ===== SIDEBAR – Version Gold ===== */
         .sidebar {
             width: 260px;
-            background: var(--bg-sidebar);
+            background: #1e293b;
             padding: 24px 0;
             display: flex;
             flex-direction: column;
             position: fixed;
+            top: 0; left: 0;
             height: 100vh;
             z-index: 100;
             color: white;
+            overflow-y: auto;
         }
-
-        .brand {
+        .sidebar .brand {
             padding: 0 24px;
             margin-bottom: 40px;
             text-decoration: none;
             color: white;
+            display: block;
         }
-
-        .brand h2 { font-size: 1.5rem; font-weight: 700; }
-        .brand p { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
-
+        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        
         .nav-section { margin-bottom: 32px; }
         .nav-label {
             font-size: 0.7rem;
@@ -82,7 +83,8 @@
             display: block;
             padding: 0 24px;
         }
-
+        
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .menu-link {
             display: flex;
             align-items: center;
@@ -90,41 +92,20 @@
             padding: 12px 24px;
             color: #94a3b8;
             text-decoration: none;
-            transition: 0.3s;
             font-weight: 500;
             font-size: 0.95rem;
             border-left: 4px solid transparent;
+            transition: 0.3s;
         }
-
         .menu-link i { width: 20px; text-align: center; }
-
-        .menu-dot { 
-            width: 8px; 
-            height: 8px; 
-            border-radius: 50%; 
-            background: currentColor; 
-            opacity: 0.5; 
-            margin-right: 12px;
-            display: inline-block;
-        }
-
-        .menu-link:hover .menu-dot { opacity: 1; }
-
+        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
         .menu-link.active {
             background: rgba(175, 242, 47, 0.1);
-            color: var(--sidebar-active);
-            border-left-color: var(--sidebar-active);
+            color: #aff22f;
+            border-left-color: #aff22f;
             font-weight: 600;
         }
-
-        .badge {
-            background: var(--danger);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 20px;
-            margin-left: auto;
-        }
+        /* ===== END SIDEBAR ===== */
 
         /* Main Content */
         .main-content {
@@ -336,44 +317,92 @@
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <a href="#" class="brand">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
 
+            <!-- 1. TỔNG QUAN -->
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="#" class="menu-link active"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link active">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
 
+            <!-- 2. QUẢN LÝ BÁN HÀNG -->
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
                     <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
                             <i class="fa-solid fa-receipt"></i>Đơn hàng
                         </a>
                     </li>
-                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link"><i class="fa-solid fa-home"></i>Trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
 
+            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
             <div class="nav-section">
-                <span class="nav-label">HỆ THỐNG</span>
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
 
-            <div style="margin-top: auto;">
+            <!-- 4. CẤU HÌNH GIAO DIỆN -->
+            <div class="nav-section">
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 5. HỆ THỐNG -->
+            <div style="margin-top: auto; padding-bottom: 24px;">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>

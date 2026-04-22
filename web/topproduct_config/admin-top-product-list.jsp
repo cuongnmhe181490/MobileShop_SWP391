@@ -152,7 +152,7 @@
                 font-weight: 600;
             }
 
-        /* ===== SIDEBAR – Dashboard Design ===== */
+        /* ===== SIDEBAR – Version Gold ===== */
         .sidebar {
             width: 260px;
             background: #1e293b;
@@ -175,6 +175,7 @@
         }
         .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
         .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        
         .nav-section { margin-bottom: 32px; }
         .nav-label {
             font-size: 0.7rem;
@@ -185,6 +186,7 @@
             display: block;
             padding: 0 24px;
         }
+        
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .menu-link {
             display: flex;
@@ -199,14 +201,13 @@
             transition: 0.3s;
         }
         .menu-link i { width: 20px; text-align: center; }
-        .menu-link:hover { background: rgba(175,242,47,0.05); color: #cbd5e1; }
+        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
         .menu-link.active {
-            background: rgba(175,242,47,0.1);
+            background: rgba(175, 242, 47, 0.1);
             color: #aff22f;
             border-left-color: #aff22f;
             font-weight: 600;
         }
-        .sidebar-logout { margin-top: auto; }
         /* ===== END SIDEBAR ===== */
 
         </style>
@@ -220,40 +221,88 @@
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
+
+            <!-- 1. TỔNG QUAN -->
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 2. QUẢN LÝ BÁN HÀNG -->
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
-                    <li><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
             <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
-                    <li><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link active"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 4. CẤU HÌNH GIAO DIỆN -->
             <div class="nav-section">
-                <span class="nav-label">HỆ THỐNG</span>
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link active">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
                 </ul>
             </div>
-            <div class="sidebar-logout">
+
+            <!-- 5. HỆ THỐNG -->
+            <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>

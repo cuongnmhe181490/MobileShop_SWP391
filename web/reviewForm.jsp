@@ -306,6 +306,44 @@
             }
             .char-counter.warn { color: #f59e0b; }
             .char-counter.ok   { color: #22c55e; }
+
+            /* Topic Grid (Service mode) */
+            .topic-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+                margin-top: 12px;
+            }
+            .topic-item {
+                position: relative;
+            }
+            .topic-item input {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+            }
+            .topic-item label {
+                display: block;
+                padding: 12px;
+                background: #f8fafc;
+                border: 1px solid var(--rv-border);
+                border-radius: 12px;
+                font-size: 13px;
+                font-weight: 600;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .topic-item input:checked + label {
+                background: var(--rv-primary-soft);
+                border-color: var(--rv-primary);
+                color: var(--rv-primary);
+                box-shadow: 0 4px 12px rgba(61, 115, 234, 0.1);
+            }
+            .topic-item label:hover {
+                background: #f1f5f9;
+                border-color: var(--rv-text-muted);
+            }
         </style>
     </head>
     <body>
@@ -317,27 +355,41 @@
                     <h1>${isEdit ? 'Chỉnh sửa đánh giá' : 'Viết đánh giá'}</h1>
                     <p class="subtitle">Chia sẻ cảm nhận của bạn để giúp cộng đồng mua sắm tốt hơn.</p>
 
-                    <%-- Thực tế thông tin sản phẩm từ Servlet --%>
-                    <div class="rv-product-strip">
-                        <img src="${productImage != null ? productImage : 'https://res.cloudinary.com/dovcx8lxl/image/upload/v1713581000/placeholder.png'}" 
-                             alt="product" onerror="this.src='https://res.cloudinary.com/dovcx8lxl/image/upload/v1713581000/placeholder.png'"/>
-                        <div class="rv-product-name">${productName != null ? productName : 'Sản phẩm MobileShop'}</div>
-                    </div>
+                    <c:if test="${type eq 'PRODUCT'}">
+                        <div class="rv-product-strip">
+                            <img src="${productImage != null ? productImage : 'https://res.cloudinary.com/dovcx8lxl/image/upload/v1713581000/placeholder.png'}" 
+                                 alt="product" onerror="this.src='https://res.cloudinary.com/dovcx8lxl/image/upload/v1713581000/placeholder.png'"/>
+                            <div class="rv-product-name">${productName != null ? productName : 'Sản phẩm MobileShop'}</div>
+                        </div>
+                    </c:if>
+
+                    <c:if test="${type eq 'SERVICE'}">
+                        <div class="rv-product-strip" style="background:#f1f5f9; border-color:#e2e8f0;">
+                            <div style="width: 80px; height: 80px; background: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: var(--rv-primary);">
+                                <i class="fa-solid fa-shop"></i>
+                            </div>
+                            <div>
+                                <div class="rv-product-name" style="color: var(--rv-text-main);">Đánh giá dịch vụ MobileShop</div>
+                                <div style="font-size:13px; color: var(--rv-text-muted);">Trải nghiệm mua sắm & chăm sóc khách hàng</div>
+                            </div>
+                        </div>
+                    </c:if>
 
                     <div id="fileAlert" class="rv-alert"></div>
 
                     <form id="reviewForm" method="post" action="${ctx}/review/write" enctype="multipart/form-data">
                         <input type="hidden" name="mode" value="${mode}"/>
+                        <input type="hidden" name="type" value="${type}"/>
                         <c:if test="${isEdit}">
                             <input type="hidden" name="reviewId" value="${review.reviewId}"/>
                         </c:if>
-                        <c:if test="${not isEdit}">
+                        <c:if test="${not isEdit && type eq 'PRODUCT'}">
                             <input type="hidden" name="pid" value="${pid}"/>
                         </c:if>
 
                         <%-- Rating --%>
                         <div class="form-group">
-                            <label class="form-label">Chất lượng sản phẩm</label>
+                            <label class="form-label">${type eq 'SERVICE' ? 'Chất lượng trải nghiệm' : 'Chất lượng sản phẩm'}</label>
                             <div class="star-picker">
                                 <c:forEach begin="1" end="5" var="s">
                                     <c:set var="val" value="${6 - s}"/>
@@ -347,6 +399,27 @@
                                 </c:forEach>
                             </div>
                         </div>
+
+                        <%-- Service Topics (Conditional) --%>
+                        <c:if test="${type eq 'SERVICE'}">
+                            <div class="form-group">
+                                <label class="form-label">Chủ đề bạn quan tâm <span style="color:#ef4444">*</span></label>
+                                <div style="font-size: 13px; color: var(--rv-text-muted); margin-bottom: 12px;">Bạn có thể chọn nhiều mục cùng lúc</div>
+                                <div class="topic-grid">
+                                    <c:set var="topics" value="Giao hàng, Tư vấn và chăm sóc, Bảo hành, Trải nghiệm Web, Khác" />
+                                    <c:forEach var="topic" items="${topics.split(', ')}">
+                                        <div class="topic-item">
+                                            <input type="checkbox" name="topics" id="topic_${topic}" value="${topic}" 
+                                                   ${(isEdit && review.reviewTopic.contains(topic)) ? 'checked' : ''}>
+                                            <label for="topic_${topic}">${topic}</label>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                                <div class="field-error" id="err-topics">
+                                    &#9888; Vui lòng chọn ít nhất một chủ đề.
+                                </div>
+                            </div>
+                        </c:if>
 
                         <%-- Content --%>
                         <div class="form-group">
@@ -512,6 +585,14 @@
             (function() {
                 const ta = document.getElementById('reviewContent');
                 if (ta && ta.value.length > 0) onContentInput(ta);
+                
+                // Real-time blur validation for content
+                if (ta) ta.addEventListener('blur', function() {
+                    if (this.value.trim().length > 0 && this.value.trim().length < 20) {
+                        this.classList.add('error');
+                        document.getElementById('err-content').classList.add('show');
+                    }
+                });
             })();
 
             // ── Validate toàn bộ form trước khi gửi ──
@@ -547,11 +628,23 @@
                 if (!content.value || content.value.trim().length < 20) {
                     content.classList.add('error');
                     errContent.classList.add('show');
-                    content.focus();
+                    if (isValid) content.focus();
                     isValid = false;
                 } else {
                     content.classList.remove('error');
                     errContent.classList.remove('show');
+                }
+
+                // 3. Kiểm tra topics (nếu là Service)
+                if ("${type}" === "SERVICE") {
+                    const checkedTopics = document.querySelectorAll('input[name="topics"]:checked');
+                    const errTopics = document.getElementById('err-topics');
+                    if (checkedTopics.length === 0) {
+                        errTopics.classList.add('show');
+                        isValid = false;
+                    } else {
+                        errTopics.classList.remove('show');
+                    }
                 }
 
                 if (!isValid) return;
@@ -571,6 +664,21 @@
                     if (errStar) errStar.classList.remove('show');
                 });
             });
+
+            // Lắng nghe thay đổi topics (Real-time)
+            if ("${type}" === "SERVICE") {
+                document.querySelectorAll('input[name="topics"]').forEach(function(cb) {
+                    cb.addEventListener('change', function() {
+                        const checkedTopics = document.querySelectorAll('input[name="topics"]:checked');
+                        const errTopics = document.getElementById('err-topics');
+                        if (checkedTopics.length > 0) {
+                            errTopics.classList.remove('show');
+                        } else {
+                            errTopics.classList.add('show');
+                        }
+                    });
+                });
+            }
 
             function showAlert(msg) {
                 const el = document.getElementById('fileAlert');
