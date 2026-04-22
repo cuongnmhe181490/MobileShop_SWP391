@@ -90,7 +90,7 @@
                                 <input class="auth-input" name="name" id="name" type="text"
                                        value="${param.name}" placeholder="Họ và tên"
                                        required maxlength="50">
-                                <span class="field-error" id="nameError">Họ và tên không được để trống!</span>
+                                <span class="field-error" id="nameError">Họ và tên không được để trống hoặc chứa ký tự số!</span>
                             </label>
 
                             <%-- GIỚI TÍNH & NGÀY SINH --%>
@@ -228,7 +228,7 @@
                     { id:"user",     errId:"userError",     test: v => v.trim() !== "" },
                     { id:"pass",     errId:"passError",     test: v => v.length >= 8 },
                     { id:"repass",   errId:"repassError",   test: v => v === document.getElementById("pass").value },
-                    { id:"name",     errId:"nameError",     test: v => v.trim() !== "" },
+                    { id:"name",     errId:"nameError",     test: v => v.trim() !== "" && /^[\p{L}\s]+$/u.test(v) },
                     { id:"gender",   errId:"genderError",   test: v => v !== "" },
                     { id:"birthday", errId:"birthdayError", test: v => v !== "" && v <= today },
                     { id:"email",    errId:"emailError",    test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },

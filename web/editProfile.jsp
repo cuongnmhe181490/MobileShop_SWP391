@@ -257,21 +257,27 @@
     <script>
         const form = document.querySelector("form");
 
-        // Hàm hiện lỗi tại field
         function showError(inputId, errorId) {
             document.getElementById(inputId).classList.add("error");
             document.getElementById(errorId).classList.add("show");
         }
 
-        // Hàm xóa lỗi tại field
         function clearError(inputId, errorId) {
             document.getElementById(inputId).classList.remove("error");
             document.getElementById(errorId).classList.remove("show");
         }
+        
+        const nameRegex = /^[\p{L}\s]+$/u;
 
-        // Validate realtime khi người dùng gõ
         document.getElementById("name").addEventListener("input", function () {
-            if (this.value.trim() === "") {
+            const nameValue = this.value.trim();
+            const errorSpan = document.getElementById("nameError");
+
+            if (nameValue === "") {
+                errorSpan.textContent = "Họ và tên không được để trống!";
+                showError("name", "nameError");
+            } else if (!nameRegex.test(nameValue)) {
+                errorSpan.textContent = "Họ và tên không được chứa số hay ký tự đặc biệt!";
                 showError("name", "nameError");
             } else {
                 clearError("name", "nameError");
@@ -287,20 +293,24 @@
             }
         });
 
-        // Validate khi submit form
         form.addEventListener("submit", function (e) {
             let valid = true;
 
-            // Kiểm tra họ tên
             const name = document.getElementById("name");
-            if (name.value.trim() === "") {
+            const nameValue = name.value.trim();
+            const nameError = document.getElementById("nameError");
+            if (nameValue === "") {
+                nameError.textContent = "Họ và tên không được để trống!";
+                showError("name", "nameError");
+                valid = false;
+            } else if (!nameRegex.test(nameValue)) {
+                nameError.textContent = "Họ và tên không được chứa số hay ký tự đặc biệt!";
                 showError("name", "nameError");
                 valid = false;
             } else {
                 clearError("name", "nameError");
             }
 
-            // Kiểm tra số điện thoại
             const phone = document.getElementById("phone");
             const phoneRegex = /^0\d{9}$/;
             if (!phoneRegex.test(phone.value.trim())) {
@@ -310,28 +320,24 @@
                 clearError("phone", "phoneError");
             }
 
-            // Nếu có lỗi thì chặn submit
             if (!valid) {
                 e.preventDefault();
             }
         });
-        // Hàm đếm ký tự
         function setupCharCount(inputId, countId, max) {
             const input = document.getElementById(inputId);
             const counter = document.getElementById(countId);
 
-            // Hiển thị số ký tự hiện tại khi load trang
             counter.textContent = input.value.length + "/" + max;
 
             input.addEventListener("input", function () {
                 const len = this.value.length;
                 counter.textContent = len + "/" + max;
 
-                // Đổi màu theo mức độ
                 counter.classList.remove("warning", "danger");
                 if (len >= max) {
                     counter.classList.add("danger");
-                } else if (len >= max * 0.8) { // 80% thì cảnh báo
+                } else if (len >= max * 0.8) { 
                     counter.classList.add("warning");
                 }
             });

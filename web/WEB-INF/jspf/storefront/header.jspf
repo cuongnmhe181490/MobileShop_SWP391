@@ -23,7 +23,6 @@
         </nav>
 
         <div class="store-actions">
-            <a class="pill-link" href="${ctx}/product">Tìm</a>
             <a class="pill-link pill-link--cart" href="${ctx}/cart">Giỏ hàng <span class="cart-badge">${cartSize}</span></a>
             <c:if test="${sessionScope.acc != null}">
                 <a class="pill-link" href="${ctx}/profile" style="text-decoration: none;">${sessionScope.acc.name}</a>

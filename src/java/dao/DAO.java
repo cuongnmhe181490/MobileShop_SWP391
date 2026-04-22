@@ -1162,4 +1162,19 @@ public class DAO {
         } catch (Exception e) { e.printStackTrace(); }
         return 0.0;
     }
+    
+    public List<String> getActiveSuppliers() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT DISTINCT IdSupplier FROM ProductDetail WHERE IdSupplier IS NOT NULL ORDER BY IdSupplier";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString(1));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
