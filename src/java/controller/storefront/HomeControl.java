@@ -42,16 +42,12 @@ public class HomeControl extends HttpServlet {
         BlogDAO bdao = new BlogDAO();
         List<ProductModel> featuredProducts = dao.getFeaturedProducts(6);
         List<ProductModel> latestProducts = dao.getLatestProducts(4);
-        List<BlogPost> blogPosts = bdao.getAllBlogs(); // Lấy tất cả, ta sẽ sublist hoặc để JSP xử lý
+        List<BlogPost> blogPosts = bdao.getLatestBlogs(3); 
         
         request.setAttribute("heroProduct", featuredProducts.isEmpty() ? null : featuredProducts.get(0));
         request.setAttribute("featuredProducts", featuredProducts);
         request.setAttribute("latestProducts", latestProducts);
         request.setAttribute("blogPosts", blogPosts);
-        request.setAttribute("heroProduct", featuredProducts.isEmpty() ? null : featuredProducts.get(0));
-        request.setAttribute("featuredProducts", featuredProducts);
-        request.setAttribute("latestProducts", latestProducts);
-  
 
         request.getRequestDispatcher("HomePage.jsp").forward(request, response);
     }

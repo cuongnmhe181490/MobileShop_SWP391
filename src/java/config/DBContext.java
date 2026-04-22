@@ -36,25 +36,4 @@ public class DBContext {
         }
         return value == null || value.trim().isEmpty() ? defaultValue : value.trim();
     }
-    
-    // --- ĐOẠN CODE TEST KẾT NỐI ---
-    public static void main(String[] args) {
-        try {
-            System.out.println("Đang tiến hành kết nối đến SQL Server...");
-            DBContext db = new DBContext();
-            Connection testConn = db.getConnection();
-            
-            if (testConn != null) {
-                System.out.println("✅ KẾT NỐI THÀNH CÔNG!");
-                System.out.println("👉 Database đang sử dụng: " + testConn.getCatalog());
-                testConn.close(); // Đóng kết nối sau khi test xong để giải phóng tài nguyên
-            }
-        } catch (Exception e) {
-            System.out.println("❌ KẾT NỐI THẤT BÀI!");
-            System.out.println("Vui lòng kiểm tra lại SQL Server đang chạy chưa, hoặc sai tên tài khoản/mật khẩu.");
-            System.out.println("Chi tiết lỗi:");
-            e.printStackTrace();
-        }
-    }
-
 }

@@ -1,7 +1,6 @@
 <%@page pageEncoding="UTF-8"%>
 <c:set var="cartSize" value="${empty sessionScope.size ? 0 : sessionScope.size}" />
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
-<c:set var="cartSize" value="${empty sessionScope.size ? 0 : sessionScope.size}" />
 <div class="store-topbar">
     <div class="mobile-shell store-topbar__inner">
         <span>MobileShop</span>
@@ -18,21 +17,22 @@
         <nav class="store-nav" aria-label="Điều hướng chính">
             <a class="store-nav__link ${activePage == 'home' ? 'is-active' : ''}" href="${ctx}/home">Trang chủ</a>
             <a class="store-nav__link ${activePage == 'catalog' ? 'is-active' : ''}" href="${ctx}/product">Cửa hàng</a>
-            <a class="store-nav__link ${activePage == 'tradein' ? 'is-active' : ''}" href="${ctx}/product#tradein">Thu cũ</a>
+            <a class="store-nav__link ${activePage == 'tradein' ? 'is-active' : ''}" href="${ctx}/tradein">Thu cũ</a>
             <a class="store-nav__link ${activePage == 'blog' ? 'is-active' : ''}" href="${ctx}/blog">Cẩm nang</a>
             <a class="store-nav__link ${activePage == 'contact' ? 'is-active' : ''}" href="${ctx}/contact">Liên hệ</a>
         </nav>
 
         <div class="store-actions">
-            <a class="pill-link" href="${ctx}/cartrole">Giỏ:  ${cartSize}</a>
+            <a class="pill-link" href="${ctx}/product">Tìm</a>
+            <a class="pill-link pill-link--cart" href="${ctx}/cart">Giỏ hàng <span class="cart-badge">${cartSize}</span></a>
             <c:if test="${sessionScope.acc != null}">
                 <a class="pill-link" href="${ctx}/profile" style="text-decoration: none;">${sessionScope.acc.name}</a>
                 <a class="pill-link" href="${ctx}/logout">Đăng xuất</a>
             </c:if>
             <c:if test="${sessionScope.acc == null}">
-                <a class="pill-link" href="${ctx}/login.jsp">Đăng nhập</a>
+                <a class="pill-link" href="${ctx}/login">Đăng nhập</a>
             </c:if>
-            <c:if test="${sessionScope.acc != null && sessionScope.acc.role.roleId > 0}">
+            <c:if test="${sessionScope.acc != null && sessionScope.acc.role != null && sessionScope.acc.role.roleId > 0}">
                 <a class="pill-link pill-link--primary" href="${ctx}/admin/dashboard">Quản trị</a>
             </c:if>
         </div>
@@ -47,6 +47,7 @@
         align-items: center !important;
         min-height: 72px !important;
     }
+
     .store-nav {
         display: flex !important;
         flex-wrap: nowrap !important;
@@ -54,11 +55,13 @@
         align-items: center !important;
         justify-content: center !important;
     }
+
     .store-nav__link {
         white-space: nowrap !important;
         font-size: 14px !important;
         padding: 8px 10px !important;
     }
+
     .store-actions {
         display: flex !important;
         flex-wrap: nowrap !important;
@@ -66,6 +69,7 @@
         gap: 6px !important;
         flex-shrink: 0 !important;
     }
+
     .store-brand:hover {
         background: transparent !important;
         box-shadow: none !important;
