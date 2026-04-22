@@ -129,6 +129,8 @@
                 white-space: nowrap;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+                border: none;
+                cursor: pointer;
             }
             .btn-write:hover {
                 transform: translateY(-2px);
@@ -381,6 +383,105 @@
             .toast--success .toast__progress { background: #10b981; }
             .toast--error .toast__progress { background: #ef4444; }
             @keyframes toast-progress { from { width: 100%; } to { width: 0%; } }
+
+            /* ─── Login Modal ─── */
+            .login-modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.5);
+                backdrop-filter: blur(4px);
+                z-index: 1000;
+                align-items: center;
+                justify-content: center;
+            }
+            .login-modal-overlay.active {
+                display: flex;
+            }
+            .login-modal {
+                background: #ffffff;
+                border-radius: 24px;
+                padding: 40px 36px;
+                max-width: 380px;
+                width: 90%;
+                text-align: center;
+                position: relative;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+                animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            @keyframes modalIn {
+                from { opacity: 0; transform: scale(0.92) translateY(16px); }
+                to   { opacity: 1; transform: scale(1)    translateY(0);     }
+            }
+            .login-modal__close {
+                position: absolute;
+                top: 16px; right: 20px;
+                background: none;
+                border: none;
+                font-size: 22px;
+                color: #94a3b8;
+                cursor: pointer;
+                line-height: 1;
+                padding: 4px;
+                border-radius: 6px;
+                transition: color 0.2s, background 0.2s;
+            }
+            .login-modal__close:hover {
+                color: #0f172a;
+                background: #f1f5f9;
+            }
+            .login-modal__icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+                display: block;
+            }
+            .login-modal__title {
+                font-size: 20px;
+                font-weight: 800;
+                color: #0f172a;
+                margin: 0 0 10px;
+            }
+            .login-modal__desc {
+                font-size: 14px;
+                color: #64748b;
+                line-height: 1.6;
+                margin: 0 0 28px;
+            }
+            .login-modal__actions {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
+            .login-modal__btn-primary {
+                padding: 12px 28px;
+                border-radius: 999px;
+                background: linear-gradient(135deg, #0284c7, #2563eb);
+                color: #fff;
+                font-size: 14px;
+                font-weight: 700;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            }
+            .login-modal__btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+            }
+            .login-modal__btn-secondary {
+                padding: 12px 24px;
+                border-radius: 999px;
+                background: #f1f5f9;
+                color: #475569;
+                font-size: 14px;
+                font-weight: 600;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            .login-modal__btn-secondary:hover {
+                background: #e2e8f0;
+                color: #0f172a;
+            }
         </style>
     </head>
     <body>
@@ -437,10 +538,15 @@
                         </c:forEach>
                     </div>
 
-                    <%-- Nút viết review (chỉ hiện khi đã đăng nhập) --%>
-                    <c:if test="${sessionScope.acc != null}">
-                        <a class="btn-write" href="${ctx}/review/write?pid=${pid}">Viết đánh giá</a>
-                    </c:if>
+                    <%-- Nút viết review: luôn hiện, nếu chưa login thì mở modal --%>
+                    <c:choose>
+                        <c:when test="${loggedIn}">
+                            <a class="btn-write" href="${ctx}/review/write?pid=${pid}">✦ Viết đánh giá</a>
+                        </c:when>
+                        <c:otherwise>
+                            <button class="btn-write" onclick="openLoginModal()">✦ Viết đánh giá</button>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
                 <%-- Danh sách review --%>
@@ -520,31 +626,65 @@
             </div>
         </main>
 
+        <%-- ─── Modal yêu cầu đăng nhập ─── --%>
+        <div class="login-modal-overlay" id="loginModalOverlay" onclick="handleOverlayClick(event)">
+            <div class="login-modal">
+                <button class="login-modal__close" onclick="closeLoginModal()">&#x2715;</button>
+                <span class="login-modal__icon">⭐</span>
+                <h3 class="login-modal__title">Vui lòng đăng nhập</h3>
+                <p class="login-modal__desc">
+                    Bạn cần đăng nhập để có thể viết đánh giá cho sản phẩm này.
+                </p>
+                <div class="login-modal__actions">
+                    <a class="login-modal__btn-primary"
+                       href="${ctx}/login.jsp?redirect=${ctx}/review/write?pid=${pid}">
+                        Đăng nhập
+                    </a>
+                    <button class="login-modal__btn-secondary" onclick="closeLoginModal()">
+                        Để sau
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
 
         <script>
-            // Tự động hiện toast khi trang load xong
+            // ── Toast ──
             (function() {
                 var toast = document.getElementById('gToast');
                 if (!toast) return;
-
-                // Hiện toast với animation
-                setTimeout(function() {
-                    toast.classList.add('show');
-                }, 100);
-
-                // Tự ẩn sau 4 giây
-                setTimeout(function() {
-                    hideToast();
-                }, 4500);
+                setTimeout(function() { toast.classList.add('show'); }, 100);
+                setTimeout(function() { hideToast(); }, 4500);
             })();
 
             function hideToast() {
                 var toast = document.getElementById('gToast');
-                if (toast) {
-                    toast.classList.remove('show');
+                if (toast) toast.classList.remove('show');
+            }
+
+            // ── Login Modal ──
+            function openLoginModal() {
+                document.getElementById('loginModalOverlay').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLoginModal() {
+                document.getElementById('loginModalOverlay').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // Đóng khi click ra vùng tối bên ngoài modal
+            function handleOverlayClick(e) {
+                if (e.target === document.getElementById('loginModalOverlay')) {
+                    closeLoginModal();
                 }
             }
+
+            // Đóng khi bấm Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeLoginModal();
+            });
         </script>
     </body>
 </html>

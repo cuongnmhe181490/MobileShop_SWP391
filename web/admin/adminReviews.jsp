@@ -47,58 +47,63 @@
                 min-height: 100vh;
             }
 
-            /* Sidebar */
-            .sidebar {
-                width: 260px;
-                background: var(--bg-sidebar);
-                padding: 24px 0;
-                display: flex;
-                flex-direction: column;
-                position: fixed;
-                height: 100vh;
-                z-index: 100;
-                color: white;
-            }
-
-            .brand {
-                padding: 0 24px;
-                margin-bottom: 40px;
-                text-decoration: none;
-                color: white;
-            }
-            .brand h2 { font-size: 1.5rem; font-weight: 700; }
-            .brand p { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
-
-            .nav-section { margin-bottom: 32px; }
-            .nav-label {
-                font-size: 0.7rem;
-                text-transform: uppercase;
-                color: #64748b;
-                letter-spacing: 1px;
-                margin-bottom: 12px;
-                display: block;
-                padding: 0 24px;
-            }
-
-            .menu-link {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 12px 24px;
-                color: #94a3b8;
-                text-decoration: none;
-                transition: 0.3s;
-                font-weight: 500;
-                font-size: 0.95rem;
-                border-left: 4px solid transparent;
-            }
-            .menu-link.active {
-                background: rgba(175, 242, 47, 0.1);
-                color: var(--sidebar-active);
-                border-left-color: var(--sidebar-active);
-                font-weight: 600;
-            }
-            .menu-link:hover { color: white; background: rgba(255,255,255,0.05); }
+        /* ===== SIDEBAR – Version Gold ===== */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 100;
+            color: white;
+            overflow-y: auto;
+        }
+        .sidebar .brand {
+            padding: 0 24px;
+            margin-bottom: 40px;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        
+        .nav-section { margin-bottom: 32px; }
+        .nav-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+            padding: 0 24px;
+        }
+        
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .menu-link i { width: 20px; text-align: center; }
+        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-link.active {
+            background: rgba(175, 242, 47, 0.1);
+            color: #aff22f;
+            border-left-color: #aff22f;
+            font-weight: 600;
+        }
+        /* ===== END SIDEBAR ===== */
 
             /* Main Content */
             .main-content {
@@ -254,6 +259,28 @@
                 border-radius: 30px;
                 box-shadow: var(--shadow);
             }
+
+            /* Validation styles */
+            .error-feedback {
+                color: var(--danger);
+                font-size: 11px;
+                font-weight: 600;
+                margin-top: 4px;
+                display: none;
+            }
+            .has-error .reply-input {
+                border-color: var(--danger) !important;
+                background-color: #fff5f5 !important;
+            }
+            .has-error .error-feedback {
+                display: block;
+            }
+            .char-counter {
+                font-size: 10px;
+                color: var(--text-muted);
+                text-align: right;
+                margin-top: 2px;
+            }
         </style>
     </head>
     <body>
@@ -266,39 +293,87 @@
                 <p>Quản trị hệ thống</p>
             </a>
 
+            <!-- 1. TỔNG QUAN -->
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
 
+            <!-- 2. QUẢN LÝ BÁN HÀNG -->
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link active"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
-                    <li><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
 
+            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
             <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
-                    <li><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link active">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
 
+            <!-- 4. CẤU HÌNH GIAO DIỆN -->
+            <div class="nav-section">
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 5. HỆ THỐNG -->
             <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
-                    <li><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>
@@ -317,10 +392,18 @@
             </header>
 
             <%-- Filter tabs --%>
-            <div class="filter-tabs">
-                <a class="tab ${empty statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews">Tất cả</a>
-                <a class="tab ${'VISIBLE' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=VISIBLE">Đang hiện</a>
-                <a class="tab ${'HIDDEN' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=HIDDEN">Đang ẩn</a>
+            <div style="display: flex; gap: 24px; margin-bottom: 32px; align-items: center; flex-wrap: wrap;">
+                <div class="filter-tabs">
+                    <a class="tab ${empty statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=${typeFilter}">Tất cả trạng thái</a>
+                    <a class="tab ${'VISIBLE' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=VISIBLE&type=${typeFilter}">Đang hiện</a>
+                    <a class="tab ${'HIDDEN' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=HIDDEN&type=${typeFilter}">Đang ẩn</a>
+                </div>
+
+                <div class="filter-tabs">
+                    <a class="tab ${empty typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=${statusFilter}">Mọi loại đánh giá</a>
+                    <a class="tab ${'PRODUCT' eq typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=PRODUCT&status=${statusFilter}">Sản phẩm</a>
+                    <a class="tab ${'SERVICE' eq typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=SERVICE&status=${statusFilter}">Dịch vụ</a>
+                </div>
             </div>
 
             <%-- Danh sách --%>
@@ -335,18 +418,34 @@
                     <c:forEach items="${reviews}" var="rv">
                         <div class="rv-card">
                             <div class="rv-card__top">
-                                <div>
-                                    <h3 class="rv-product-name">${rv.productName}</h3>
-                                    <div class="rv-user-info">
-                                        <span style="font-weight: 700; color: var(--text-main);">${rv.reviewerName}</span>
-                                        <span>&bull;</span>
-                                        <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy HH:mm"/>
-                                        <span>&bull;</span>
-                                        <span class="stars">
-                                            <c:forEach begin="1" end="5" var="s">
-                                                <i class="fa-solid fa-star ${s <= rv.ranking ? '' : 'off'}"></i>
-                                            </c:forEach>
-                                        </span>
+                                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                    <div style="flex: 1;">
+                                        <c:choose>
+                                            <c:when test="${rv.reviewType eq 'PRODUCT'}">
+                                                <h3 class="rv-product-name"><i class="fa-solid fa-box" style="font-size: 0.8rem; margin-right: 8px;"></i>${rv.productName}</h3>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <h3 class="rv-product-name" style="color: var(--primary);"><i class="fa-solid fa-shop" style="font-size: 0.8rem; margin-right: 8px;"></i>Đánh giá dịch vụ</h3>
+                                                <c:if test="${not empty rv.reviewTopic}">
+                                                    <div style="margin-top: 4px;">
+                                                        <c:forEach items="${rv.reviewTopic.split(', ')}" var="t">
+                                                            <span style="font-size: 11px; background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-weight: 700; margin-right: 4px;">${t}</span>
+                                                        </c:forEach>
+                                                    </div>
+                                                </c:if>
+                                            </c:otherwise>
+                                        </c:choose>
+                                        <div class="rv-user-info" style="margin-top: 8px;">
+                                            <span style="font-weight: 700; color: var(--text-main);">${rv.reviewerName}</span>
+                                            <span>&bull;</span>
+                                            <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                            <span>&bull;</span>
+                                            <span class="stars">
+                                                <c:forEach begin="1" end="5" var="s">
+                                                    <i class="fa-solid fa-star ${s <= rv.ranking ? '' : 'off'}"></i>
+                                                </c:forEach>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div style="display: flex; gap: 12px; align-items: center;">
@@ -359,6 +458,7 @@
                                         <input type="hidden" name="reviewId" value="${rv.reviewId}"/>
                                         <input type="hidden" name="page" value="${currentPage}"/>
                                         <input type="hidden" name="statusFilter" value="${statusFilter}"/>
+                                        <input type="hidden" name="typeFilter" value="${typeFilter}"/>
                                         <button type="submit" class="btn-action btn-toggle">
                                             ${rv.status eq 'VISIBLE' ? 'Ẩn đi' : 'Hiện lại'}
                                         </button>
@@ -381,9 +481,14 @@
                                     <input type="hidden" name="reviewId" value="${rv.reviewId}"/>
                                     <input type="hidden" name="page" value="${currentPage}"/>
                                     <input type="hidden" name="statusFilter" value="${statusFilter}"/>
-                                    <textarea name="replyContent" class="reply-input"
-                                              placeholder="${not empty rv.replyContent ? 'Sửa lại phản hồi...' : 'Gửi lời phản hồi tới khách hàng...'}"
-                                              >${rv.replyContent}</textarea>
+                                    <input type="hidden" name="typeFilter" value="${typeFilter}"/>
+                                    <div style="flex: 1; display: flex; flex-direction: column;">
+                                        <textarea name="replyContent" class="reply-input admin-reply-input"
+                                                  placeholder="${not empty rv.replyContent ? 'Sửa lại phản hồi...' : 'Gửi lời phản hồi tới khách hàng...'}"
+                                                  maxlength="1000">${rv.replyContent}</textarea>
+                                        <div class="char-counter">0/1000</div>
+                                        <div class="error-feedback">Phản hồi không được vượt quá 1000 ký tự.</div>
+                                    </div>
                                     <button type="submit" class="btn-action btn-primary">${not empty rv.replyContent ? 'Cập nhật' : 'Gửi đi'}</button>
                                 </form>
                             </div>
@@ -396,18 +501,55 @@
             <c:if test="${totalPages > 1}">
                 <nav class="pagination">
                     <c:if test="${currentPage > 1}">
-                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage-1}&status=${statusFilter}"><i class="fa-solid fa-chevron-left"></i></a>
+                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage-1}&status=${statusFilter}&type=${typeFilter}"><i class="fa-solid fa-chevron-left"></i></a>
                     </c:if>
                     <c:forEach begin="1" end="${totalPages}" var="p">
                         <a class="page-link ${currentPage == p ? 'active' : ''}"
-                           href="${ctx}/admin/reviews?page=${p}&status=${statusFilter}">${p}</a>
+                           href="${ctx}/admin/reviews?page=${p}&status=${statusFilter}&type=${typeFilter}">${p}</a>
                     </c:forEach>
                     <c:if test="${currentPage < totalPages}">
-                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage+1}&status=${statusFilter}"><i class="fa-solid fa-chevron-right"></i></a>
+                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage+1}&status=${statusFilter}&type=${typeFilter}"><i class="fa-solid fa-chevron-right"></i></a>
                     </c:if>
                 </nav>
             </c:if>
         </main>
     </div>
+        <script>
+            document.querySelectorAll('.admin-reply-input').forEach(textarea => {
+                const container = textarea.parentElement;
+                const counter = container.querySelector('.char-counter');
+                const errorFeedback = container.querySelector('.error-feedback');
+
+                const validate = () => {
+                    const len = textarea.value.length;
+                    counter.textContent = `\${len}/1000`;
+                    
+                    if (len > 1000) {
+                        container.classList.add('has-error');
+                        return false;
+                    } else {
+                        container.classList.remove('has-error');
+                        return true;
+                    }
+                };
+
+                textarea.addEventListener('input', validate);
+                textarea.addEventListener('blur', validate);
+                
+                // Initialize
+                validate();
+
+                // Form submit validation
+                const form = textarea.closest('form');
+                form.addEventListener('submit', (e) => {
+                    if (textarea.name === 'replyContent') { // Ensure we are targeting the reply form
+                         if (!validate()) {
+                            e.preventDefault();
+                            alert('Phản hồi quá dài! Vui lòng rút ngắn xuống dưới 1000 ký tự.');
+                        }
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

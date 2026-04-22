@@ -1,8 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+    <filter>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <filter-class>filter.CharacterEncodingFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <welcome-file-list>
         <welcome-file>HomePage.jsp</welcome-file>
     </welcome-file-list>
+    <servlet>
+        <servlet-name>LoadProduct</servlet-name>
+        <servlet-class>controller.storefront.LoadProduct</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoadProduct</servlet-name>
+        <url-pattern>/product</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AddToCartController</servlet-name>
+        <servlet-class>controller.storefront.AddToCartController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddToCartController</servlet-name>
+        <url-pattern>/cart/add</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CartController</servlet-name>
+        <servlet-class>controller.storefront.CartController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CartController</servlet-name>
+        <url-pattern>/cart</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RemoveCartItemController</servlet-name>
+        <servlet-class>controller.storefront.RemoveCartItemController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RemoveCartItemController</servlet-name>
+        <url-pattern>/cart/remove</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>UpdateCartController</servlet-name>
+        <servlet-class>controller.storefront.UpdateCartController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UpdateCartController</servlet-name>
+        <url-pattern>/cart/update</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DetailControl</servlet-name>
+        <servlet-class>controller.storefront.DetailControl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DetailControl</servlet-name>
+        <url-pattern>/detail</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ProductImageFallbackServlet</servlet-name>
+        <servlet-class>controller.storefront.ProductImageFallbackServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProductImageFallbackServlet</servlet-name>
+        <url-pattern>/product-image</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ProductManageController</servlet-name>
+        <servlet-class>controller.ProductManageController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProductManageController</servlet-name>
+        <url-pattern>/admin/products</url-pattern>
+    </servlet-mapping>
 <!--    <servlet>
         <servlet-name>CartRole</servlet-name>
         <servlet-class>control.CartRole</servlet-class>

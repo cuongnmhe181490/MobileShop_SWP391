@@ -2,7 +2,7 @@ package controller.storefront;
 
 import dao.DAO;
 import entity.ProductModel;
-import entity.ProductReview;
+import entity.Review;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -37,7 +37,7 @@ public class ReviewDetailControl extends HttpServlet {
         int safePage = Math.min(page, totalPages);
         int offset = (safePage - 1) * PAGE_SIZE;
 
-        List<ProductReview> reviews = dao.getProductReviews(productId, ranking, offset, PAGE_SIZE);
+        List<Review> reviews = dao.getProductReviews(productId, ranking, offset, PAGE_SIZE);
         Map<Integer, Integer> reviewCounts = dao.getReviewCountsByRating(productId);
 
         request.setAttribute("detailProduct", product);
