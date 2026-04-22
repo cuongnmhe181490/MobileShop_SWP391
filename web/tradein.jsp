@@ -79,12 +79,11 @@
                                             <p>${quote.brand} · ${quote.modelName} · ${quote.conditionLabel}</p>
                                             
                                             <div class="tradein-quote__actions" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-                                                <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Dùng số tiền này để trừ trực tiếp khi mua máy mới tại MobileShop.</p>
-                                                <a href="${ctx}/product" class="pill-button pill-button--primary" style="display: block; text-align: center; text-decoration: none;">Lên đời ngay</a>
+                                                <a href="${ctx}/product" class="pill-button pill-button--primary" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">Lên đời ngay</a>
                                             </div>
                                             <c:if test="${quote.matchedProduct != null}">
                                                 <div class="tradein-quote__matched">
-                                                    <img src="${quote.matchedProduct.imagePath}" alt="${quote.matchedProduct.productName}">
+                                                    <img src="${quote.matchedProduct.imagePath}"ãc2v alt="${quote.matchedProduct.productName}">
                                                     <div>
                                                         <h3>${quote.matchedProduct.productName}</h3>
                                                         <p>Giá bán tham chiếu hiện tại: <fmt:formatNumber value="${quote.matchedProduct.price}" type="number" maxFractionDigits="0"/>đ</p>

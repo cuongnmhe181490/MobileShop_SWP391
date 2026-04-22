@@ -84,7 +84,7 @@
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="#" class="sidebar-brand">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-brand">
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
@@ -107,6 +107,8 @@
                     </li>
                     <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-home"></i>Trang chủ</a></li>
                 </ul>
             </div>
 
@@ -373,7 +375,20 @@
 
             btnAddCat.addEventListener('click', function() {
                 const name = newCatNameInput.value.trim();
-                if (!name) return;
+                if (!name) {
+                    alert('Tên danh mục không được để trống!');
+                    return;
+                }
+                if (name.length < 2 || name.length > 50) {
+                    alert('Tên danh mục phải từ 2 đến 50 ký tự!');
+                    return;
+                }
+                const regex = /^[a-zA-Z0-9À-ỹ\s]+$/;
+                if (!regex.test(name)) {
+                    alert('Tên danh mục không được chứa ký tự đặc biệt!');
+                    return;
+                }
+                
                 fetch(`${pageContext.request.contextPath}/admin/blog?service=addCategory&name=` + encodeURIComponent(name))
                     .then(r => r.text()).then(res => { 
                         if (res === 'success') { 
@@ -381,6 +396,8 @@
                             loadCategories(); 
                         } else if (res === 'duplicate') {
                             alert('Tên danh mục này đã tồn tại!');
+                        } else if (res === 'invalid_length') {
+                            alert('Tên danh mục không hợp lệ (2-50 ký tự)!');
                         }
                     });
             });

@@ -319,7 +319,7 @@
                     <li><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
-                    <li><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link active"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                    <li><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link active"><i class="fa-solid fa-home"></i>Trang chủ</a></li>
                 </ul>
             </div>
             <div class="nav-section">

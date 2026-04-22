@@ -19,7 +19,7 @@
     <div class="admin-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <a href="#" class="sidebar-brand">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-brand">
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
@@ -42,6 +42,8 @@
                     </li>
                     <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-home"></i>Trang chủ</a></li>
                 </ul>
             </div>
 

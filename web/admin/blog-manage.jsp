@@ -24,9 +24,8 @@
 <body>
 
     <div class="admin-layout">
-        <!-- Sidebar -->
         <aside class="sidebar">
-            <a href="#" class="sidebar-brand">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-brand">
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
@@ -49,6 +48,8 @@
                     </li>
                     <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-home"></i>Trang chủ</a></li>
                 </ul>
             </div>
 
@@ -109,6 +110,7 @@
                             <th>Tiêu đề bài viết</th>
                             <th style="width: 150px;">Danh mục</th>
                             <th style="width: 130px;">Ngày đăng</th>
+                            <th style="width: 130px;">Trạng Thái</th>
                             <th style="width: 180px;">Hành động</th>
                         </tr>
                     </thead>
@@ -136,6 +138,22 @@
                                     </div>
                                 </td>
                                 <td>
+                                  <c:choose>
+                                    <c:when test="${blog.status == 'VISIBLE'}">
+                                        <a href="${pageContext.request.contextPath}/admin/blog?service=toggleStatus&blogId=${blog.blogId}&newStatus=HIDDEN" 
+                                           class="btn-outline" style="padding: 6px 12px; font-size: 0.8rem; text-decoration: none; color: #10b981; border-color: #d1fae5; background: #ecfdf5;">
+                                            <i class="fas fa-eye"></i> Hiện
+                                        </a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${pageContext.request.contextPath}/admin/blog?service=toggleStatus&blogId=${blog.blogId}&newStatus=VISIBLE" 
+                                           class="btn-outline" style="padding: 6px 12px; font-size: 0.8rem; text-decoration: none; color: #f59e0b; border-color: #fef3c7; background: #fffbeb;">
+                                            <i class="fas fa-eye-slash"></i> Ẩn
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
+                                </td>
+                                <td>
                                     <div style="display: flex; gap: 8px;">
                                         <a href="${pageContext.request.contextPath}/admin/blog?service=updateBlog&blogId=${blog.blogId}" class="btn-outline" style="padding: 6px 12px; font-size: 0.8rem; text-decoration: none;">
                                             <i class="fas fa-edit me-1"></i> Sửa
@@ -149,7 +167,7 @@
                         </c:forEach>
                         <c:if test="${empty blogList}">
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                                <td colspan="7" style="text-align: center; padding: 4rem; color: var(--text-muted);">
                                     <div class="mb-2"><i class="fas fa-folder-open fa-3x" style="opacity: 0.2;"></i></div>
                                     Chưa có bài viết nào trong danh sách.
                                 </td>

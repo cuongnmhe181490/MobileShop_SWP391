@@ -127,8 +127,7 @@
                 <p class="blog-subtitle">${blog.subTitle}</p>
                 <div class="blog-meta">
                     <span><i class="fa-regular fa-calendar me-2"></i> <fmt:formatDate value="${blog.createdDate}" pattern="dd 'tháng' MM, yyyy"/></span>
-                    <span>•</span>
-                    <span>Tác giả: Admin</span>
+                    
                 </div>
             </header>
 

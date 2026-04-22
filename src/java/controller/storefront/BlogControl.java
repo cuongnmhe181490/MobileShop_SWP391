@@ -41,7 +41,7 @@ public class BlogControl extends HttpServlet {
             int catId = Integer.parseInt(catStr);
             allFiltered = dao.getBlogsByCategory(catId);
         } else {
-            allFiltered = dao.getAllBlogs();
+            allFiltered = dao.getAllVisibleBlogs();
         }
         
         if (search != null && !search.isEmpty()) {
