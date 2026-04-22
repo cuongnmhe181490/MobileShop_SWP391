@@ -88,7 +88,7 @@
         }
         .btn-cancel:hover { background: #e2e8f0; }
 
-        /* ===== SIDEBAR – Dashboard Design ===== */
+        /* ===== SIDEBAR – Version Gold ===== */
         .sidebar {
             width: 260px;
             background: #1e293b;
@@ -111,6 +111,7 @@
         }
         .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
         .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        
         .nav-section { margin-bottom: 32px; }
         .nav-label {
             font-size: 0.7rem;
@@ -121,6 +122,7 @@
             display: block;
             padding: 0 24px;
         }
+        
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .menu-link {
             display: flex;
@@ -135,14 +137,28 @@
             transition: 0.3s;
         }
         .menu-link i { width: 20px; text-align: center; }
-        .menu-link:hover { background: rgba(175,242,47,0.05); color: #cbd5e1; }
+        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
         .menu-link.active {
-            background: rgba(175,242,47,0.1);
+            background: rgba(175, 242, 47, 0.1);
             color: #aff22f;
             border-left-color: #aff22f;
             font-weight: 600;
         }
-        .sidebar-logout { margin-top: auto; }
+        /* Validation styles */
+        .error-feedback {
+            color: #ea4f68;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: none;
+        }
+        .form-group.has-error .form-control {
+            border-color: #ff7b8f !important;
+            background-color: #fff5f5 !important;
+        }
+        .form-group.has-error .error-feedback {
+            display: block;
+        }
         /* ===== END SIDEBAR ===== */
 
         </style>
@@ -156,40 +172,88 @@
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
+
+            <!-- 1. TỔNG QUAN -->
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 2. QUẢN LÝ BÁN HÀNG -->
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
-                    <li><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
             <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
-                    <li><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link active"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 4. CẤU HÌNH GIAO DIỆN -->
             <div class="nav-section">
-                <span class="nav-label">HỆ THỐNG</span>
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link active">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
                 </ul>
             </div>
-            <div class="sidebar-logout">
+
+            <!-- 5. HỆ THỐNG -->
+            <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>
@@ -212,12 +276,14 @@
                             <input type="text" id="title" name="title" class="form-control" 
                                    value="${config.Title}" placeholder="Ví dụ: Đổi máy cũ - Giá hời ngay" 
                                    required minlength="5" maxlength="120" title="Bắt buộc, 5-120 ký tự">
+                            <div class="error-feedback"></div>
                         </div>
                         <div class="form-group">
                             <label for="description">Mô tả <span style="color:#ea4f68">*</span></label>
                             <textarea id="description" name="description" class="form-control" 
                                       placeholder="Mô tả ngắn về chương trình Trade-in"
                                       required maxlength="300" title="Bắt buộc, tối đa 300 ký tự">${config.Description}</textarea>
+                            <div class="error-feedback"></div>
                         </div>
                     </div>
 
@@ -229,12 +295,14 @@
                             <input type="text" id="note1Title" name="note1Title" class="form-control" 
                                    value="${config.Note1_Title}" placeholder="Ví dụ: Đánh giá công bằng"
                                    required maxlength="50" title="Bắt buộc, tối đa 50 ký tự">
+                            <div class="error-feedback"></div>
                         </div>
                         <div class="form-group">
                             <label for="note1Desc">Nội dung lưu ý 1 <span style="color:#ea4f68">*</span></label>
                             <textarea id="note1Desc" name="note1Desc" class="form-control" 
                                       placeholder="Mô tả chi tiết lưu ý 1"
                                       required maxlength="255" title="Bắt buộc, tối đa 255 ký tự">${config.Note1_Desc}</textarea>
+                            <div class="error-feedback"></div>
                         </div>
                     </div>
 
@@ -246,12 +314,14 @@
                             <input type="text" id="note2Title" name="note2Title" class="form-control" 
                                    value="${config.Note2_Title}" placeholder="Ví dụ: Thủ tục nhanh gọn"
                                    required maxlength="50" title="Bắt buộc, tối đa 50 ký tự">
+                            <div class="error-feedback"></div>
                         </div>
                         <div class="form-group">
                             <label for="note2Desc">Nội dung lưu ý 2 <span style="color:#ea4f68">*</span></label>
                             <textarea id="note2Desc" name="note2Desc" class="form-control" 
                                       placeholder="Mô tả chi tiết lưu ý 2"
                                       required maxlength="255" title="Bắt buộc, tối đa 255 ký tự">${config.Note2_Desc}</textarea>
+                            <div class="error-feedback"></div>
                         </div>
                     </div>
 
@@ -263,12 +333,14 @@
                             <input type="text" id="note3Title" name="note3Title" class="form-control" 
                                    value="${config.Note3_Title}" placeholder="Ví dụ: Giá trị cao nhất"
                                    required maxlength="50" title="Bắt buộc, tối đa 50 ký tự">
+                            <div class="error-feedback"></div>
                         </div>
                         <div class="form-group">
                             <label for="note3Desc">Nội dung lưu ý 3 <span style="color:#ea4f68">*</span></label>
                             <textarea id="note3Desc" name="note3Desc" class="form-control" 
                                       placeholder="Mô tả chi tiết lưu ý 3"
                                       required maxlength="255" title="Bắt buộc, tối đa 255 ký tự">${config.Note3_Desc}</textarea>
+                            <div class="error-feedback"></div>
                         </div>
                     </div>
 
@@ -281,6 +353,64 @@
             </div>
         </div>
     </div>
+<script>
+    const validationRules = {
+        title: { required: true, min: 5, max: 120, label: 'Tiêu đề' },
+        description: { required: true, max: 300, label: 'Mô tả' },
+        note1Title: { required: true, max: 50, label: 'Tiêu đề lưu ý 1' },
+        note1Desc: { required: true, max: 255, label: 'Nội dung lưu ý 1' },
+        note2Title: { required: true, max: 50, label: 'Tiêu đề lưu ý 2' },
+        note2Desc: { required: true, max: 255, label: 'Nội dung lưu ý 2' },
+        note3Title: { required: true, max: 50, label: 'Tiêu đề lưu ý 3' },
+        note3Desc: { required: true, max: 255, label: 'Nội dung lưu ý 3' }
+    };
+
+    function validateField(id) {
+        const field = document.getElementById(id);
+        const group = field.closest('.form-group');
+        const errorDiv = group.querySelector('.error-feedback');
+        const rules = validationRules[id];
+        const value = field.value.trim();
+        let errorMsg = '';
+
+        if (rules.required && !value) {
+            errorMsg = `\${rules.label} không được để trống.`;
+        } else if (rules.min && value.length < rules.min) {
+            errorMsg = `\${rules.label} phải có ít nhất \${rules.min} ký tự.`;
+        } else if (rules.max && value.length > rules.max) {
+            errorMsg = `\${rules.label} không được vượt quá \${rules.max} ký tự.`;
+        }
+
+        if (errorMsg) {
+            group.classList.add('has-error');
+            errorDiv.textContent = errorMsg;
+            return false;
+        } else {
+            group.classList.remove('has-error');
+            errorDiv.textContent = '';
+            return true;
+        }
+    }
+
+    Object.keys(validationRules).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', () => validateField(id));
+            el.addEventListener('blur', () => validateField(id));
+        }
+    });
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        let isValid = true;
+        Object.keys(validationRules).forEach(id => {
+            if (!validateField(id)) isValid = false;
+        });
+        if (!isValid) {
+            e.preventDefault();
+            alert('Vui lòng kiểm tra lại các trường thông tin!');
+        }
+    });
+</script>
 </body>
 
 </html>

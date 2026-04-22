@@ -226,7 +226,7 @@ public class HeroBannerDAO {
      * Yêu cầu giáo viên: AVG(Ranking), không fix cứng.
      */
     public String getLiveSatisfactionRate() {
-        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) AS Average FROM ProductReview";
+        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) AS Average FROM GeneralReview WHERE ReviewType = 'PRODUCT'";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

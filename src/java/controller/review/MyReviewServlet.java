@@ -1,7 +1,7 @@
 package controller.review;
 
 import dao.ReviewDAO;
-import entity.ProductReview;
+import entity.Review;
 import entity.User;
 
 import jakarta.servlet.ServletException;
@@ -35,17 +35,16 @@ public class MyReviewServlet extends HttpServlet {
         }
 
         try {
-            List<ProductReview> reviews = dao.getByUser(acc.getId());
+            List<Review> reviews = dao.getByUser(acc.getId());
             // Load ảnh cho từng review
-            for (ProductReview r : reviews) {
+            for (Review r : reviews) {
                 r.setImages(dao.getImages(r.getReviewId()));
             }
             
             req.setAttribute("reviews", reviews);
             req.setAttribute("successMsg", req.getParameter("success"));
 
-            req.getRequestDispatcher("/customer/myReviews.jsp")
-               .forward(req, resp);
+            req.getRequestDispatcher("/customer/myReviews.jsp").forward(req, resp);
 
         } catch (Exception e) {
             throw new ServletException(e);

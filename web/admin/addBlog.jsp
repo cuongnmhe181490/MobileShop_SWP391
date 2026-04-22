@@ -11,115 +11,154 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-custom.css">
     <style>
-        :root {
-            --primary-bg: #ffffff;
-            --input-bg: #fdfdfd;
-            --border-clr: #e5e7eb;
-            --text-main: #111827;
-            --text-sub: #6b7280;
+        /* ===== SIDEBAR – Version Gold ===== */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 100;
+            color: white;
+            overflow-y: auto;
         }
-        * { box-sizing: border-box; }
-        body { background-color: #f9fafb; font-family: 'Inter', sans-serif; margin: 0; }
-        
-        /* Cấu trúc Layout chính kế thừa từ admin-custom.css */
-        .main-content { margin-left: 260px; padding: 40px; background: #f9fafb; min-height: 100vh; }
-        
-        /* Định dạng Form */
-        .form-container { background: var(--primary-bg); border-radius: 12px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; }
-        .form-group { margin-bottom: 20px; position: relative; }
-        .label-custom { display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem; }
-        .form-input-custom { 
-            width: 100%; border: 1px solid var(--border-clr); border-radius: 8px; 
-            padding: 8px 12px; background: var(--input-bg); color: var(--text-main);
-            transition: border-color 0.2s; resize: none; font-size: 0.9rem;
+        .sidebar .brand {
+            padding: 0 24px;
+            margin-bottom: 40px;
+            text-decoration: none;
+            color: white;
+            display: block;
         }
-        .form-input-custom:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
         
-        /* Bộ đếm ký tự nằm dưới góc phải */
-        .counter-wrap { display: flex; justify-content: flex-end; margin-top: 4px; }
-        .counter-label { font-size: 0.75rem; color: var(--text-sub); }
-
-        /* Khung Upload Ảnh */
-        .upload-zone {
-            border: 2px dashed var(--border-clr); border-radius: 12px;
-            padding: 40px 20px; text-align: center; cursor: pointer;
-            transition: all 0.2s; background: #fafafa; position: relative;
+        .nav-section { margin-bottom: 32px; }
+        .nav-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+            padding: 0 24px;
         }
-        .upload-zone:hover { border-color: #4f46e5; background: #f5f3ff; }
-        .upload-icon { font-size: 2rem; color: #9ca3af; margin-bottom: 12px; }
-        .upload-text { font-size: 0.9rem; color: var(--text-sub); }
-        .upload-text span { color: #4f46e5; font-weight: 600; }
-        #thumbInput { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
-
-        /* Nút bấm ở dưới cùng bên phải */
-        .action-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-clr); }
-        .btn-cancel { padding: 10px 24px; border-radius: 8px; background: #f3f4f6; color: var(--text-main); border: none; font-weight: 600; }
-        .btn-submit { padding: 10px 24px; border-radius: 8px; background: #111827; color: white; border: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .btn-submit:hover { background: #1f2937; }
-
-        /* Modal Quản lý danh mục - Light Theme */
-        .modal-content-custom { background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); padding: 0; overflow: hidden; }
-        .modal-header-custom { padding: 20px 24px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
-        .modal-title-custom { font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; }
-        .modal-body-custom { padding: 24px; }
-        .modal-footer-custom { padding: 16px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; background: #f9fafb; }
-        .cat-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        .cat-list { max-height: 300px; overflow-y: auto; border: 1px solid #f3f4f6; border-radius: 8px; background: #fdfdfd; }
-        .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; transition: background 0.2s; }
-        .cat-item:last-child { border-bottom: none; }
-        .cat-item:hover { background: #f9fafb; }
-        .cat-name-wrapper { flex: 1; display: flex; align-items: center; gap: 8px; }
-        .cat-name { font-weight: 500; color: #374151; }
-        .btn-edit-cat { color: #6366f1; background: transparent; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; opacity: 0.6; transition: opacity 0.2s; }
-        .btn-edit-cat:hover { opacity: 1; color: #4f46e5; }
-        .btn-delete-cat { color: #ef4444; background: transparent; border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px; opacity: 0.6; transition: opacity 0.2s; }
-        .btn-delete-cat:hover { opacity: 1; color: #dc2626; }
-        .btn-manage-cat { padding: 8px 14px; border: 1px solid #e5e7eb; border-radius: 8px; background: #ffffff; color: #374151; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
-        .btn-manage-cat:hover { background: #f9fafb; border-color: #d1d5db; }
-        .btn-add-cat { padding: 0 20px; background: #111827; color: white; border: none; border-radius: 8px; font-weight: 600; }
-        .close-modal-btn { background: #f3f4f6; border: none; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #6b7280; cursor: pointer; }
-        .empty-cats { padding: 40px; text-align: center; color: #9ca3af; font-style: italic; }
+        
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .menu-link i { width: 20px; text-align: center; }
+        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-link.active {
+            background: rgba(175, 242, 47, 0.1);
+            color: #aff22f;
+            border-left-color: #aff22f;
+            font-weight: 600;
+        }
+        /* ===== END SIDEBAR ===== */
     </style>
 </head>
 <body>
     <div class="admin-layout">
         <aside class="sidebar">
-            <a href="#" class="sidebar-brand">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
 
+            <!-- 1. TỔNG QUAN -->
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
 
+            <!-- 2. QUẢN LÝ BÁN HÀNG -->
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
                     <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
                             <i class="fa-solid fa-receipt"></i>Đơn hàng
                         </a>
                     </li>
-                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
 
+            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
             <div class="nav-section">
-                <span class="nav-label">HỆ THỐNG</span>
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
 
-            <div style="margin-top: auto;">
+            <!-- 4. CẤU HÌNH GIAO DIỆN -->
+            <div class="nav-section">
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 5. HỆ THỐNG -->
+            <div style="margin-top: auto; padding-bottom: 24px;">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>
@@ -151,19 +190,19 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label class="label-custom">Tiêu đề bài viết <span class="text-danger">*</span></label>
-                                <input type="text" name="title" id="titleInput" class="form-input-custom" placeholder="Nhập tiêu đề ..." required maxlength="255">
+                                <input type="text" name="title" id="titleInput" class="form-input-custom" placeholder="Nhập tiêu đề hấp dẫn..." required maxlength="255">
                                 <div class="counter-wrap"><span class="counter-label" id="titleCounter">0 / 255</span></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="label-custom">Phụ đề </label>
-                                <input type="text" name="subTitle" id="subTitleInput" class="form-input-custom" placeholder="(Không bắt buộc)..." maxlength="255">
+                                <label class="label-custom">Phụ đề (SubTitle)</label>
+                                <input type="text" name="subTitle" id="subTitleInput" class="form-input-custom" placeholder="Câu dẫn dắt ngắn gọn (không bắt buộc)..." maxlength="255">
                                 <div class="counter-wrap"><span class="counter-label" id="subTitleCounter">0 / 255</span></div>
                             </div>
 
                             <div class="form-group">
-                                <label class="label-custom">Tóm tắt ngắn  <span class="text-danger">*</span></label>
-                                <textarea name="description" id="descInput" class="form-input-custom" rows="3" required maxlength="255" placeholder="Mô tả  cho bài viết..."></textarea>
+                                <label class="label-custom">Tóm tắt ngắn (Description) <span class="text-danger">*</span></label>
+                                <textarea name="description" id="descInput" class="form-input-custom" rows="3" required maxlength="255" placeholder="Mô tả ngắn cho bài viết..."></textarea>
                                 <div class="counter-wrap"><span class="counter-label" id="descCounter">0 / 255</span></div>
                             </div>
 
@@ -176,18 +215,13 @@
 
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label class="label-custom">Danh mục bài viết <span class="text-danger">*</span></label>
-                                <div class="d-flex gap-2">
-                                    <select name="idBlogCat" id="categorySelect" class="form-select form-input-custom" required>
-                                        <option value="">-- Chọn danh mục --</option>
-                                        <c:forEach items="${catList}" var="cat">
-                                            <option value="${cat.idBlogCat}">${cat.categoryName}</option>
-                                        </c:forEach>
-                                    </select>
-                                    <button type="button" class="btn-manage-cat" data-bs-toggle="modal" data-bs-target="#manageCatModal">
-                                        <i class="fa-solid fa-square-pen"></i> Quản lý
-                                    </button>
-                                </div>
+                                <label class="label-custom">Hãng / Category <span class="text-danger">*</span></label>
+                                <select name="idSupplier" class="form-select form-input-custom" required>
+                                    <option value="">-- Chọn hãng --</option>
+                                    <c:forEach items="${supList}" var="sup">
+                                        <option value="${sup}">${sup}</option>
+                                    </c:forEach>
+                                </select>
                             </div>
 
                             <div class="form-group">
@@ -215,27 +249,6 @@
         </main>
     </div>
 
-    <div class="modal fade" id="manageCatModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-content-custom">
-                <div class="modal-header-custom">
-                    <h5 class="modal-title-custom">Quản lý danh mục</h5>
-                    <button type="button" class="close-modal-btn" data-bs-dismiss="modal"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="modal-body-custom">
-                    <div class="cat-input-group">
-                        <input type="text" id="newCatName" class="form-input-custom" placeholder="Tên danh mục mới...">
-                        <button type="button" id="btnAddCat" class="btn-add-cat">+ Thêm</button>
-                    </div>
-                    <div class="cat-list" id="catListContainer"><div class="empty-cats">Đang tải danh mục...</div></div>
-                </div>
-                <div class="modal-footer-custom">
-                    <button type="button" class="btn-cancel" data-bs-dismiss="modal" style="padding: 8px 20px;">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function updateCounter(inputId, counterId, maxLength) {
@@ -256,136 +269,27 @@
         updateCounter('descInput', 'descCounter', 255);
         updateCounter('blogContent', 'contentCounter', 4000);
 
-        // Preview Image and Validation
+        // Preview Image
         document.getElementById('thumbInput').addEventListener('change', function() {
             var file = this.files[0];
             if (file) {
-                // 1. Kiểm tra dung lượng (500KB)
+                // Kiểm tra dung lượng ngay tại Client (500KB = 512000 bytes)
                 if (file.size > 500 * 1024) {
-                    alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB để tối ưu tốc độ tải trang.");
-                    this.value = "";
+                    alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB (Ảnh bạn chọn: " + (file.size/1024).toFixed(2) + "KB)");
+                    this.value = ""; // Xóa file đã chọn
                     document.getElementById('thumbPreview').classList.add('d-none');
                     return;
                 }
                 
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    var img = new Image();
-                    img.onload = function() {
-                        // 2. Kiểm tra độ phân giải (Tối thiểu 800x450 để tránh bị mờ)
-                        if (this.width < 800 || this.height < 450) {
-                            alert("Ảnh có độ phân giải quá thấp (" + this.width + "x" + this.height + "px). \nVui lòng chọn ảnh có chiều ngang tối thiểu 800px để tránh bị mờ trên giao diện.");
-                            document.getElementById('thumbInput').value = "";
-                            document.getElementById('thumbPreview').classList.add('d-none');
-                            return;
-                        }
-                        
-                        document.getElementById('imgShow').src = e.target.result;
-                        document.getElementById('thumbPreview').classList.remove('d-none');
-                        document.getElementById('uploadZone').style.borderColor = "#4f46e5";
-                    };
-                    img.src = e.target.result;
+                    document.getElementById('imgShow').src = e.target.result;
+                    document.getElementById('thumbPreview').classList.remove('d-none');
+                    document.getElementById('uploadZone').style.borderColor = "#4f46e5";
                 };
                 reader.readAsDataURL(file);
             }
         });
-
-        // Safe AJAX for Category Management
-        try {
-            const categoryModal = document.getElementById('manageCatModal');
-            const catListContainer = document.getElementById('catListContainer');
-            const btnAddCat = document.getElementById('btnAddCat');
-            const newCatNameInput = document.getElementById('newCatName');
-            const categorySelect = document.getElementById('categorySelect');
-
-            function loadCategories() {
-                fetch('${pageContext.request.contextPath}/admin/blog?service=listCategories')
-                    .then(response => response.json())
-                    .then(data => {
-                        renderCatList(data);
-                        updateSelectOptions(data);
-                    });
-            }
-
-            function renderCatList(cats) {
-                if (cats.length === 0) {
-                    catListContainer.innerHTML = '<div class="empty-cats">Chưa có danh mục nào</div>';
-                    return;
-                }
-                let html = '';
-                cats.forEach(cat => {
-                    html += `
-                        <div class="cat-item">
-                            <div class="cat-name-wrapper" id="cat-display-\${cat.id}">
-                                <span class="cat-name">\${cat.name}</span>
-                                <button type="button" class="btn-edit-cat" onclick="showEditInput(\${cat.id}, '\${cat.name.replace(/'/g, "\\'")}')">
-                                    <i class="fas fa-pen-to-square"></i>
-                                </button>
-                            </div>
-                            <div class="cat-edit-wrapper d-none" id="cat-edit-\${cat.id}" style="flex: 1; display: flex; gap: 5px;">
-                                <input type="text" class="form-input-custom" value="\${cat.name}" id="input-edit-\${cat.id}" style="padding: 4px 8px; height: 32px;">
-                                <button type="button" class="btn-add-cat" style="padding: 0 10px; height: 32px; font-size: 0.75rem;" onclick="saveCategory(\${cat.id})">Lưu</button>
-                                <button type="button" class="btn-cancel" style="padding: 0 10px; height: 32px; font-size: 0.75rem;" onclick="cancelEdit(\${cat.id})">Hủy</button>
-                            </div>
-                            <button type="button" class="btn-delete-cat" onclick="deleteCategory(\${cat.id})">
-                                <i class="fas fa-trash-can"></i>
-                            </button>
-                        </div>
-                    `;
-                });
-                catListContainer.innerHTML = html;
-            }
-
-            window.showEditInput = function(id, currentName) {
-                document.getElementById('cat-display-' + id).classList.add('d-none');
-                document.getElementById('cat-edit-' + id).classList.remove('d-none');
-                const input = document.getElementById('input-edit-' + id);
-                input.focus();
-                input.select();
-            };
-
-            window.cancelEdit = function(id) {
-                document.getElementById('cat-display-' + id).classList.remove('d-none');
-                document.getElementById('cat-edit-' + id).classList.add('d-none');
-            };
-
-            window.saveCategory = function(id) {
-                const newName = document.getElementById('input-edit-' + id).value.trim();
-                if (!newName) return;
-                fetch(`${pageContext.request.contextPath}/admin/blog?service=updateCategory&id=\${id}&name=` + encodeURIComponent(newName))
-                    .then(r => r.text()).then(res => {
-                        if (res === 'success') {
-                            loadCategories();
-                        } else {
-                            alert('Lỗi cập nhật danh mục!');
-                        }
-                    });
-            };
-
-            function updateSelectOptions(cats) {
-                const currentValue = categorySelect.value;
-                let html = '<option value="">-- Chọn danh mục --</option>';
-                cats.forEach(cat => {
-                    html += `<option value="\${cat.id}" \${currentValue == cat.id ? 'selected' : ''}>\${cat.name}</option>`;
-                });
-                categorySelect.innerHTML = html;
-            }
-
-            btnAddCat.addEventListener('click', function() {
-                const name = newCatNameInput.value.trim();
-                if (!name) return;
-                fetch(`${pageContext.request.contextPath}/admin/blog?service=addCategory&name=` + encodeURIComponent(name))
-                    .then(r => r.text()).then(res => { if (res === 'success') { newCatNameInput.value = ''; loadCategories(); } });
-            });
-
-            window.deleteCategory = function(id) {
-                if (!confirm('Xóa danh mục này? Bạn có chắc không?')) return;
-                fetch(`${pageContext.request.contextPath}/admin/blog?service=deleteCategory&id=` + id)
-                    .then(r => r.text()).then(res => { if (res === 'success') loadCategories(); else alert('Lỗi xóa danh mục! Có thể danh mục đang được sử dụng.'); });
-            };
-
-            categoryModal.addEventListener('show.bs.modal', function () { loadCategories(); });
-        } catch (e) { console.error("Cat Manage JS Error: ", e); }
     </script>
 </body>
 </html>

@@ -6,7 +6,7 @@ package dao;
 import config.DBContext;
 import entity.Product;
 import entity.ProductModel;
-import entity.ProductReview;
+import entity.Review;
 import entity.Role;
 import java.sql.SQLException;
 import entity.User;
@@ -188,8 +188,8 @@ public class DAO {
         );
     }
     
-    private ProductReview mapReview(ResultSet rs) throws SQLException {
-        ProductReview r = new ProductReview();
+    private Review mapReview(ResultSet rs) throws SQLException {
+        Review r = new Review();
         r.setIdProduct(rs.getString("IdProduct"));
         r.setUserId(rs.getInt("UserId"));
         r.setReviewerName(rs.getString("ReviewerName"));
@@ -656,8 +656,8 @@ public class DAO {
         return 0;
     }
     
-    public List<ProductReview> getProductReviews(String productId, Integer ranking, int offset, int pageSize) {
-        List<ProductReview> reviews = new ArrayList<>();
+    public List<Review> getProductReviews(String productId, Integer ranking, int offset, int pageSize) {
+        List<Review> reviews = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT pr.IdProduct, pr.UserId, pr.ReviewDate, pr.Review, pr.Ranking, u.FullName AS ReviewerName ");
         sql.append("FROM ProductReview pr ");

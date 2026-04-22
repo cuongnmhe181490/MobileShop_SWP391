@@ -193,7 +193,7 @@
                 }
             }
 
-        /* ===== SIDEBAR – Dashboard Design ===== */
+        /* ===== SIDEBAR – Version Gold ===== */
         .sidebar {
             width: 260px;
             background: #1e293b;
@@ -216,6 +216,7 @@
         }
         .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
         .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        
         .nav-section { margin-bottom: 32px; }
         .nav-label {
             font-size: 0.7rem;
@@ -226,6 +227,7 @@
             display: block;
             padding: 0 24px;
         }
+        
         .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .menu-link {
             display: flex;
@@ -240,14 +242,28 @@
             transition: 0.3s;
         }
         .menu-link i { width: 20px; text-align: center; }
-        .menu-link:hover { background: rgba(175,242,47,0.05); color: #cbd5e1; }
+        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
         .menu-link.active {
-            background: rgba(175,242,47,0.1);
+            background: rgba(175, 242, 47, 0.1);
             color: #aff22f;
             border-left-color: #aff22f;
             font-weight: 600;
         }
-        .sidebar-logout { margin-top: auto; }
+        /* Validation styles */
+        .error-feedback {
+            color: var(--danger-text);
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: none;
+        }
+        .field.has-error .input {
+            border-color: #ff7b8f !important;
+            background-color: var(--danger-bg) !important;
+        }
+        .field.has-error .error-feedback {
+            display: block;
+        }
         /* ===== END SIDEBAR ===== */
 
         </style>
@@ -260,40 +276,88 @@
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
+
+            <!-- 1. TỔNG QUAN -->
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 2. QUẢN LÝ BÁN HÀNG -->
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
-                    <li><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
-                    <li><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
             <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
-                    <li><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link active"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
-                    <li><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
+
+            <!-- 4. CẤU HÌNH GIAO DIỆN -->
             <div class="nav-section">
-                <span class="nav-label">HỆ THỐNG</span>
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link active">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
                 </ul>
             </div>
-            <div class="sidebar-logout">
+
+            <!-- 5. HỆ THỐNG -->
+            <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>
@@ -319,28 +383,32 @@
                             </div>
                             <div class="field">
                                 <label>Tên Thương Hiệu <span style="color:#ea4f68">*</span></label>
-                                <input class="input" type="text" name="name" 
+                                <input class="input" type="text" name="name" id="name"
                                        value="${brand.name}" required maxlength="100">
+                                <div class="error-feedback"></div>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="field">
                                 <label>Email liên hệ <span style="color:#ea4f68">*</span></label>
-                                <input class="input" type="email" name="email" 
+                                <input class="input" type="email" name="email" id="email"
                                        value="${brand.email}" required maxlength="100">
+                                <div class="error-feedback"></div>
                             </div>
                             <div class="field">
                                 <label>Số điện thoại</label>
-                                <input class="input" type="text" name="phoneNumber" 
+                                <input class="input" type="text" name="phoneNumber" id="phoneNumber"
                                        value="${brand.phoneNumber}" maxlength="15">
+                                <div class="error-feedback"></div>
                             </div>
                         </div>
 
                         <div class="field">
                             <label>Địa chỉ</label>
-                            <input class="input" type="text" name="address" 
+                            <input class="input" type="text" name="address" id="address"
                                    value="${brand.address}" maxlength="255">
+                            <div class="error-feedback"></div>
                         </div>
 
                         <div class="field">
@@ -352,6 +420,7 @@
                                     </div>
                                 </c:if>
                                 <input class="input" type="file" name="logoFile" id="logoFile" accept="image/*">
+                                <div class="error-feedback"></div>
                             </div>
                             <small style="font-size: 11px; color: #7e8eb8; display: block;">
                                 Bỏ trống nếu muốn giữ logo cũ. Định dạng: JPG, PNG, WEBP, SVG. Dung lượng: < 500 KB.<br>
@@ -372,6 +441,66 @@
         <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
         <script>
+            // Real-time Validation
+            const validationRules = {
+                name: { required: true, max: 100, label: 'Tên thương hiệu' },
+                email: { required: true, max: 100, format: 'email', label: 'Email liên hệ' },
+                phoneNumber: { max: 15, label: 'Số điện thoại' },
+                address: { max: 255, label: 'Địa chỉ' },
+                logoFile: { required: false, label: 'Logo thương hiệu' }
+            };
+
+            function validateField(id) {
+                const field = document.getElementById(id);
+                if (!field) return true;
+                const container = field.closest('.field');
+                const errorDiv = container.querySelector('.error-feedback');
+                const rules = validationRules[id];
+                const value = field.type === 'file' ? field.value : field.value.trim();
+                let errorMsg = '';
+
+                if (rules.required && !value) {
+                    errorMsg = `\${rules.label} không được để trống.`;
+                } else if (value && rules.max && value.length > rules.max) {
+                    errorMsg = `\${rules.label} không được vượt quá \${rules.max} ký tự.`;
+                } else if (value && rules.format === 'email') {
+                    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!re.test(value)) {
+                        errorMsg = 'Định dạng email không hợp lệ.';
+                    }
+                }
+
+                if (errorMsg) {
+                    container.classList.add('has-error');
+                    errorDiv.textContent = errorMsg;
+                    return false;
+                } else {
+                    container.classList.remove('has-error');
+                    errorDiv.textContent = '';
+                    return true;
+                }
+            }
+
+            Object.keys(validationRules).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', () => validateField(id));
+                    el.addEventListener('blur', () => validateField(id));
+                    if (id === 'logoFile') el.addEventListener('change', () => validateField(id));
+                }
+            });
+
+            document.getElementById('brandForm').addEventListener('submit', function(e) {
+                let isValid = true;
+                Object.keys(validationRules).forEach(id => {
+                    if (!validateField(id)) isValid = false;
+                });
+                if (!isValid) {
+                    e.preventDefault();
+                    showToast('Vui lòng kiểm tra lại các trường thông tin!', 'error');
+                }
+            });
+
             function showToast(message, type = 'success') {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
