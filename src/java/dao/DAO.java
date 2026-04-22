@@ -382,10 +382,10 @@ public class DAO {
                 sql.append("Price DESC, ReleaseDate DESC");
                 break;
             case "year-asc":
-                sql.append("ReleaseDate ASC, Price DESC");
+                sql.append("YEAR(ReleaseDate) ASC, Price DESC");
                 break;
             case "year-desc":
-                sql.append("ReleaseDate DESC, Price DESC");
+                sql.append("YEAR(ReleaseDate) DESC, Price DESC");
                 break;
             default:
                 sql.append("ReleaseDate DESC, Price DESC");

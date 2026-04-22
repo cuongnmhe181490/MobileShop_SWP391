@@ -30,23 +30,35 @@
             <div class="nav-section">
                 <span class="nav-label">QUẢN LÝ</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="javascript:void(0)" class="menu-link"><i class="fa-solid fa-user-gear"></i>Quản lý tài khoản</a></li>
+                    <li class="menu-item"><a href="javascript:void(0)" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/products" class="menu-link active"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Quản lý blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
                 </ul>
             </div>
 
             <div class="nav-section">
                 <span class="nav-label">HỆ THỐNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-arrow-left"></i>Về trang chủ</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
                 </ul>
             </div>
 
             <div style="margin-top: auto;">
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
                 </ul>
             </div>
         </aside>
@@ -175,44 +187,33 @@
                                     <c:param name="sort" value="${sortBy}" />
                                 </c:url>
 
-                                <c:choose>
-                                    <c:when test="${totalPages <= 5}">
-                                        <c:forEach begin="1" end="${totalPages}" var="pageIndex">
-                                            <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <c:choose>
-                                            <c:when test="${currentPage <= 3}">
-                                                <c:forEach begin="1" end="3" var="pageIndex">
-                                                    <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
-                                                </c:forEach>
-                                                <span class="product-page-ellipsis">...</span>
-                                                <c:forEach begin="${totalPages - 1}" end="${totalPages}" var="pageIndex">
-                                                    <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
-                                                </c:forEach>
-                                            </c:when>
-                                            <c:when test="${currentPage >= totalPages - 2}">
-                                                <c:forEach begin="1" end="2" var="pageIndex">
-                                                    <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
-                                                </c:forEach>
-                                                <span class="product-page-ellipsis">...</span>
-                                                <c:forEach begin="${totalPages - 2}" end="${totalPages}" var="pageIndex">
-                                                    <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
-                                                </c:forEach>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <a href="${basePageUrl}&page=1" class="product-page-link ${currentPage == 1 ? 'is-active' : ''}">1</a>
-                                                <span class="product-page-ellipsis">...</span>
-                                                <c:forEach begin="${currentPage - 1}" end="${currentPage + 1}" var="pageIndex">
-                                                    <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
-                                                </c:forEach>
-                                                <span class="product-page-ellipsis">...</span>
-                                                <a href="${basePageUrl}&page=${totalPages}" class="product-page-link ${currentPage == totalPages ? 'is-active' : ''}">${totalPages}</a>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </c:otherwise>
-                                </c:choose>
+                                <c:if test="${currentPage > 1}">
+                                    <a href="${basePageUrl}&page=1" class="product-page-link">Đầu</a>
+                                    <a href="${basePageUrl}&page=${prevPage}" class="product-page-link">Trước</a>
+                                </c:if>
+
+                                <c:if test="${showFirstPage}">
+                                    <a href="${basePageUrl}&page=1" class="product-page-link">1</a>
+                                </c:if>
+                                <c:if test="${showLeadingEllipsis}">
+                                    <span class="product-page-ellipsis">...</span>
+                                </c:if>
+
+                                <c:forEach begin="${startPage}" end="${endPage}" var="pageIndex">
+                                    <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
+                                </c:forEach>
+
+                                <c:if test="${showTrailingEllipsis}">
+                                    <span class="product-page-ellipsis">...</span>
+                                </c:if>
+                                <c:if test="${showLastPage}">
+                                    <a href="${basePageUrl}&page=${totalPages}" class="product-page-link">${totalPages}</a>
+                                </c:if>
+
+                                <c:if test="${currentPage < totalPages}">
+                                    <a href="${basePageUrl}&page=${nextPage}" class="product-page-link">Sau</a>
+                                    <a href="${basePageUrl}&page=${totalPages}" class="product-page-link">Cuối</a>
+                                </c:if>
                             </div>
                         </c:if>
                     </c:when>

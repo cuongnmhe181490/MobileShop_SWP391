@@ -32,6 +32,7 @@ public class ProductManageController extends HttpServlet {
 
     private static final long MAX_IMAGE_SIZE = 500 * 1024;
     private static final int PAGE_SIZE = 4;
+    private static final int PAGE_WINDOW = 4;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -88,7 +89,7 @@ public class ProductManageController extends HttpServlet {
         String id = trim(request.getParameter("id"));
         Product product = dao.getProductByID(id);
         if (product == null) {
-            request.getSession().setAttribute("errorMessage", "KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+            request.getSession().setAttribute("errorMessage", "Không tìm thấy sản phẩm.");
             response.sendRedirect(request.getContextPath() + "/admin/products");
             return;
         }
@@ -125,10 +126,39 @@ public class ProductManageController extends HttpServlet {
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", PAGE_SIZE);
+        populatePaginationAttributes(request, currentPage, totalPages);
         if (!productDataAvailable) {
-            request.setAttribute("productDataError", "Khong the tai du lieu san pham tu co so du lieu. Vui long kiem tra cau hinh DB.");
+            request.setAttribute("productDataError", "Không thể tải dữ liệu sản phẩm từ cơ sở dữ liệu. Vui lòng kiểm tra cấu hình DB.");
         }
         request.getRequestDispatcher("/admin/product-manage.jsp").forward(request, response);
+    }
+
+    private void populatePaginationAttributes(HttpServletRequest request, int currentPage, int totalPages) {
+        int startPage;
+        int endPage;
+
+        if (totalPages <= PAGE_WINDOW + 1) {
+            startPage = 1;
+            endPage = totalPages;
+        } else if (currentPage <= 3) {
+            startPage = 1;
+            endPage = Math.min(totalPages, PAGE_WINDOW);
+        } else if (currentPage >= totalPages - 2) {
+            endPage = totalPages;
+            startPage = Math.max(1, totalPages - (PAGE_WINDOW - 1));
+        } else {
+            startPage = currentPage - 1;
+            endPage = currentPage + 1;
+        }
+
+        request.setAttribute("startPage", startPage);
+        request.setAttribute("endPage", endPage);
+        request.setAttribute("prevPage", Math.max(1, currentPage - 1));
+        request.setAttribute("nextPage", Math.min(totalPages, currentPage + 1));
+        request.setAttribute("showFirstPage", startPage > 1);
+        request.setAttribute("showLeadingEllipsis", startPage > 2);
+        request.setAttribute("showLastPage", endPage < totalPages);
+        request.setAttribute("showTrailingEllipsis", endPage < totalPages - 1);
     }
 
     private void handleSave(HttpServletRequest request, HttpServletResponse response, DAO dao, boolean editMode)
@@ -168,7 +198,7 @@ public class ProductManageController extends HttpServlet {
                     errors,
                     editMode,
                     false,
-                    duplicateProduct ? "Sáº£n pháº©m Ä‘Ã£ tá»“n táº¡i. Náº¿u lÆ°u, há»‡ thá»‘ng sáº½ cá»™ng thÃªm sá»‘ lÆ°á»£ng tá»“n kho." : null
+                    duplicateProduct ? "Sản phẩm đã tồn tại. Nếu lưu, hệ thống sẽ cộng thêm số lượng tồn kho." : null
             );
             return;
         }
@@ -178,13 +208,13 @@ public class ProductManageController extends HttpServlet {
         if (duplicateProduct) {
             success = dao.restockExistingProduct(product.getProductName(), product.getIdSupplier(), product.getCurrentQuantity());
             successMessage = success
-                    ? "Sáº£n pháº©m Ä‘Ã£ tá»“n táº¡i, há»‡ thá»‘ng Ä‘Ã£ cá»™ng thÃªm sá»‘ lÆ°á»£ng vÃ o kho."
-                    : "KhÃ´ng thá»ƒ cáº­p nháº­t sá»‘ lÆ°á»£ng cho sáº£n pháº©m Ä‘Ã£ tá»“n táº¡i.";
+                    ? "Sản phẩm đã tồn tại, hệ thống đã cộng thêm số lượng vào kho."
+                    : "Không thể cập nhật số lượng cho sản phẩm đã tồn tại.";
         } else {
             success = editMode ? dao.updateProduct(product) : dao.addProduct(product);
             successMessage = success
-                    ? (editMode ? "Cáº­p nháº­t sáº£n pháº©m thÃ nh cÃ´ng." : "ThÃªm sáº£n pháº©m thÃ nh cÃ´ng.")
-                    : (editMode ? "Cáº­p nháº­t sáº£n pháº©m tháº¥t báº¡i." : "ThÃªm sáº£n pháº©m tháº¥t báº¡i.");
+                    ? (editMode ? "Cập nhật sản phẩm thành công." : "Thêm sản phẩm thành công.")
+                    : (editMode ? "Cập nhật sản phẩm thất bại." : "Thêm sản phẩm thất bại.");
         }
 
         if (success) {
@@ -202,8 +232,8 @@ public class ProductManageController extends HttpServlet {
                 editMode,
                 false,
                 duplicateProduct
-                        ? "Cáº­p nháº­t sá»‘ lÆ°á»£ng tháº¥t báº¡i. Vui lÃ²ng kiá»ƒm tra láº¡i dá»¯ liá»‡u."
-                        : "LÆ°u sáº£n pháº©m tháº¥t báº¡i. Vui lÃ²ng thá»­ láº¡i."
+                        ? "Cập nhật số lượng thất bại. Vui lòng kiểm tra lại dữ liệu."
+                        : "Lưu sản phẩm thất bại. Vui lòng thử lại."
         );
     }
 
@@ -213,7 +243,7 @@ public class ProductManageController extends HttpServlet {
         boolean success = !id.isBlank() && dao.deleteProduct(id);
         request.getSession().setAttribute(
                 success ? "successMessage" : "errorMessage",
-                success ? "XÃ³a sáº£n pháº©m thÃ nh cÃ´ng." : "XÃ³a sáº£n pháº©m tháº¥t báº¡i."
+                success ? "Xóa sản phẩm thành công." : "Xóa sản phẩm thất bại."
         );
         response.sendRedirect(request.getContextPath() + "/admin/products");
     }
@@ -267,53 +297,53 @@ public class ProductManageController extends HttpServlet {
         Part imageFile = request.getPart("imageFile");
         boolean hasUploadedImage = imageFile != null && imageFile.getSize() > 0;
 
-        validateRequired(product.getProductName(), "productName", "Ten san pham khong duoc de trong.", errors);
-        validateRequired(product.getIdSupplier(), "idSupplier", "Nha cung cap khong duoc de trong.", errors);
+        validateRequired(product.getProductName(), "productName", "Tên sản phẩm không được để trống.", errors);
+        validateRequired(product.getIdSupplier(), "idSupplier", "Nhà cung cấp không được để trống.", errors);
         if (!hasUploadedImage) {
-            validateRequired(product.getImagePath(), "imagePath", "Vui long nhap URL anh hoac tai anh len.", errors);
+            validateRequired(product.getImagePath(), "imagePath", "Vui lòng nhập URL ảnh hoặc tải ảnh lên.", errors);
         }
 
-        validateMaxLength(product.getProductName(), 150, "productName", "Ten san pham toi da 150 ky tu.", errors);
-        validateMaxLength(product.getScreen(), 50, "screen", "Man hinh toi da 50 ky tu.", errors);
-        validateMaxLength(product.getOperatingSystem(), 30, "operatingSystem", "He dieu hanh toi da 30 ky tu.", errors);
-        validateMaxLength(product.getCpu(), 50, "cpu", "CPU toi da 50 ky tu.", errors);
-        validateMaxLength(product.getRam(), 10, "ram", "RAM toi da 10 ky tu.", errors);
-        validateMaxLength(product.getCamera(), 80, "camera", "Camera toi da 80 ky tu.", errors);
-        validateMaxLength(product.getBattery(), 20, "battery", "Pin toi da 20 ky tu.", errors);
-        validateMaxLength(product.getDescription(), 1000, "description", "Mo ta toi da 1000 ky tu.", errors);
-        validateMaxLength(product.getImagePath(), 500, "imagePath", "Duong dan anh toi da 500 ky tu.", errors);
+        validateMaxLength(product.getProductName(), 150, "productName", "Tên sản phẩm tối đa 150 ký tự.", errors);
+        validateMaxLength(product.getScreen(), 50, "screen", "Màn hình tối đa 50 ký tự.", errors);
+        validateMaxLength(product.getOperatingSystem(), 30, "operatingSystem", "Hệ điều hành tối đa 30 ký tự.", errors);
+        validateMaxLength(product.getCpu(), 50, "cpu", "CPU tối đa 50 ký tự.", errors);
+        validateMaxLength(product.getRam(), 10, "ram", "RAM tối đa 10 ký tự.", errors);
+        validateMaxLength(product.getCamera(), 80, "camera", "Camera tối đa 80 ký tự.", errors);
+        validateMaxLength(product.getBattery(), 20, "battery", "Pin tối đa 20 ký tự.", errors);
+        validateMaxLength(product.getDescription(), 1000, "description", "Mô tả tối đa 1000 ký tự.", errors);
+        validateMaxLength(product.getImagePath(), 500, "imagePath", "Đường dẫn ảnh tối đa 500 ký tự.", errors);
 
         if (product.getPrice() < 0) {
-            errors.put("price", "Gia phai la so lon hon hoac bang 0.");
+            errors.put("price", "Giá phải là số lớn hơn hoặc bằng 0.");
         }
         if (product.getCurrentQuantity() < 0) {
-            errors.put("quantity", "So luong phai la so nguyen lon hon hoac bang 0.");
+            errors.put("quantity", "Số lượng phải là số nguyên lớn hơn hoặc bằng 0.");
         }
 
         if (!product.getReleaseDate().isBlank()) {
             try {
                 LocalDate.parse(product.getReleaseDate());
             } catch (Exception ex) {
-                errors.put("releaseDate", "Ngay ra mat khong hop le.");
+                errors.put("releaseDate", "Ngày ra mắt không hợp lệ.");
             }
         }
 
         if (!product.getImagePath().isBlank() && !isValidImageReference(product.getImagePath())) {
-            errors.put("imagePath", "Khong the tai anh tu duong dan da nhap.");
+            errors.put("imagePath", "Không thể tải ảnh từ đường dẫn đã nhập.");
         }
 
         if (hasUploadedImage) {
             String contentType = imageFile.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
-                errors.put("imageFile", "Tep tai len phai la anh hop le.");
+                errors.put("imageFile", "Tệp tải lên phải là ảnh hợp lệ.");
             }
             if (imageFile.getSize() > MAX_IMAGE_SIZE) {
-                errors.put("imageFile", "Anh tai len khong duoc vuot qua 500kb.");
+                errors.put("imageFile", "Ảnh tải lên không được vượt quá 500KB.");
             }
         }
 
         if (editMode && product.getIdProduct().isBlank()) {
-            errors.put("idProduct", "Khong tim thay ma san pham de cap nhat.");
+            errors.put("idProduct", "Không tìm thấy mã sản phẩm để cập nhật.");
         }
 
         return errors;
@@ -445,4 +475,3 @@ public class ProductManageController extends HttpServlet {
         return "Admin product management";
     }
 }
-

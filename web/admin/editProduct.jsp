@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.math.BigDecimal" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
@@ -30,23 +31,35 @@
             <div class="nav-section">
                 <span class="nav-label">QUẢN LÝ</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="javascript:void(0)" class="menu-link"><i class="fa-solid fa-user-gear"></i>Quản lý tài khoản</a></li>
+                    <li class="menu-item"><a href="javascript:void(0)" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
                     <li class="menu-item"><a href="${ctx}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
                     <li class="menu-item"><a href="${ctx}/admin/products" class="menu-link active"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li class="menu-item"><a href="${ctx}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Quản lý blog</a></li>
+                    <li class="menu-item"><a href="${ctx}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${ctx}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item"><a href="${ctx}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${ctx}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
+                    <li class="menu-item"><a href="${ctx}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
+                    <li class="menu-item"><a href="${ctx}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
+                    <li class="menu-item"><a href="${ctx}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
                 </ul>
             </div>
 
             <div class="nav-section">
                 <span class="nav-label">HỆ THỐNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${ctx}/home" class="menu-link"><i class="fa-solid fa-arrow-left"></i>Về trang chủ</a></li>
+                    <li class="menu-item"><a href="${ctx}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
                 </ul>
             </div>
 
             <div style="margin-top: auto;">
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${ctx}/logout" class="menu-link"><i class="fa-solid fa-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item"><a href="${ctx}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
                 </ul>
             </div>
         </aside>
@@ -96,8 +109,22 @@
                                     <div class="product-detail-value"><fmt:formatNumber value="${productForm.price}" type="number" groupingUsed="true" maxFractionDigits="0"/> đ</div>
                                 </c:when>
                                 <c:otherwise>
+                                    <%
+                                        String formattedPriceValue = "";
+                                        Object productFormAttr = request.getAttribute("productForm");
+                                        if (productFormAttr != null) {
+                                            try {
+                                                Object priceValue = productFormAttr.getClass().getMethod("getPrice").invoke(productFormAttr);
+                                                if (priceValue != null) {
+                                                    formattedPriceValue = new BigDecimal(String.valueOf(priceValue)).stripTrailingZeros().toPlainString();
+                                                }
+                                            } catch (Exception ignored) {
+                                            }
+                                        }
+                                        pageContext.setAttribute("formattedPriceValue", formattedPriceValue);
+                                    %>
                                     <div class="input-suffix-wrap">
-                                        <input class="form-control form-input admin-product-input admin-product-input--suffix" type="text" inputmode="decimal" name="price" id="price" value="${param.price != null ? param.price : productForm.price}">
+                                        <input class="form-control form-input admin-product-input admin-product-input--suffix" type="text" inputmode="decimal" name="price" id="price" value="${param.price != null ? param.price : formattedPriceValue}">
                                         <span class="input-suffix">VNĐ</span>
                                     </div>
                                 </c:otherwise>

@@ -47,7 +47,7 @@
                             <i class="fa-solid fa-receipt"></i>Đơn hàng
                         </a>
                     </li>
-                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/products" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
                 </ul>
             </div>

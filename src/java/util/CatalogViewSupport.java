@@ -3,6 +3,7 @@ package util;
 import dao.DAO;
 import entity.Product;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,12 +25,14 @@ public final class CatalogViewSupport {
 
     public static void prepareCatalogRequest(HttpServletRequest request, List<Product> products) {
         DAO dao = new DAO();
+        HttpSession session = request.getSession(false);
         List<String> brandOptions = dao.getAvailableBrands();
         request.setAttribute("brandOptions", brandOptions);
         request.setAttribute("brandLabels", buildBrandLabels(brandOptions));
         request.setAttribute("ramOptions", dao.getAvailableRamOptions());
         request.setAttribute("recentYears", resolveRecentYears(dao, products));
         request.setAttribute("catalogPriceLabels", buildPriceLabels(products));
+        request.setAttribute("catalogDisplayStockMap", CartSupport.buildDisplayStockMap(session, products));
         request.setAttribute("catalogPriceBounds", buildPriceBounds(products));
         request.setAttribute("selectedBrand", firstNotBlank(request.getAttribute("validatedBrand"), request.getParameter("brand")));
         request.setAttribute("selectedStorage", firstNotBlank(request.getAttribute("validatedStorage"), request.getParameter("storage")));

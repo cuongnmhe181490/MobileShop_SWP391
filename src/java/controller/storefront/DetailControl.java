@@ -3,6 +3,7 @@ package controller.storefront;
 import dao.DAO;
 import entity.Product;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import util.CartSupport;
 
+@WebServlet(name = "DetailControl", urlPatterns = {"/detail"})
 public class DetailControl extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -21,24 +24,32 @@ public class DetailControl extends HttpServlet {
         DAO dao = new DAO();
         Product product = dao.getProductByID(id);
         if (product == null) {
-            if (!dao.canAccessProductData()) {
-                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Product data is temporarily unavailable.");
-                return;
-            }
             response.sendRedirect(request.getContextPath() + "/product");
             return;
         }
 
+        double averageRating = dao.getAverageRating(id);
+        int reviewCount = dao.getReviewCount(id);
+        Map<Integer, Integer> reviewCounts = dao.getReviewCountsByRating(id);
         List<Product> relatedProducts = dao.getRelatedProducts(product.getIdSupplier(), product.getIdProduct(), 4);
         Map<String, String> relatedPriceLabels = new LinkedHashMap<>();
         for (Product item : relatedProducts) {
             relatedPriceLabels.put(item.getIdProduct(), formatCurrency(item.getPrice()));
         }
 
+        int detailDisplayStock = CartSupport.getDisplayStock(request.getSession(false), product);
+        Map<String, Integer> relatedDisplayStockMap = CartSupport.buildDisplayStockMap(request.getSession(false), relatedProducts);
+
         request.setAttribute("detail", product);
         request.setAttribute("detailPriceLabel", formatCurrency(product.getPrice()));
+        request.setAttribute("detailDisplayStock", detailDisplayStock);
+        request.setAttribute("averageRating", averageRating);
+        request.setAttribute("reviewCount", reviewCount);
+        request.setAttribute("reviewCounts", reviewCounts);
+        request.setAttribute("reviewPreview", dao.getProductReviews(id, null, 0, 3));
         request.setAttribute("relatedProducts", relatedProducts);
         request.setAttribute("relatedPriceLabels", relatedPriceLabels);
+        request.setAttribute("relatedDisplayStockMap", relatedDisplayStockMap);
         request.getRequestDispatcher("Detail.jsp").forward(request, response);
     }
 
