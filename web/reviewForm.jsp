@@ -50,59 +50,63 @@
             }
 
             .rv-card h1 {
-                font-size: 28px;
-                font-weight: 800;
-                letter-spacing: -0.03em;
-                margin-bottom: 8px;
+                font-size: 32px;
+                font-weight: 700;
+                color: #0f172a;
+                letter-spacing: -0.04em;
+                margin-bottom: 12px;
             }
 
             .rv-card p.subtitle {
-                color: var(--rv-text-muted);
-                font-size: 15px;
-                margin-bottom: 32px;
+                color: #64748b;
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 40px;
             }
 
             /* Product Strip */
             .rv-product-strip {
                 display: flex;
                 align-items: center;
-                gap: 20px;
-                background: var(--rv-primary-soft);
-                padding: 20px;
-                border-radius: 18px;
-                margin-bottom: 32px;
-                border: 1px solid rgba(61, 115, 234, 0.1);
+                gap: 24px;
+                background: #f8fafc;
+                padding: 24px;
+                border-radius: 20px;
+                margin-bottom: 48px;
+                border: 1px solid #e2e8f0;
             }
 
             .rv-product-strip img {
-                width: 80px;
-                height: 80px;
-                border-radius: 14px;
-                object-fit: cover;
+                width: 90px;
+                height: 90px;
+                border-radius: 16px;
+                object-fit: contain;
                 background: #fff;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+                padding: 8px;
             }
 
             .rv-product-name {
-                font-weight: 700;
-                font-size: 18px;
-                color: var(--rv-primary);
+                font-weight: 600;
+                font-size: 20px;
+                color: #1e293b;
                 line-height: 1.4;
+                letter-spacing: -0.01em;
             }
 
             /* Form Elements */
             .form-group {
-                margin-bottom: 28px;
+                margin-bottom: 32px;
             }
 
             .form-label {
                 display: block;
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--rv-text-muted);
+                font-size: 11px;
+                font-weight: 800;
+                color: #94a3b8;
                 text-transform: uppercase;
-                letter-spacing: 0.05em;
-                margin-bottom: 12px;
+                letter-spacing: 0.12em;
+                margin-bottom: 16px;
             }
 
             .rv-textarea {

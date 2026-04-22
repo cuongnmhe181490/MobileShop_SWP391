@@ -270,7 +270,7 @@
                     <c:when test="${empty reviews}">
                         <div class="empty-state">
                             <p>Bạn chưa đánh giá sản phẩm nào.</p>
-                            <a class="btn-browse" href="${ctx}/catalog">Khám phá sản phẩm</a>
+                            <a class="btn-browse" href="${ctx}/product">Khám phá sản phẩm</a>
                         </div>
                     </c:when>
                     <c:otherwise>
