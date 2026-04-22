@@ -237,23 +237,23 @@
             </a>
 
             <div class="nav-section">
-                <span class="nav-label">TỔNG QUAN</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
-                </ul>
-            </div>
-
-            <div class="nav-section">
                 <span class="nav-label">QUẢN LÝ</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/account-manage" class="menu-link active"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
+                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
                     <li class="menu-item">
                         <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
                             <i class="fa-solid fa-receipt"></i>Đơn hàng
                         </a>
                     </li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/product-manage" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
+                    <li class="menu-item"><a href="#" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/banned-words" class="menu-link">
+                            <i class="fa-solid fa-comment-slash"></i>Từ nhạy cảm
+                        </a>
+                    </li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link"><i class="fa-solid fa-home"></i>Trang chủ</a></li>
                 </ul>
             </div>
 
