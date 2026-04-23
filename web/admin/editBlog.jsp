@@ -100,7 +100,7 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="${pageContext.request.contextPath}/admin/products" class="menu-link">
                             <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
                         </a>
                     </li>

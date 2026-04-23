@@ -3,4 +3,12 @@
     <welcome-file-list>
         <welcome-file>HomePage.jsp</welcome-file>
     </welcome-file-list>
+    <servlet>
+        <servlet-name>ProductManageController</servlet-name>
+        <servlet-class>controller.ProductManageController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProductManageController</servlet-name>
+        <url-pattern>/admin/products</url-pattern>
+    </servlet-mapping>
 </web-app>

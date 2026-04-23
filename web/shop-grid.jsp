@@ -17,11 +17,6 @@
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
-        <!-- Css Styles -->
-        <link rel="stylesheet" href="${ctx}/css/bootstrap.min.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/owl.carousel.min.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/style.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/custom.css" type="text/css">
     </head>
     <body>
         <%@ include file="/WEB-INF/jspf/storefront/header.jspf" %>
@@ -40,7 +35,6 @@
                                 <div class="filter-group">
                                     <h3>Tìm kiếm</h3>
                                     <input id="catalogSearchInput" class="catalog-search" type="text" name="txt" value="${fn:escapeXml(searchQuery)}" placeholder="Tìm sản phẩm như iPhone 17 Pro Max">
-                                    <p class="catalog-filter-note">Hệ thống tự bỏ khác biệt hoa/thường và khoảng trắng khi tìm kiếm.</p>
                                 </div>
 
                                 <div class="filter-group">
@@ -313,6 +307,7 @@
                 }
 
                 if (filterForm && searchInput) {
+                    searchInput.setAttribute('maxlength', '100');
                     filterForm.querySelectorAll('input[type="radio"], select[name="brand"], select[name="storage"], select[name="year"]').forEach(function (control) {
                         control.addEventListener('change', function () {
                             filterForm.requestSubmit();
@@ -323,6 +318,11 @@
                         searchInput.value = searchInput.value.trim().replace(/\s+/g, ' ');
                         if (searchInput.value.length === 0) {
                             searchInput.value = '';
+                        }
+                        if (searchInput.value.length > 100) {
+                            event.preventDefault();
+                            alert('Từ khóa tìm kiếm tối đa 100 ký tự.');
+                            return;
                         }
                         if (minInput && maxInput) {
                             const minValue = Math.max(0, toNumber(minInput.value, 0));
