@@ -19,6 +19,7 @@ public class User {
     private Role role;         
     private String resetToken;
     private Date resetTokenExpiry;
+    private java.sql.Timestamp createdDate; // Mới thêm để lọc Dashboard
 
     public User() {
     }
@@ -126,6 +127,14 @@ public class User {
 
     public Date getResetTokenExpiry() {
         return resetTokenExpiry;
+    }
+
+    public java.sql.Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(java.sql.Timestamp createdDate) {
+        this.createdDate = createdDate;
     }
 
     public void setResetTokenExpiry(Date resetTokenExpiry) {

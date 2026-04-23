@@ -80,7 +80,25 @@ public class LoginControl extends HttpServlet {
         User loginUser = udao.getAccountByUser(user);
         
         // 3. Kiểm tra User có tồn tại và Mật khẩu có khớp không (Dùng BCrypt)
-        if (loginUser != null && BCrypt.checkpw(pass, loginUser.getPass())) {
+        // 3. Kiểm tra User có tồn tại và Mật khẩu có khớp không
+        boolean isCorrectPassword = false;
+        if (loginUser != null) {
+            String storedPass = loginUser.getPass();
+            // Thử kiểm tra bằng BCrypt trước
+            try {
+                if (storedPass.startsWith("$2a$") || storedPass.startsWith("$2b$")) {
+                    isCorrectPassword = BCrypt.checkpw(pass, storedPass);
+                } else {
+                    // Nếu không phải hash BCrypt thì so sánh trực tiếp
+                    isCorrectPassword = pass.equals(storedPass);
+                }
+            } catch (Exception e) {
+                // Nếu có lỗi khi check BCrypt (vd: data lỗi), quay về so sánh trực tiếp
+                isCorrectPassword = pass.equals(storedPass);
+            }
+        }
+
+        if (loginUser != null && isCorrectPassword) {
 
             // Đăng nhập thành công -> Lưu nguyên Object User vào Session
             HttpSession session = request.getSession();

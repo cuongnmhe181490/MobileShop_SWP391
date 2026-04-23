@@ -6,7 +6,7 @@ package dao;
 import config.DBContext;
 import entity.Product;
 import entity.ProductModel;
-import entity.ProductReview;
+import entity.Review;
 import entity.Role;
 import java.sql.SQLException;
 import entity.User;
@@ -44,8 +44,8 @@ public class DAO {
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
     // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
     String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], "
-                 + "Email, PhoneNumber, FullName, Birthday, [RoleId]) \n"
-                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)"; // 0 ở cuối là Role mặc định (Khách hàng)
+                 + "Email, PhoneNumber, FullName, Birthday, [RoleId], CreatedDate) \n"
+                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, GETDATE())"; // GETDATE() để lấy giờ hiện tại của SQL Server
     try {
         conn = new DBContext().getConnection();
         ps = conn.prepareStatement(query);
@@ -206,11 +206,14 @@ public class DAO {
         );
     }
     
+
     /**
      * Chuyển đổi dữ liệu từ ResultSet sang đối tượng ProductReview (Đánh giá)
      */
-    private ProductReview mapReview(ResultSet rs) throws SQLException {
-        ProductReview r = new ProductReview();
+
+
+    private Review mapReview(ResultSet rs) throws SQLException {
+        Review r = new Review();
         r.setIdProduct(rs.getString("IdProduct"));
         r.setUserId(rs.getInt("UserId"));
         r.setReviewerName(rs.getString("ReviewerName"));
@@ -743,11 +746,14 @@ public class DAO {
         return 0;
     }
     
+
     /**
      * Lấy danh sách đánh giá của sản phẩm có phân trang
      */
-    public List<ProductReview> getProductReviews(String productId, Integer ranking, int offset, int pageSize) {
-        List<ProductReview> reviews = new ArrayList<>();
+ 
+
+    public List<Review> getProductReviews(String productId, Integer ranking, int offset, int pageSize) {
+        List<Review> reviews = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT pr.IdProduct, pr.UserId, pr.ReviewDate, pr.Review, pr.Ranking, u.FullName AS ReviewerName ");
         sql.append("FROM ProductReview pr ");
@@ -1388,5 +1394,34 @@ public class DAO {
             e.printStackTrace();
         }
         return list;
+    }
+    /**
+     * Lấy doanh thu theo từng ngày trong khoảng thời gian xác định
+     */
+    public Map<String, Double> getDailyRevenue(java.sql.Date startDate, java.sql.Date endDate) {
+        Map<String, Double> stats = new LinkedHashMap<>();
+        
+        // Tạo câu lệnh SQL lấy doanh thu theo ngày
+        String query = "SELECT CAST(OrderDate AS DATE) as OrderDay, SUM(TotalPrice) as Revenue " +
+                      "FROM [Order] " +
+                      "WHERE OrderDate >= ? AND OrderDate <= ? AND OrderStatus = N'Hoàn thành' " +
+                      "GROUP BY CAST(OrderDate AS DATE) " +
+                      "ORDER BY OrderDay ASC";
+                      
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM");
+                while (rs.next()) {
+                    stats.put(sdf.format(rs.getDate("OrderDay")), rs.getDouble("Revenue"));
+                }
+            }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
+        
+        return stats;
     }
 }

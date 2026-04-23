@@ -13,6 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.util.List;
 import util.CloudinaryUtil;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
 
 @MultipartConfig(
         fileSizeThreshold = 1024 * 500, // 2MB
@@ -84,6 +87,21 @@ public class BlogManageController extends HttpServlet {
                     request.setAttribute("searchTitle", searchTitle);
                     request.setAttribute("currentPage", pageIndexAdmin);
                     request.setAttribute("totalPages", totalPagesAdmin);
+
+                    // Phân trang nâng cao (giống Product)
+                    int pageRange = 2;
+                    int startPage = Math.max(1, pageIndexAdmin - pageRange);
+                    int endPage = Math.min(totalPagesAdmin, pageIndexAdmin + pageRange);
+
+                    request.setAttribute("prevPage", pageIndexAdmin - 1);
+                    request.setAttribute("nextPage", pageIndexAdmin + 1);
+                    request.setAttribute("startPage", startPage);
+                    request.setAttribute("endPage", endPage);
+                    request.setAttribute("showFirstPage", startPage > 1);
+                    request.setAttribute("showLastPage", endPage < totalPagesAdmin);
+                    request.setAttribute("showLeadingEllipsis", startPage > 2);
+                    request.setAttribute("showTrailingEllipsis", endPage < totalPagesAdmin - 1);
+
                     request.getRequestDispatcher("/admin/blog-manage.jsp").forward(request, response);
                     break;
 
@@ -97,6 +115,23 @@ public class BlogManageController extends HttpServlet {
                             int idBlogCat = Integer.parseInt(request.getParameter("idBlogCat"));
 
                             Part filePart = request.getPart("image");
+                            
+                            // SERVER-SIDE VALIDATION: Kích thước ảnh
+                            if (filePart != null && filePart.getSize() > 0) {
+                                try (InputStream is = filePart.getInputStream()) {
+                                    BufferedImage bi = ImageIO.read(is);
+                                    if (bi != null) {
+                                        int width = bi.getWidth();
+                                        int height = bi.getHeight();
+                                        if (width < 800 || height < 400) {
+                                            request.getSession().setAttribute("errorMessage", "Ảnh không đạt chuẩn (" + width + "x" + height + "px). Yêu cầu tối thiểu 800x400px.");
+                                            response.sendRedirect(request.getContextPath() + "/admin/blog?service=insertBlog");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+
                             String imageUrl = CloudinaryUtil.upload(filePart);
                             if (imageUrl == null) {
                                 imageUrl = "";
@@ -147,6 +182,20 @@ public class BlogManageController extends HttpServlet {
                             if (blog != null) {
                                 Part filePart = request.getPart("image");
                                 if (filePart != null && filePart.getSize() > 0) {
+                                    // SERVER-SIDE VALIDATION: Kích thước ảnh mới
+                                    try (InputStream is = filePart.getInputStream()) {
+                                        BufferedImage bi = ImageIO.read(is);
+                                        if (bi != null) {
+                                            int width = bi.getWidth();
+                                            int height = bi.getHeight();
+                                            if (width < 800 || height < 400) {
+                                                request.getSession().setAttribute("errorMessage", "Ảnh mới không đạt chuẩn (" + width + "x" + height + "px). Yêu cầu tối thiểu 800x400px.");
+                                                response.sendRedirect(request.getContextPath() + "/admin/blog?service=updateBlog&blogId=" + blogId);
+                                                return;
+                                            }
+                                        }
+                                    }
+                                    
                                     String newImageUrl = CloudinaryUtil.upload(filePart);
                                     if (newImageUrl != null) {
                                         blog.setImagePath(newImageUrl);

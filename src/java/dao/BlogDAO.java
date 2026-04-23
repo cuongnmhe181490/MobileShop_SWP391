@@ -13,8 +13,8 @@ public class BlogDAO extends DBContext {
 
     // ================== C: CREATE ==================
     public boolean insertBlog(BlogPost blog) {
-        String query = "INSERT INTO Blog (UserId, Title, SubTitle, Summary, Content, ThumbnailPath, IdBlogCat, CreatedDate) \n"
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())";
+        String query = "INSERT INTO Blog (UserId, Title, SubTitle, Summary, Content, ThumbnailPath, IdBlogCat, CreatedDate, Status) \n"
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE(), 'VISIBLE')";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setInt(1, blog.getUserId());
@@ -41,7 +41,7 @@ public class BlogDAO extends DBContext {
         String query = "SELECT TOP (?) b.IdPost, b.UserId, b.Title, b.SubTitle, b.Summary, b.ThumbnailPath, b.IdBlogCat, b.CreatedDate, bc.CategoryName \n" +
                        "FROM Blog b \n" +
                        "LEFT JOIN BlogCategory bc ON b.IdBlogCat = bc.IdBlogCat \n" +
-                       "WHERE b.Status = 'VISIBLE' \n" +
+                       "WHERE (b.Status = 'VISIBLE' OR b.Status IS NULL) \n" +
                        "ORDER BY b.IdPost DESC";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, limit);
@@ -72,7 +72,7 @@ public class BlogDAO extends DBContext {
         String query = "SELECT b.*, bc.CategoryName \n" +
                        "FROM Blog b \n" +
                        "LEFT JOIN BlogCategory bc ON b.IdBlogCat = bc.IdBlogCat \n" +
-                       "WHERE b.Status = 'VISIBLE' \n" +
+                       "WHERE (b.Status = 'VISIBLE' OR b.Status IS NULL) \n" +
                        "ORDER BY b.IdPost DESC";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
 
@@ -200,7 +200,7 @@ public class BlogDAO extends DBContext {
     }
 
     public int getTotalBlogs() {
-        String query = "SELECT COUNT(*) FROM Blog  WHERE Status = 'VISIBLE'";
+        String query = "SELECT COUNT(*) FROM Blog  WHERE (Status = 'VISIBLE' OR Status IS NULL)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
@@ -214,7 +214,7 @@ public class BlogDAO extends DBContext {
     }
 
     public int getTotalBlogsByCategory(int categoryId) {
-        String query = "SELECT COUNT(*) FROM Blog WHERE IdBlogCat = ? AND Status = 'VISIBLE' ";
+        String query = "SELECT COUNT(*) FROM Blog WHERE IdBlogCat = ? AND (Status = 'VISIBLE' OR Status IS NULL) ";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, categoryId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -230,7 +230,7 @@ public class BlogDAO extends DBContext {
         List<BlogPost> list = new ArrayList<>();
         String query = "SELECT b.*, bc.CategoryName FROM Blog b \n" +
                        "LEFT JOIN BlogCategory bc ON b.IdBlogCat = bc.IdBlogCat \n" +
-                       "WHERE b.Status = 'VISIBLE' \n" +
+                       "WHERE (b.Status = 'VISIBLE' OR b.Status IS NULL) \n" +
                        "ORDER BY b.IdPost DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, offset);
@@ -256,7 +256,7 @@ public class BlogDAO extends DBContext {
         List<BlogPost> list = new ArrayList<>();
         String query = "SELECT b.*, bc.CategoryName FROM Blog b \n" +
                        "LEFT JOIN BlogCategory bc ON b.IdBlogCat = bc.IdBlogCat \n" +
-                        "WHERE b.IdBlogCat = ? AND b.Status = 'VISIBLE' \n" +
+                        "WHERE b.IdBlogCat = ? AND (b.Status = 'VISIBLE' OR b.Status IS NULL) \n" +
                        "ORDER BY b.IdPost DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, categoryId);
@@ -300,7 +300,7 @@ public class BlogDAO extends DBContext {
         String query = "SELECT b.*, bc.CategoryName \n" +
                        "FROM Blog b \n" +
                        "LEFT JOIN BlogCategory bc ON b.IdBlogCat = bc.IdBlogCat \n" +
-                       "WHERE b.IdBlogCat = ? AND b.Status = 'VISIBLE' \n"  +
+                       "WHERE b.IdBlogCat = ? AND (b.Status = 'VISIBLE' OR b.Status IS NULL) \n"  +
                        "ORDER BY b.IdPost DESC";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, categoryId);

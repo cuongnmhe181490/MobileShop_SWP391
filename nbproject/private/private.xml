@@ -5,12 +5,25 @@
         <group>
             <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/web/admin/dashboard.jsp</file>
             <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/dao/DAO.java</file>
-            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/web/topproduct_config/config-top-product-add.jsp</file>
-            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/web/admin-home-config.jsp</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/dao/UserDAO.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/filter/CharacterEncodingFilter.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/dao/BlogDAO.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/web/admin/addBlog.jsp</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/controller/brand/BrandListServlet.java</file>
             <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/config/DBContext.java</file>
-            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/entity/ProductModel.java</file>
-            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/web/topproduct_config/admin-top-product-list.jsp</file>
-            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/web/shop-grid.jsp</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/controller/BlogCategoryManageController.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/entity/BlogCategory.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/util/CloudinaryUtil.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/controller/storefront/BlogDetailControl.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/controller/BlogManageController.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/controller/AdminHomeConfigServlet.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/entity/BlogPost.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/util/CartSupport.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/web/admin/blog-manage.jsp</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/controller/storefront/BlogControl.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/util/CatalogViewSupport.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/controller/AdminDashboardController.java</file>
+            <file>file:/C:/Users/Hai%20Vu/Downloads/MobileShop_SWP391-main/src/java/config.properties</file>
         </group>
     </open-files>
 </project-private>

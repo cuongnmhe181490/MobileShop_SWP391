@@ -43,6 +43,7 @@ public class UserDAO extends DBContext{
                     u.setPhone(rs.getString("PhoneNumber"));
                     u.setName(rs.getString("FullName"));
                     u.setBirthday(rs.getDate("Birthday"));
+                    u.setCreatedDate(rs.getTimestamp("CreatedDate"));
                     u.setRole(r);
                     return u;
                 }
@@ -86,18 +87,33 @@ public class UserDAO extends DBContext{
             return false;
         }
     }
- 
+
+    /**
+     * Đếm tổng số người dùng (Không lọc theo ngày - Dùng cho con số tổng quát)
+     */
     public int getTotalUsers() {
         String query = "SELECT COUNT(*) FROM [User]";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /**
+     * Đếm số lượng người dùng đăng ký mới trong khoảng thời gian xác định
+     */
+    public int getTotalUsersByDate(java.sql.Date startDate, java.sql.Date endDate) {
+        String query = "SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
 }

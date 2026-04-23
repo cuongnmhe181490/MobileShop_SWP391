@@ -2,11 +2,10 @@ package controller.review;
 
 import dao.ProductDAO;
 import dao.ReviewDAO;
-import entity.ProductReview;
+import entity.Review;
 import entity.ReviewImage;
 import entity.User;
 import jakarta.servlet.ServletException;
-
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,15 +22,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * /review/write?pid=...        → Màn 2: Viết mới
- * /review/edit?id=...          → Màn 3: Chỉnh sửa
- * POST cả hai đều về đây
+ * Handlers writing/editing for both PRODUCT and SERVICE reviews.
+ * Form entry: 
+ *   /review/write?pid=... (Product mode)
+ *   /review/write?type=SERVICE (Service mode)
  */
 @WebServlet("/review/write")
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 1, // 1MB
     maxFileSize = 1024 * 1024 * 5,        // 5MB
-    maxRequestSize = 1024 * 1024 * 20    // 20MB (Total for 5 images)
+    maxRequestSize = 1024 * 1024 * 20    // 20MB
 )
 public class ReviewWriteServlet extends HttpServlet {
 
@@ -41,7 +41,7 @@ public class ReviewWriteServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // ... (existing doGet code remains the same)
+        
         HttpSession session = req.getSession(false);
         User acc = (session != null) ? (User) session.getAttribute("acc") : null;
         if (acc == null) {
@@ -50,43 +50,43 @@ public class ReviewWriteServlet extends HttpServlet {
         }
 
         String idProduct  = req.getParameter("pid");
-        String reviewIdStr = req.getParameter("id");  // có id → chế độ sửa
+        String type       = req.getParameter("type"); // Can be "SERVICE"
+        String reviewIdStr = req.getParameter("id");  // Edit mode
+
+        if (type == null) type = "PRODUCT"; // Default
 
         try {
             if (reviewIdStr != null) {
-                // ── Màn 3: Load form sửa ──
+                // ── Mode: EDIT ──
                 int reviewId = Integer.parseInt(reviewIdStr);
-                ProductReview review = dao.getById(reviewId);
+                Review review = dao.getById(reviewId);
 
-                // Bảo vệ: chỉ chủ review mới được sửa
                 if (review == null || review.getUserId() != acc.getId()) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
 
-                List<ReviewImage> images = dao.getImages(reviewId);
                 req.setAttribute("review", review);
-                req.setAttribute("images", images);
                 req.setAttribute("mode",   "edit");
-                idProduct = review.getIdProduct(); // Lấy pid từ review cũ để fetch info
+                type = review.getReviewType();
+                idProduct = review.getIdProduct();
             } else {
-                // ... (Màn 2 logic)
-                if (idProduct == null || idProduct.isBlank()) {
-                    resp.sendRedirect(req.getContextPath() + "/");
-                    return;
-                }
-
-                boolean already = dao.hasReviewed(acc.getId(), idProduct);
+                // ── Mode: CREATE ──
+                // Check if already reviewed
+                boolean already = dao.hasReviewed(acc.getId(), idProduct, type);
                 if (already) {
-                    req.setAttribute("errorMsg", "Bạn đã đánh giá sản phẩm này rồi.");
+                    req.setAttribute("errorMsg", "SERVICE".equals(type) ? 
+                        "Bạn đã gửi đánh giá dịch vụ trước đó rồi." : 
+                        "Bạn đã đánh giá sản phẩm này rồi.");
                 }
-
-                req.setAttribute("pid",  idProduct);
                 req.setAttribute("mode", "create");
             }
 
-            // Fetch Product Info for Display
-            if (idProduct != null) {
+            // Fetch metadata for UI
+            req.setAttribute("type", type);
+            req.setAttribute("pid",  idProduct);
+
+            if ("PRODUCT".equals(type) && idProduct != null) {
                 Map<String, Object> product = pDao.getProductById(idProduct);
                 if (product != null) {
                     req.setAttribute("productName",  product.get("ProductName"));
@@ -94,8 +94,7 @@ public class ReviewWriteServlet extends HttpServlet {
                 }
             }
 
-            req.getRequestDispatcher("/reviewForm.jsp")
-               .forward(req, resp);
+            req.getRequestDispatcher("/reviewForm.jsp").forward(req, resp);
 
         } catch (Exception e) {
             throw new ServletException(e);
@@ -115,36 +114,39 @@ public class ReviewWriteServlet extends HttpServlet {
             return;
         }
 
+        String type        = req.getParameter("type");         // "PRODUCT" | "SERVICE"
         String mode        = req.getParameter("mode");         // "create" | "edit"
         String content     = req.getParameter("reviewContent");
         String rankingStr  = req.getParameter("ranking");
         int    ranking     = (rankingStr != null) ? Integer.parseInt(rankingStr) : 5;
+        
+        // Handle multiple topics (for service mode)
+        String[] topicsArr = req.getParameterValues("topics");
+        String finalTopic  = (topicsArr != null) ? String.join(", ", topicsArr) : null;
 
-        // Xử lý upload ảnh server-side (Giống HeroAdd)
+        // Image Upload
         List<String> uploadedUrls = new ArrayList<>();
         Collection<Part> parts = req.getParts();
         for (Part part : parts) {
             if ("imageFiles".equals(part.getName()) && part.getSize() > 0) {
                 String resultUrl = CloudinaryUtil.upload(part);
-                if (resultUrl != null) {
-                    uploadedUrls.add(resultUrl);
-                }
+                if (resultUrl != null) uploadedUrls.add(resultUrl);
             }
         }
 
         try {
             if ("edit".equals(mode)) {
                 int reviewId = Integer.parseInt(req.getParameter("reviewId"));
-                ProductReview existing = dao.getById(reviewId);
+                Review existing = dao.getById(reviewId);
 
                 if (existing == null || existing.getUserId() != acc.getId()) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
 
-                dao.updateReview(reviewId, content, ranking);
+                // Topic update only matters for Service, but we store it for consistency
+                dao.updateReview(reviewId, content, ranking, finalTopic);
 
-                // Nếu có ảnh mới thì cập nhật (xóa cũ, thêm mới)
                 if (!uploadedUrls.isEmpty()) {
                     dao.deleteImages(reviewId);
                     dao.insertImages(buildImageList(reviewId, uploadedUrls));
@@ -155,24 +157,31 @@ public class ReviewWriteServlet extends HttpServlet {
             } else {
                 String idProduct = req.getParameter("pid");
 
-                if (dao.hasReviewed(acc.getId(), idProduct)) {
-                    resp.sendRedirect(req.getContextPath() + "/reviews?pid=" + idProduct + "&error=duplicate");
+                if (dao.hasReviewed(acc.getId(), idProduct, type)) {
+                    String redirect = "PRODUCT".equals(type) ? 
+                        "/reviews?pid=" + idProduct + "&error=duplicate" :
+                        "/reviews?type=SERVICE&error=duplicate";
+                    resp.sendRedirect(req.getContextPath() + redirect);
                     return;
                 }
 
-                ProductReview r = new ProductReview();
+                Review r = new Review();
+                r.setReviewType(type);
                 r.setIdProduct(idProduct);
                 r.setUserId(acc.getId());
                 r.setReviewContent(content);
+                r.setReviewTopic(finalTopic);
                 r.setRanking(ranking);
 
                 int newId = dao.insertReview(r);
-
                 if (!uploadedUrls.isEmpty()) {
                     dao.insertImages(buildImageList(newId, uploadedUrls));
                 }
 
-                resp.sendRedirect(req.getContextPath() + "/reviews?pid=" + idProduct + "&success=created");
+                String redirect = "PRODUCT".equals(type) ? 
+                    "/reviews?pid=" + idProduct + "&success=created" :
+                    "/reviews?type=SERVICE&success=created";
+                resp.sendRedirect(req.getContextPath() + redirect);
             }
 
         } catch (Exception e) {

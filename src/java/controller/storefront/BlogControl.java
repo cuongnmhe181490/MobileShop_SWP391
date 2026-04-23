@@ -47,7 +47,7 @@ public class BlogControl extends HttpServlet {
         if (search != null && !search.isEmpty()) {
             String sLower = search.toLowerCase();
             allFiltered = allFiltered.stream()
-                    .filter(b -> b.getTitle().toLowerCase().contains(sLower))
+                    .filter(b -> b.getTitle() != null && b.getTitle().toLowerCase().contains(sLower))
                     .collect(java.util.stream.Collectors.toList());
         }
         
