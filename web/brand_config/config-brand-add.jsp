@@ -399,10 +399,16 @@
 
                         <div class="field">
                             <label>Logo Thương Hiệu (Tải lên từ máy) <span style="color:#ea4f68">*</span></label>
-                            <input class="input" type="file" name="logoFile" id="logoFile" 
-                                   accept="image/*" required>
-                            <div class="error-feedback"></div>
-                            <small style="font-size: 11px; color: #7e8eb8; margin-top: 4px; display: block;">
+                            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 8px;">
+                                <div id="previewContainer" style="display: none; width: 120px; height: 120px; border-radius: 20px; overflow: hidden; border: 2px solid #e2e8f0; background: white; align-items: center; justify-content: center; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                                     <img id="logoPreview" src="#" style="width: 100%; height: 100%; object-fit: contain;" alt="Brand Logo Preview">
+                                 </div>
+                                 <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                     <input class="input" type="file" name="logoFile" id="logoFile" accept="image/*" required style="flex: 1;">
+                                     <div class="error-feedback"></div>
+                                 </div>
+                            </div>
+                            <small style="font-size: 11px; color: #7e8eb8; margin-top: 8px; display: block;">
                                 Định dạng: JPG, PNG, WEBP, SVG. Dung lượng: < 500 KB.<br>
                                 Kích thước khuyên dùng: <b>400 x 400 px</b> (Tỷ lệ 1:1).
                             </small>
@@ -522,16 +528,25 @@
 
             document.getElementById('logoFile').addEventListener('change', function(e) {
                 const file = e.target.files[0];
+                const container = document.getElementById('previewContainer');
+                const preview = document.getElementById('logoPreview');
                 if (file) {
                     if (file.size > 500 * 1024) {
                         showToast('Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB.', 'error');
                         e.target.value = '';
+                        container.style.display = 'none';
                     } else {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            preview.src = event.target.result;
+                            container.style.display = 'flex';
+                        };
+                        reader.readAsDataURL(file);
+
                         const img = new Image();
                         img.onload = function() {
-                            if (this.width > 800 || this.height > 800) {
-                                showToast('Kích thước logo quá lớn! Khuyên dùng 400x400px.', 'error');
-                                e.target.value = '';
+                            if (this.width > 1200 || this.height > 1200) {
+                                showToast('Kích thước logo quá lớn! Cảnh báo: nên dùng 400x400px để tối ưu.', 'warning');
                             }
                         };
                         img.src = URL.createObjectURL(file);

@@ -228,20 +228,22 @@
 
             .product-image {
                 width: 100%;
-                height: 140px;
+                height: 200px;
                 border-radius: 12px;
-                overflow: auto;
-                background: #f8faff;
+                overflow: hidden;
+                background: #ffffff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
+                border: 1px solid #f1f5f9;
             }
 
             .product-image img {
-                max-width: 100%;
-                max-height: 100%;
+                width: 100%;
+                height: 100%;
                 object-fit: contain;
+                padding: 12px;
             }
 
             .product-image .no-image {

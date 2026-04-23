@@ -175,8 +175,20 @@
             }
 
             // Realtime validation
-            document.getElementById("user").addEventListener("blur", function () {
-                this.value.trim() === "" ? showError("user","userError") : clearError("user","userError");
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            document.getElementById("user").addEventListener("input", function () {
+                const val = this.value.trim();
+                const err = document.getElementById("userError");
+
+                if (val === "") {
+                    err.textContent = "Tên đăng nhập không được để trống!";
+                    showError("user", "userError");
+                } else if (!usernameRegex.test(val)) {
+                    err.textContent = "Viết liền không dấu, không chứa khoảng trắng!";
+                    showError("user", "userError");
+                } else {
+                    clearError("user", "userError");
+                }
             });
 
             document.getElementById("pass").addEventListener("input", function () {
@@ -225,7 +237,7 @@
                 let valid = true;
                 const today = new Date().toISOString().split("T")[0];
                 const checks = [
-                    { id:"user",     errId:"userError",     test: v => v.trim() !== "" },
+                    { id:"user",     errId:"userError",     test: v => v.trim() !== "" && /^[a-zA-Z0-9_]+$/.test(v) },
                     { id:"pass",     errId:"passError",     test: v => v.length >= 8 },
                     { id:"repass",   errId:"repassError",   test: v => v === document.getElementById("pass").value },
                     { id:"name",     errId:"nameError",     test: v => v.trim() !== "" && /^[\p{L}\s]+$/u.test(v) },

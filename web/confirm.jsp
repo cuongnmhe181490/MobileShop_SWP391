@@ -98,7 +98,7 @@
                 <div class="success-container">
                     <img src="${ctx}/img/order_success_illustration.png" alt="Đặt hàng thành công" class="success-image">
                     
-                    <span class="status-chip status-chip--green" style="margin-bottom: 20px; padding: 10px 24px;">Giao dịch hoàn tất</span>
+                    <span class="status-chip status-chip--green" style="margin-bottom: 20px; padding: 10px 24px;">Đặt hàng thành công</span>
                     <h1>Cảm ơn bạn đã tin tưởng!</h1>
                     <p>
                         Đơn hàng của bạn đã được ghi nhận. Chúng tôi sẽ xử lý và liên hệ với bạn trong thời gian sớm nhất để xác nhận giao hàng.
@@ -107,7 +107,10 @@
                     <div class="order-receipt">
                         <div class="order-receipt-row">
                             <span>Mã đơn hàng</span>
+
                             <strong>#ORD-${sessionScope.lastOrderId}</strong>
+                            
+
                         </div>
                         <div class="order-receipt-row">
                             <span>Ngày đặt hàng</span>

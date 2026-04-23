@@ -159,4 +159,32 @@ public class SupplierDAO {
             return false;
         }
     }
+
+    public boolean checkIdSupplierExist(String id) {
+        String query = "SELECT IdSupplier FROM Supplier WHERE IdSupplier = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean checkSupplierNameExist(String name) {
+        String query = "SELECT Name FROM Supplier WHERE Name = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

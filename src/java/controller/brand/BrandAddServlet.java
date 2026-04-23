@@ -45,12 +45,16 @@ public class BrandAddServlet extends HttpServlet {
         
         if (idSupplier == null || idSupplier.isEmpty()) {
             errors.append("Mã thương hiệu không được để trống. ");
+        } else if (dao.checkIdSupplierExist(idSupplier)) {
+            errors.append("Mã thương hiệu đã tồn tại. ");
         }
 
         if (name == null || name.isEmpty()) {
             errors.append("Tên thương hiệu không được để trống. ");
         } else if (name.length() < 2 || name.length() > 100) {
             errors.append("Tên thương hiệu phải từ 2-100 ký tự. ");
+        } else if (dao.checkSupplierNameExist(name)) {
+            errors.append("Tên thương hiệu này đã tồn tại trong hệ thống. ");
         }
 
         if (email == null || email.isEmpty()) {

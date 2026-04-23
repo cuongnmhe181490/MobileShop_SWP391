@@ -203,19 +203,79 @@
                 const countdown = document.getElementById('reservationCountdown');
                 if (!countdown) return;
                 const expiresAt = Number(countdown.dataset.expiresAt);
+
                 function tick() {
                     const remaining = Math.max(0, expiresAt - Date.now());
                     const minutes = Math.floor(remaining / 60000);
                     const seconds = Math.floor((remaining % 60000) / 1000);
                     countdown.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+
                     if (remaining <= 0) {
                         countdown.textContent = '00:00 - đã hết thời gian giữ hàng';
                         return;
                     }
                     window.setTimeout(tick, 1000);
                 }
+
                 tick();
             })();
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('checkoutForm');
+                if (!form) return;
+
+                const inputs = form.querySelectorAll('.auth-input');
+
+                const validators = {
+                    fullName: (val) => val.trim().length > 0 ? '' : 'Họ tên không được để trống',
+                    phone: (val) => /^[0-9]{10,11}$/.test(val) ? '' : 'Số điện thoại phải từ 10-11 chữ số',
+                    email: (val) => /^[A-Za-z0-9+_.-]+@(.+)$/.test(val) ? '' : 'Email không hợp lệ',
+                    address: (val) => val.trim().length > 0 ? '' : 'Vui lòng nhập địa chỉ nhận hàng'
+                };
+
+                function validateField(input) {
+                    const name = input.getAttribute('name');
+                    if (!validators[name]) return true;
+
+                    const error = validators[name](input.value);
+                    const container = input.closest('.filter-group');
+                    let errorEl = container.querySelector('.error-message');
+
+                    if (error) {
+                        input.classList.add('is-invalid');
+                        if (!errorEl) {
+                            errorEl = document.createElement('div');
+                            errorEl.className = 'error-message';
+                            container.appendChild(errorEl);
+                        }
+                        errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + error;
+                        return false;
+                    } else {
+                        input.classList.remove('is-invalid');
+                        if (errorEl) errorEl.remove();
+                        return true;
+                    }
+                }
+
+                inputs.forEach(input => {
+                    input.addEventListener('blur', () => validateField(input));
+                    input.addEventListener('input', () => {
+                        if (input.classList.contains('is-invalid')) {
+                            validateField(input);
+                        }
+                    });
+                });
+
+                form.addEventListener('submit', function(e) {
+                    let isValid = true;
+                    inputs.forEach(input => {
+                        if (!validateField(input)) isValid = false;
+                    });
+                    if (!isValid) e.preventDefault();
+                });
+            });
         </script>
     </body>
 </html>
