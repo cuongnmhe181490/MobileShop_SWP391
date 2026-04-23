@@ -137,6 +137,74 @@ public class ReviewDAO {
     }
 
     // ─────────────────────────────────────────────
+    // MÀN 1.5: Đánh giá dịch vụ (Service Reviews)
+    // ─────────────────────────────────────────────
+
+    public List<Review> getServiceReviews(Integer star, int page, int pageSize) throws Exception {
+        List<Review> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT r.ReviewId, r.UserId, r.ReviewDate, r.ReviewContent, r.ReviewTopic, " +
+            "       r.Ranking, r.ReplyContent, r.ReplyDate, u.FullName " +
+            "FROM GeneralReview r " +
+            "JOIN [User] u ON r.UserId = u.UserId " +
+            "WHERE r.ReviewType = 'SERVICE' AND r.[Status] = 'VISIBLE' "
+        );
+        if (star != null) sql.append("AND r.Ranking = ? ");
+        sql.append("ORDER BY r.ReviewDate DESC ");
+        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection cn = new DBContext().getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            if (star != null) ps.setInt(idx++, star);
+            ps.setInt(idx++, (page - 1) * pageSize);
+            ps.setInt(idx,   pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Review r = mapRow(rs);
+                r.setReviewType("SERVICE");
+                list.add(r);
+            }
+        }
+        return list;
+    }
+
+    public int countServiceReviews(Integer star) throws Exception {
+        String sql = "SELECT COUNT(*) FROM GeneralReview WHERE ReviewType = 'SERVICE' AND [Status] = 'VISIBLE' " +
+                     (star != null ? " AND Ranking = ?" : "");
+        try (Connection cn = new DBContext().getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            if (star != null) ps.setInt(1, star);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
+    public double getServiceAverageRating() throws Exception {
+        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) FROM GeneralReview WHERE ReviewType = 'SERVICE' AND [Status] = 'VISIBLE'";
+        try (Connection cn = new DBContext().getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getDouble(1) : 0.0;
+        }
+    }
+
+    public Map<Integer, Integer> countServiceByStar() throws Exception {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 1; i <= 5; i++) map.put(i, 0);
+        String sql = "SELECT Ranking, COUNT(*) FROM GeneralReview WHERE ReviewType = 'SERVICE' AND [Status] = 'VISIBLE' GROUP BY Ranking";
+        try (Connection cn = new DBContext().getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                map.put(rs.getInt(1), rs.getInt(2));
+            }
+        }
+        return map;
+    }
+
+    // ─────────────────────────────────────────────
     // MÀN 2: Viết review mới (Product & Service)
     // ─────────────────────────────────────────────
 

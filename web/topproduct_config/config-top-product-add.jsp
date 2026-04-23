@@ -112,7 +112,7 @@
                             </div>
                         </c:forEach>
                     </div>
-                </when>
+                </c:when>
                 <c:otherwise>
                     <div style="text-align: center; padding: 80px; background: white; border-radius: 24px; border: 1px solid var(--border);">
                         <i class="fas fa-box-open fa-3x mb-3" style="opacity: 0.1;"></i>

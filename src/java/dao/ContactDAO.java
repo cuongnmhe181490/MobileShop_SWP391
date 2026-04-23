@@ -22,14 +22,21 @@ public class ContactDAO {
         }
     }
 
-    public List<ContactMessage> getAll(int page, int pageSize) throws Exception {
+    public List<ContactMessage> getFiltered(String status, String subject, int page, int pageSize) throws Exception {
         List<ContactMessage> list = new ArrayList<>();
-        String sql = "SELECT * FROM ContactMessages ORDER BY SentDate DESC " +
-                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        StringBuilder sql = new StringBuilder("SELECT * FROM ContactMessages WHERE 1=1");
+        if (status != null && !status.isEmpty()) sql.append(" AND [Status] = ?");
+        if (subject != null && !subject.isEmpty()) sql.append(" AND [Subject] = ?");
+        sql.append(" ORDER BY SentDate DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        
         try (Connection cn = new DBContext().getConnection();
-             PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setInt(1, (page - 1) * pageSize);
-            ps.setInt(2, pageSize);
+             PreparedStatement ps = cn.prepareStatement(sql.toString())) {
+            int i = 1;
+            if (status != null && !status.isEmpty()) ps.setString(i++, status);
+            if (subject != null && !subject.isEmpty()) ps.setString(i++, subject);
+            ps.setInt(i++, (page - 1) * pageSize);
+            ps.setInt(i++, pageSize);
+            
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(mapRow(rs));
@@ -38,13 +45,29 @@ public class ContactDAO {
         return list;
     }
 
-    public int countAll() throws Exception {
-        String sql = "SELECT COUNT(*) FROM ContactMessages";
+    public int countFiltered(String status, String subject) throws Exception {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ContactMessages WHERE 1=1");
+        if (status != null && !status.isEmpty()) sql.append(" AND [Status] = ?");
+        if (subject != null && !subject.isEmpty()) sql.append(" AND [Subject] = ?");
+        
         try (Connection cn = new DBContext().getConnection();
-             PreparedStatement ps = cn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getInt(1) : 0;
+             PreparedStatement ps = cn.prepareStatement(sql.toString())) {
+            int i = 1;
+            if (status != null && !status.isEmpty()) ps.setString(i++, status);
+            if (subject != null && !subject.isEmpty()) ps.setString(i++, subject);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
         }
+    }
+
+    public List<ContactMessage> getAll(int page, int pageSize) throws Exception {
+        return getFiltered(null, null, page, pageSize);
+    }
+
+    public int countAll() throws Exception {
+        return countFiltered(null, null);
     }
 
     public boolean updateStatus(int contactId, String status, String adminNotes) throws Exception {

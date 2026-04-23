@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -10,218 +11,527 @@
         <link rel="stylesheet" href="css/style.css" type="text/css">
         <link rel="stylesheet" href="css/mobileshop.css" type="text/css">
         <link rel="stylesheet" href="css/custom.css" type="text/css">
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
         
         <style>
-            /* Sync with Review Form Typography */
+            :root {
+              --navy: #0E1D35;
+              --navy2: #1B2B4B;
+              --navy3: #243654;
+              --blue: #3B6FE8;
+              --blue-dark: #2C59C8;
+              --blue-light: #EEF3FD;
+              --page-bg: #F2F4F8;
+              --white: #FFFFFF;
+              --gray-50: #F8F9FC;
+              --gray-100: #ECEEF4;
+              --gray-200: #D8DCE8;
+              --gray-300: #B8BECE;
+              --gray-500: #6B7491;
+              --gray-700: #374060;
+              --text: #1A2340;
+              --text2: #4A5370;
+              --text3: #8A92A8;
+              --green: #12B76A;
+              --orange: #F59E0B;
+              --red: #EF4444;
+              --r-xs: 4px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px; --r-2xl: 28px;
+              --shadow-sm: 0 1px 3px rgba(14,29,53,.07), 0 1px 2px rgba(14,29,53,.04);
+              --shadow-md: 0 4px 16px rgba(14,29,53,.09), 0 2px 4px rgba(14,29,53,.05);
+              --shadow-lg: 0 12px 40px rgba(14,29,53,.12), 0 4px 8px rgba(14,29,53,.06);
+              --font: 'Be Vietnam Pro', sans-serif;
+            }
+
+            *, *::before, *::after {
+                box-sizing: border-box;
+            }
+
+            html, body, h1, h2, h3, h4, h5, h6, input, select, textarea, button, span, p, a, div {
+                font-family: var(--font) !important;
+            }
+
             body {
-                background-color: var(--bg);
-                font-family: 'Plus Jakarta Sans', sans-serif;
+                background: var(--page-bg);
                 color: var(--text);
-                line-height: 1.7;
-            }
-
-            h1, h2, h3, h4, .section-eyebrow {
-                font-family: 'Plus Jakarta Sans', sans-serif;
-            }
-
-            .contact-wrapper {
-                max-width: 1200px;
-                margin: 80px auto;
-                padding: 0 40px;
-            }
-
-            .contact-header {
-                margin-bottom: 64px;
-                text-align: left;
-            }
-
-            .contact-header h1 {
-                font-size: 42px;
-                font-weight: 700;
-                margin-bottom: 12px;
-                color: #0f172a;
-                letter-spacing: -0.04em;
-                line-height: 1.2;
-            }
-
-            .contact-header p {
-                font-size: 16px;
-                color: #64748b;
-                max-width: 600px;
-                margin: 0;
+                -webkit-font-smoothing: antialiased;
+                font-size: 14px;
                 line-height: 1.6;
             }
 
-            .section-eyebrow {
-                font-size: 12px;
-                font-weight: 800;
-                color: var(--accent);
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-                margin-bottom: 8px;
-                display: block;
+            .page-wrap {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 48px 40px 80px;
             }
 
-            /* Info Cards Grid */
-            .info-grid {
+            /* ── PAGE HEADING ── */
+            .page-heading { margin-bottom: 36px; }
+            .page-kicker {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .14em;
+                color: var(--blue);
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .page-kicker::before {
+                content: '';
+                width: 22px;
+                height: 2px;
+                background: var(--blue);
+                border-radius: 2px;
+            }
+            .page-heading h1 {
+                font-size: 36px;
+                font-weight: 800;
+                color: var(--navy);
+                letter-spacing: -.03em;
+                line-height: 1.08;
+                margin-bottom: 10px;
+            }
+            .page-heading p {
+                font-size: 14.5px;
+                color: var(--text2);
+                max-width: 520px;
+                line-height: 1.7;
+            }
+
+            /* ── INFO CARDS ROW ── */
+            .info-row {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
-                gap: 24px;
-                margin-bottom: 64px;
+                gap: 14px;
+                margin-bottom: 36px;
             }
-
             .info-card {
-                background: #ffffff;
-                padding: 32px;
-                border-radius: 32px;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
-                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-                border: 1px solid var(--line);
-                display: flex;
-                flex-direction: column;
-                min-height: 160px;
+                background: var(--white);
+                border: 1px solid var(--gray-100);
+                border-radius: var(--r-xl);
+                padding: 22px 22px 20px;
+                box-shadow: var(--shadow-sm);
+                transition: .2s;
+                position: relative;
+                overflow: hidden;
             }
-
+            .info-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                border-radius: var(--r-xl) var(--r-xl) 0 0;
+                background: var(--blue);
+                opacity: 0;
+                transition: .2s;
+            }
             .info-card:hover {
-                transform: translateY(-8px);
-                box-shadow: 0 30px 60px rgba(18, 32, 74, 0.08);
-                border-color: var(--accent);
-            }
-
-            .info-card__label {
-                font-size: 11px;
-                font-weight: 800;
-                color: var(--muted);
-                text-transform: uppercase;
-                letter-spacing: 0.12em;
-                margin-bottom: 16px;
-                display: block;
-            }
-
-            .info-card__value {
-                font-size: 18px;
-                font-weight: 700;
-                line-height: 1.5;
-                color: var(--text);
-                overflow-wrap: break-word;
-            }
-
-            /* Form Section */
-            .form-section {
-                background: #ffffff;
-                padding: 56px;
-                border-radius: 40px;
-                box-shadow: 0 30px 80px rgba(18, 32, 74, 0.05);
-                border: 1px solid var(--line);
-            }
-
-            .form-section h2 {
-                font-size: 32px;
-                font-weight: 700;
-                margin-bottom: 40px;
-                letter-spacing: -0.04em;
-                text-align: left;
-                color: #0f172a;
-            }
-
-            .input-field {
-                width: 100%;
-                padding: 16px 20px;
-                background: #f8fafc;
-                border: 1px solid var(--line);
-                border-radius: 18px;
-                font-size: 15px;
-                outline: none;
-                transition: all 0.3s;
-                color: var(--text);
-                margin-top: 10px;
-                font-family: inherit;
-            }
-
-            .input-field:focus {
-                border-color: var(--accent);
-                background: #fff;
-                box-shadow: 0 0 0 4px var(--accent-soft);
-            }
-
-            .input-label {
-                font-size: 12px;
-                font-weight: 800;
-                color: var(--muted);
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                display: block;
-            }
-
-            .required-mark {
-                color: #ef4444;
-                margin-left: 2px;
-                font-size: 14px;
-            }
-
-            textarea.input-field {
-                height: 180px;
-                resize: none;
-            }
-
-            .btn-submit {
-                background: var(--accent);
-                color: white;
-                padding: 14px 36px;
-                border-radius: 999px;
-                font-weight: 700;
-                font-size: 14px;
-                border: none;
-                cursor: pointer;
-                transition: all 0.3s;
-                float: right;
-            }
-
-            .btn-submit:hover {
-                background: var(--brand);
-                box-shadow: 0 10px 20px rgba(61, 115, 234, 0.2);
+                box-shadow: var(--shadow-md);
                 transform: translateY(-2px);
             }
-
-            /* Error markers */
-            .error-text {
-                color: #ef4444;
-                font-size: 12px;
-                font-weight: 600;
-                margin-top: 4px;
-                display: none;
-                animation: fadeIn 0.2s ease;
+            .info-card:hover::before { opacity: 1; }
+            .ic-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: var(--r-md);
+                background: var(--blue-light);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 14px;
             }
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-            .input-field.is-invalid { border-color: #ef4444; background: #fff1f2; }
+            .ic-icon svg, .ic-icon i {
+                width: 18px;
+                height: 18px;
+                color: var(--blue);
+                font-size: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .ic-label {
+                font-size: 10.5px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--gray-500);
+                margin-bottom: 5px;
+            }
+            .ic-value {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--navy);
+                line-height: 1.3;
+            }
+            .ic-value.sm { font-size: 13.5px; }
 
-            /* Service Review Section */
-            .service-review-cta {
-                margin-top: 40px;
-                padding: 32px;
-                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                border-radius: 24px;
-                color: white;
+            /* ── MAIN GRID ── */
+            .main-grid {
+                display: grid;
+                grid-template-columns: 1fr 360px;
+                gap: 24px;
+                align-items: start;
+            }
+
+            /* ── FORM CARD ── */
+            .form-card {
+                background: var(--white);
+                border: 1px solid var(--gray-100);
+                border-radius: var(--r-2xl);
+                box-shadow: var(--shadow-sm);
+                overflow: hidden;
+            }
+            .form-card-head {
+                padding: 28px 32px 24px;
+                border-bottom: 1px solid var(--gray-100);
+            }
+            .form-card-head h2 {
+                font-size: 20px;
+                font-weight: 800;
+                color: var(--navy);
+                letter-spacing: -.02em;
+                margin-bottom: 4px;
+            }
+            .form-card-head p {
+                font-size: 13.5px;
+                color: var(--text2);
+                line-height: 1.6;
+            }
+            .form-body { padding: 28px 32px 32px; }
+            .fg { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+            .fl {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .1em;
+                color: var(--gray-700);
+            }
+            .fl .req { color: var(--red); margin-left: 2px; }
+            .fi {
+                border: 1px solid var(--gray-200);
+                border-radius: var(--r-md);
+                padding: 11px 14px;
+                font-family: var(--font);
+                font-size: 13.5px;
+                color: var(--text);
+                outline: none;
+                background: var(--gray-50);
+                transition: .18s;
+                width: 100%;
+            }
+            .fi:focus {
+                border-color: var(--blue);
+                background: var(--white);
+                box-shadow: 0 0 0 3px rgba(59, 111, 232, .1);
+            }
+            .fi::placeholder { color: var(--gray-300); }
+            textarea.fi { resize: none; min-height: 120px; line-height: 1.65; }
+
+            .form-foot {
+                margin-top: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .form-note {
+                font-size: 12px;
+                color: var(--text3);
+                line-height: 1.5;
+                max-width: 280px;
+            }
+            .btn-submit {
+                background: var(--blue);
+                color: var(--white);
+                border: none;
+                border-radius: var(--r-2xl);
+                padding: 13px 28px;
+                font-family: var(--font);
+                font-size: 14px;
+                font-weight: 700;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: .18s;
+                white-space: nowrap;
+            }
+            .btn-submit:hover {
+                background: var(--blue-dark);
+                transform: translateY(-1px);
+                box-shadow: 0 6px 20px rgba(59, 111, 232, .35);
+            }
+
+            .select-custom-arrow {
+                cursor: pointer;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7491' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 14px center;
+                padding-right: 36px !important;
+            }
+
+            /* ── SIDE PANEL ── */
+            .side-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            /* map card */
+            .map-card {
+                background: var(--navy2);
+                border-radius: var(--r-2xl);
+                overflow: hidden;
+                box-shadow: var(--shadow-md);
+            }
+            .map-placeholder {
+                height: 180px;
+                background: var(--navy3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            .map-grid {
+                position: absolute;
+                inset: 0;
+                background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
+                background-size: 28px 28px;
+            }
+            .map-pin {
+                width: 44px;
+                height: 44px;
+                background: var(--blue);
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 16px rgba(59, 111, 232, .5);
+                position: relative;
+                z-index: 1;
+            }
+            .map-pin-inner { width: 16px; height: 16px; background: white; border-radius: 50%; transform: rotate(45deg); }
+            .map-pin-ring {
+                position: absolute;
+                width: 64px;
+                height: 64px;
+                border: 2px solid rgba(59, 111, 232, .35);
+                border-radius: 50%;
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse { 0% { transform: scale(.8); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+
+            .map-info { padding: 20px 22px; }
+            .map-info-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 8px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, .07);
+            }
+            .map-info-row:last-child { border: none; }
+            .mrow-ic {
+                width: 28px;
+                height: 28px;
+                border-radius: var(--r-sm);
+                background: rgba(255, 255, 255, .07);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .mrow-ic i { font-size: 13px; color: rgba(255, 255, 255, .6); }
+            .mrow-label {
+                font-size: 10px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: rgba(255, 255, 255, .3);
+                margin-bottom: 1px;
+            }
+            .mrow-val { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, .85); }
+
+            /* quick actions card */
+            .quick-card {
+                background: var(--white);
+                border: 1px solid var(--gray-100);
+                border-radius: var(--r-2xl);
+                padding: 22px;
+                box-shadow: var(--shadow-sm);
+            }
+            .quick-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--navy);
+                margin-bottom: 14px;
+                letter-spacing: -.01em;
+            }
+            .quick-actions { display: flex; flex-direction: column; gap: 8px; }
+            .qa-link {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 14px;
+                border-radius: var(--r-lg);
+                border: 1.5px solid var(--gray-100);
+                background: var(--gray-50);
+                cursor: pointer;
+                transition: .18s;
+                text-align: left;
+                width: 100%;
+                text-decoration: none;
+            }
+            .qa-link:hover {
+                border-color: var(--blue);
+                background: var(--blue-light);
+                transform: translateX(2px);
+            }
+            .qa-btn-ic {
+                width: 34px;
+                height: 34px;
+                border-radius: var(--r-sm);
+                background: var(--gray-100);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                transition: .18s;
+            }
+            .qa-btn-ic i { font-size: 15px; color: var(--navy2); transition: .18s; }
+            .qa-link:hover .qa-btn-ic { background: var(--blue); }
+            .qa-link:hover .qa-btn-ic i { color: white; }
+            .qa-btn-text { flex: 1; }
+            .qa-btn-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 1px; }
+            .qa-btn-sub { font-size: 11.5px; color: var(--text3); }
+            .qa-btn-arr { font-size: 16px; color: var(--gray-300); transition: .18s; }
+            .qa-link:hover .qa-btn-arr { color: var(--blue); }
+
+            /* hours card */
+            .hours-card {
+                background: var(--white);
+                border: 1px solid var(--gray-100);
+                border-radius: var(--r-2xl);
+                padding: 22px;
+                box-shadow: var(--shadow-sm);
+            }
+            .hours-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 14px; }
+            .hours-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 0;
+                border-bottom: 1px solid var(--gray-100);
+                font-size: 13px;
+            }
+            .hours-row:last-child { border: none; }
+            .hours-day { color: var(--text2); font-weight: 500; }
+            .hours-time { font-weight: 700; color: var(--navy); }
+            .hours-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 9px;
+                border-radius: 999px;
+                background: rgba(18, 183, 106, .12);
+                color: var(--green);
+            }
+            .hours-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+
+            /* ── CTA BANNER ── */
+            .cta-banner {
+                background: var(--navy);
+                border-radius: var(--r-2xl);
+                padding: 28px 36px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 24px;
+                margin-top: 24px;
+                position: relative;
+                overflow: hidden;
             }
-            .service-review-cta h3 { margin: 0; font-size: 20px; font-weight: 700; }
-            .service-review-cta p { margin: 8px 0 0; font-size: 14px; opacity: 0.8; }
-            .btn-review {
-                background: #9fcdff;
-                color: #0f172a;
-                padding: 12px 28px;
-                border-radius: 999px;
-                font-weight: 800;
-                font-size: 14px;
-                text-decoration: none;
-                transition: 0.3s;
+            .cta-banner::before {
+                content: '';
+                position: absolute;
+                right: -40px;
+                top: -40px;
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                background: rgba(59, 111, 232, .18);
+            }
+            .cta-banner::after {
+                content: '';
+                position: absolute;
+                right: 40px;
+                bottom: -60px;
+                width: 140px;
+                height: 140px;
+                border-radius: 50%;
+                background: rgba(59, 111, 232, .1);
+            }
+            .cta-left { position: relative; z-index: 1; }
+            .cta-left h3 { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: -.02em; margin-bottom: 5px; }
+            .cta-left p { font-size: 13px; color: rgba(255, 255, 255, .5); line-height: 1.6; }
+            .cta-btns { display: flex; gap: 10px; position: relative; z-index: 1; flex-shrink: 0; }
+            .btn-cta-white {
+                background: var(--white);
+                color: var(--navy);
+                border: none;
+                border-radius: var(--r-2xl);
+                padding: 12px 22px;
+                font-family: var(--font);
+                font-size: 13.5px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: .15s;
                 white-space: nowrap;
+                text-decoration: none;
             }
-            .btn-review:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(175, 242, 47, 0.3);}
+            .btn-cta-white:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
+            }
+            .btn-cta-outline {
+                background: transparent;
+                color: var(--white);
+                border: 1.5px solid rgba(255, 255, 255, .25);
+                border-radius: var(--r-2xl);
+                padding: 12px 22px;
+                font-family: var(--font);
+                font-size: 13.5px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: .15s;
+                white-space: nowrap;
+                text-decoration: none;
+            }
+            .btn-cta-outline:hover {
+                border-color: rgba(255, 255, 255, .5);
+                background: rgba(255, 255, 255, .06);
+            }
+
+            /* Responsive */
+            @media (max-width: 992px) {
+                .main-grid { grid-template-columns: 1fr; }
+                .info-row { grid-template-columns: repeat(2, 1fr); }
+            }
+            @media (max-width: 600px) {
+                .info-row { grid-template-columns: 1fr; }
+                .cta-banner { flex-direction: column; align-items: flex-start; }
+            }
 
             .alert-success {
                 padding: 16px;
@@ -233,10 +543,23 @@
                 font-weight: 600;
             }
 
-            .clearfix::after {
-                content: "";
-                clear: both;
-                display: table;
+            .error-text {
+                color: var(--red);
+                font-size: 12px;
+                font-weight: 600;
+                margin-top: 4px;
+                display: none;
+            }
+            .is-invalid { border-color: var(--red) !important; background: #fff1f2 !important; }
+
+            /* Responsive */
+            @media (max-width: 992px) {
+                .contact-main { grid-template-columns: 1fr; }
+                .info-grid { grid-template-columns: repeat(2, 1fr); }
+            }
+            @media (max-width: 600px) {
+                .info-grid { grid-template-columns: 1fr; }
+                .rb-actions { flex-direction: column; }
             }
 
             /* ─── Login Modal ─── */
@@ -343,79 +666,175 @@
         <%@ include file="/WEB-INF/jspf/storefront/header.jspf" %>
 
         <main>
-            <div class="contact-wrapper">
-                <div class="contact-header">
-                    <span class="section-eyebrow">Kết nối</span>
+            <div class="page-wrap">
+                <div class="page-heading">
+                    <div class="page-kicker">Kết nối</div>
                     <h1>Liên hệ</h1>
-                    <p>Mọi thắc mắc của bạn sẽ được giải đáp trong vòng 24h. Vui lòng kết nối với chúng tôi qua các kênh bên dưới.</p>
                 </div>
 
-                <div class="info-grid">
+                <div class="info-row">
                     <div class="info-card">
-                        <span class="info-card__label">Điện thoại</span>
-                        <div class="info-card__value">0385 842 752</div>
+                        <div class="ic-icon"><i class="fa-solid fa-phone"></i></div>
+                        <div class="ic-label">Điện thoại</div>
+                        <div class="ic-value">0385 842 752</div>
                     </div>
                     <div class="info-card">
-                        <span class="info-card__label">Địa chỉ</span>
-                        <div class="info-card__value">Khu Công Nghệ cao, Hoà lạc</div>
+                        <div class="ic-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="ic-label">Địa chỉ</div>
+                        <div class="ic-value">Khu CNC, Hoà Lạc, Hà Nội</div>
                     </div>
                     <div class="info-card">
-                        <span class="info-card__label">Giờ mở cửa</span>
-                        <div class="info-card__value">08:00 - 22:00</div>
+                        <div class="ic-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div class="ic-label">Giờ mở cửa</div>
+                        <div class="ic-value">08:00 – 22:00</div>
                     </div>
                     <div class="info-card">
-                        <span class="info-card__label">Email</span>
-                        <div class="info-card__value">mobileshop@example.com</div>
+                        <div class="ic-icon"><i class="fa-solid fa-envelope"></i></div>
+                        <div class="ic-label">Email</div>
+                        <div class="ic-value sm">mobileshop@example.com</div>
                     </div>
                 </div>
 
-                <section class="form-section">
-                    <h2>Gửi yêu cầu tư vấn</h2>
-
-                    <c:if test="${param.success eq 'true'}">
-                        <div class="alert-success">Cảm ơn bạn! Yêu cầu của bạn đã được gửi thành công.</div>
-                    </c:if>
-
-                    <form action="${pageContext.request.contextPath}/contact" method="post" class="clearfix" id="contactForm">
-                        <div class="row">
-                            <div class="col-md-4 mb-4">
-                                <label class="input-label">Họ và tên <span class="required-mark">*</span></label>
-                                <input type="text" name="name" id="name" class="input-field" placeholder="Nhập tên của bạn">
-                                <div id="err-name" class="error-text">Họ tên không được để trống.</div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <label class="input-label">Email <span class="required-mark">*</span></label>
-                                <input type="email" name="email" id="email" class="input-field" placeholder="example@gmail.com">
-                                <div id="err-email" class="error-text">Vui lòng nhập email hợp lệ.</div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <label class="input-label">Số điện thoại <span class="required-mark">*</span></label>
-                                <input type="tel" name="phone" id="phone" class="input-field" placeholder="0xxx ...">
-                                <div id="err-phone" class="error-text">Số điện thoại không đúng định dạng.</div>
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="input-label">Nội dung <span class="required-mark">*</span></label>
-                            <textarea name="message" id="message" class="input-field" placeholder="Bạn cần hỗ trợ điều gì?"></textarea>
-                            <div id="err-message" class="error-text">Nội dung phải có ít nhất 10 ký tự.</div>
-                        </div>
-                        <button type="submit" class="btn-submit">Gửi liên hệ</button>
-                    </form>
-                </section>
-
-                <div class="service-review-cta">
+                <div class="main-grid">
+                    <%-- Left: Form --%>
                     <div>
-                        <h3 style="color : #fff3cd">Bạn thấy dịch vụ của chúng tôi thế nào?</h3>
-                        <p  style="color : #fff8e6">Ý kiến của bạn giúp chúng tôi cải thiện chất lượng mỗi ngày.</p>
+                        <div class="form-card">
+                            <div class="form-card-head">
+                                <h2>Gửi yêu cầu tư vấn</h2>
+                                <p>Điền thông tin bên dưới, đội ngũ của chúng tôi sẽ liên hệ lại trong vòng 24h.</p>
+                            </div>
+
+                            <div class="form-body">
+                                <c:if test="${param.success eq 'true'}">
+                                    <div class="alert-success">Cảm ơn bạn! Yêu cầu của bạn đã được gửi thành công.</div>
+                                </c:if>
+
+                                <form action="${pageContext.request.contextPath}/contact" method="post" id="contactForm">
+                                    <div class="field-row">
+                                        <div class="fg">
+                                            <label class="fl">Họ và tên <span class="req">*</span></label>
+                                            <input type="text" name="name" id="name" class="fi" placeholder="Nhập tên của bạn">
+                                            <div id="err-name" class="error-text">Họ tên không được để trống.</div>
+                                        </div>
+                                        <div class="fg">
+                                            <label class="fl">Email <span class="req">*</span></label>
+                                            <input type="email" name="email" id="email" class="fi" placeholder="example@gmail.com">
+                                            <div id="err-email" class="error-text">Vui lòng nhập email hợp lệ.</div>
+                                        </div>
+                                        <div class="fg">
+                                            <label class="fl">Số điện thoại <span class="req">*</span></label>
+                                            <input type="tel" name="phone" id="phone" class="fi" placeholder="0xxx...">
+                                            <div id="err-phone" class="error-text">Số điện thoại không đúng định dạng.</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="fg">
+                                        <label class="fl">Chủ đề</label>
+                                        <select name="topic" id="topic" class="fi select-custom-arrow">
+                                            <option value="" disabled selected>Chọn chủ đề hỗ trợ...</option>
+                                            <option value="Tư vấn mua hàng">Tư vấn mua hàng</option>
+                                            <option value="Thu cũ đổi mới">Thu cũ đổi mới</option>
+                                            <option value="Bảo hành & sửa chữa">Bảo hành & sửa chữa</option>
+                                            <option value="Đơn hàng & vận chuyển">Đơn hàng & vận chuyển</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="fg" style="margin-bottom:0">
+                                        <label class="fl">Nội dung <span class="req">*</span></label>
+                                        <textarea name="message" id="message" class="fi" placeholder="Bạn cần hỗ trợ điều gì? Mô tả chi tiết để chúng tôi hỗ trợ nhanh hơn..." style="height: 160px;"></textarea>
+                                        <div id="err-message" class="error-text">Nội dung phải có ít nhất 10 ký tự.</div>
+                                    </div>
+                                    
+                                    <div class="form-foot">
+                                        <p class="form-note">Chúng tôi sẽ liên hệ lại trong vòng <strong>24 giờ</strong> làm việc. Thông tin của bạn được bảo mật hoàn toàn.</p>
+                                        <button type="submit" class="btn-submit">
+                                            Gửi liên hệ
+                                            <i class="fa-solid fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <%-- CTA Banner --%>
+                        <div class="cta-banner">
+                            <div class="cta-left">
+                                <h3>Bạn thấy dịch vụ của chúng tôi thế nào?</h3>
+                                <p>Ý kiến của bạn giúp chúng tôi cải thiện chất lượng dịch vụ mỗi ngày.</p>
+                            </div>
+                            <div class="cta-btns">
+                                <c:choose>
+                                    <c:when test="${sessionScope.acc != null}">
+                                        <a href="${ctx}/review/write?type=SERVICE" class="btn-cta-white">Đánh giá dịch vụ</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <button class="btn-cta-white" onclick="openLoginModal()" style="border:none; cursor:pointer;">Đánh giá dịch vụ</button>
+                                    </c:otherwise>
+                                </c:choose>
+                                <a href="${ctx}/reviews?type=SERVICE" class="btn-cta-outline">Xem đánh giá</a>
+                            </div>
+                        </div>
                     </div>
-                    <c:choose>
-                        <c:when test="${sessionScope.acc != null}">
-                            <a href="${pageContext.request.contextPath}/review/write?type=SERVICE" class="btn-review">Đánh giá dịch vụ</a>
-                        </c:when>
-                        <c:otherwise>
-                            <button class="btn-review" onclick="openLoginModal()" style="border:none; cursor:pointer;">Đánh giá dịch vụ</button>
-                        </c:otherwise>
-                    </c:choose>
+
+                    <%-- Right: Side Panel --%>
+                    <div class="side-panel">
+                        <div class="map-card">
+                            <div class="map-placeholder">
+                                <div class="map-grid"></div>
+                                <div style="position:relative">
+                                    <div class="map-pin-ring"></div>
+                                    <div class="map-pin"><div class="map-pin-inner"></div></div>
+                                </div>
+                            </div>
+                            <div class="map-info">
+                                <div class="map-info-row">
+                                    <div class="mrow-ic"><i class="fa-solid fa-location-dot"></i></div>
+                                    <div>
+                                        <div class="mrow-label">Địa chỉ</div>
+                                        <div class="mrow-val">Khu CNC, Hoà Lạc, TP.Hà Nội</div>
+                                    </div>
+                                </div>
+                                <div class="map-info-row">
+                                    <div class="mrow-ic"><i class="fa-solid fa-phone"></i></div>
+                                    <div>
+                                        <div class="mrow-label">Hotline</div>
+                                        <div class="mrow-val">0385 842 752</div>
+                                    </div>
+                                </div>
+                                <div class="map-info-row">
+                                    <div class="mrow-ic"><i class="fa-solid fa-clock"></i></div>
+                                    <div>
+                                        <div class="mrow-label">Giờ mở cửa</div>
+                                        <div class="mrow-val">08:00 – 22:00 hàng ngày</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-card">
+                            <div class="quick-title">Liên hệ nhanh</div>
+                            <div class="quick-actions">
+                                <a href="tel:0385842752" class="qa-link">
+                                    <div class="qa-btn-ic"><i class="fa-solid fa-phone-volume"></i></div>
+                                    <div class="qa-btn-text">
+                                        <div class="qa-btn-title">Gọi ngay</div>
+                                        <div class="qa-btn-sub">0385 842 752</div>
+                                    </div>
+                                    <span class="qa-btn-arr">›</span>
+                                </a>
+                                <a href="mailto:mobileshop@example.com" class="qa-link">
+                                    <div class="qa-btn-ic"><i class="fa-solid fa-envelope-open-text"></i></div>
+                                    <div class="qa-btn-text">
+                                        <div class="qa-btn-title">Gửi email</div>
+                                        <div class="qa-btn-sub">mobileshop@example.com</div>
+                                    </div>
+                                    <span class="qa-btn-arr">›</span>
+                                </a>
+                              
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
