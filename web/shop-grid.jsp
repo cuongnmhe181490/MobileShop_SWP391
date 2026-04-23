@@ -35,7 +35,6 @@
                                 <div class="filter-group">
                                     <h3>Tìm kiếm</h3>
                                     <input id="catalogSearchInput" class="catalog-search" type="text" name="txt" value="${fn:escapeXml(searchQuery)}" placeholder="Tìm sản phẩm như iPhone 17 Pro Max">
-                                    <p class="catalog-filter-note">Hệ thống tự bỏ khác biệt hoa/thường và khoảng trắng khi tìm kiếm.</p>
                                 </div>
 
                                 <div class="filter-group">

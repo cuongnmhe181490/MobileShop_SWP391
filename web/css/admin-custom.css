@@ -319,16 +319,16 @@ body {
 
 .product-filter-bar {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     gap: 18px;
 }
 
 .product-search-wrap {
     position: relative;
-    flex: 0 0 240px;
-    min-width: 240px;
-    max-width: 240px;
+    flex: 0 0 280px;
+    min-width: 280px;
+    max-width: 280px;
 }
 
 .product-search-wrap i {
@@ -350,8 +350,8 @@ body {
 }
 
 .product-filter-select {
-    flex: 0 0 220px;
-    min-width: 220px;
+    flex: 0 0 200px;
+    min-width: 200px;
 }
 
 .product-filter-bar .btn-primary,

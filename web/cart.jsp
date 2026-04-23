@@ -2,6 +2,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="checkoutPlaceholderUrl" value="${ctx}/checkout.jsp" />
 <c:set var="pageTitle" value="Giỏ hàng" />
 <!DOCTYPE html>
 <html lang="vi">
@@ -82,8 +83,10 @@
                                     <strong><fmt:formatNumber value="${cartTotal}" type="number" maxFractionDigits="0"/> đ</strong>
                                 </div>
                                 <div class="summary-actions">
-                                    <a class="pill-link pill-link--primary" href="${ctx}/product">Tiếp tục mua sắm</a>
+                                    <a class="pill-link pill-link--primary summary-actions__checkout" href="${checkoutPlaceholderUrl}">Đặt hàng</a>
+                                    <a class="pill-link" href="${ctx}/product">Tiếp tục mua sắm</a>
                                 </div>
+                                <p class="summary-note">Màn thanh toán đang chờ tích hợp. Nút này là điểm nối tạm để teammate gắn checkout thật ở bước sau.</p>
                             </div>
                         </aside>
                     </div>

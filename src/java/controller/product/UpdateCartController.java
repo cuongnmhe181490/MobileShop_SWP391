@@ -1,6 +1,6 @@
-package controller.storefront;
+package controller.product;
 
-import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.ProductModel;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -35,7 +35,7 @@ public class UpdateCartController extends HttpServlet {
             return;
         }
 
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         ProductModel product = dao.getProductByID(productId);
         if (product == null) {
             cart.remove(productId);

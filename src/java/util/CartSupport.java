@@ -1,6 +1,6 @@
 package util;
 
-import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.CartItem;
 
 import entity.ProductModel;
@@ -58,7 +58,7 @@ public final class CartSupport {
         return stockMap;
     }
 
-    public static List<CartItem> buildCartItems(HttpSession session, DAO dao) {
+    public static List<CartItem> buildCartItems(HttpSession session, ProductStorefrontDAO dao) {
         Map<String, Integer> cart = getCart(session);
         List<CartItem> items = new ArrayList<>();
         List<String> invalidKeys = new ArrayList<>();

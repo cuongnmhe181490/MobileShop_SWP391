@@ -1,6 +1,6 @@
-package controller.storefront;
+package controller.product;
 
-import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,7 +21,7 @@ public class AddToCartController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         String productId = safeTrim(request.getParameter("idProduct"));
         int quantity = parseQuantity(request.getParameter("quantity"));
 

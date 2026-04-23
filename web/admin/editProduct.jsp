@@ -141,7 +141,7 @@
 
                         <label class="field-block">
                             <span class="field-label">Ngày ra mắt</span>
-                            <input class="form-control form-input admin-product-input" type="date" name="releaseDate" value="${param.releaseDate != null ? param.releaseDate : productForm.releaseDate}" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="date" name="releaseDate" value="${param.releaseDate != null ? param.releaseDate : productForm.releaseDate}" max="${todayDate}" ${viewMode ? 'disabled' : ''}>
                             <span class="field-help">Nếu bỏ trống khi thêm mới, hệ thống sẽ dùng ngày hiện tại.</span>
                             <span class="field-error" data-error-for="releaseDate">${errors.releaseDate}</span>
                         </label>
@@ -217,7 +217,7 @@
                         <label class="field-block">
                             <span class="field-label">Tải ảnh từ máy</span>
                             <input class="form-control form-input admin-product-input" type="file" name="imageFile" id="imageFile" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" ${viewMode ? 'disabled' : ''}>
-                            <span class="field-help">Chỉ nhận ảnh hợp lệ, tối đa 10MB.</span>
+                            <span class="field-help">Chỉ nhận ảnh hợp lệ, tối đa 500KB.</span>
                             <span class="field-error" data-error-for="imageFile">${errors.imageFile}</span>
                         </label>
                     </div>
@@ -402,7 +402,7 @@
                     return;
                 }
                 if (file.size > 500 * 1024) {
-                    setError('imageFile', 'Kích thước ảnh tối đa là 500kb.');
+                    setError('imageFile', 'Kích thước ảnh tối đa là 500KB.');
                     imageFileInput.value = '';
                     return;
                 }

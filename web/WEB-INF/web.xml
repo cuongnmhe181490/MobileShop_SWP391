@@ -13,7 +13,7 @@
     </welcome-file-list>
     <servlet>
         <servlet-name>LoadProduct</servlet-name>
-        <servlet-class>controller.storefront.LoadProduct</servlet-class>
+        <servlet-class>controller.product.LoadProduct</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoadProduct</servlet-name>
@@ -22,7 +22,7 @@
 
     <servlet>
         <servlet-name>AddToCartController</servlet-name>
-        <servlet-class>controller.storefront.AddToCartController</servlet-class>
+        <servlet-class>controller.product.AddToCartController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>AddToCartController</servlet-name>
@@ -31,7 +31,7 @@
 
     <servlet>
         <servlet-name>CartController</servlet-name>
-        <servlet-class>controller.storefront.CartController</servlet-class>
+        <servlet-class>controller.product.CartController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>CartController</servlet-name>
@@ -40,7 +40,7 @@
 
     <servlet>
         <servlet-name>RemoveCartItemController</servlet-name>
-        <servlet-class>controller.storefront.RemoveCartItemController</servlet-class>
+        <servlet-class>controller.product.RemoveCartItemController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>RemoveCartItemController</servlet-name>
@@ -49,7 +49,7 @@
 
     <servlet>
         <servlet-name>UpdateCartController</servlet-name>
-        <servlet-class>controller.storefront.UpdateCartController</servlet-class>
+        <servlet-class>controller.product.UpdateCartController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>UpdateCartController</servlet-name>
@@ -58,7 +58,7 @@
 
     <servlet>
         <servlet-name>DetailControl</servlet-name>
-        <servlet-class>controller.storefront.DetailControl</servlet-class>
+        <servlet-class>controller.product.DetailControl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>DetailControl</servlet-name>
@@ -76,7 +76,7 @@
 
     <servlet>
         <servlet-name>ProductManageController</servlet-name>
-        <servlet-class>controller.ProductManageController</servlet-class>
+        <servlet-class>controller.product.ProductManageController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ProductManageController</servlet-name>
