@@ -2,6 +2,9 @@ package controller.storefront;
 
 import dao.DAO;
 import entity.CartItem;
+import entity.Order;
+import entity.OrderDetail;
+import entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -72,34 +75,67 @@ public class CheckoutController extends HttpServlet {
             request.setAttribute("errorAddress", "Vui lòng nhập địa chỉ nhận hàng");
             hasError = true;
         }
+
+        // Lấy lại dữ liệu giỏ hàng để hiển thị nếu có lỗi hoặc để lưu DB
+        List<CartItem> cartItems = CartSupport.buildCartItems(session, dao);
+        double cartTotal = 0;
+        for (CartItem item : cartItems) {
+            cartTotal += item.getSubtotal();
+        }
         
         if (hasError) {
-            // Lưu lại các giá trị đã nhập để không bị mất khi load lại trang
             request.setAttribute("fullName", fullName);
             request.setAttribute("email", email);
             request.setAttribute("phone", phone);
             request.setAttribute("address", address);
             request.setAttribute("note", note);
             
-            // Cần chuẩn bị lại dữ liệu giỏ hàng để hiển thị
-            List<CartItem> cartItems = CartSupport.buildCartItems(session, dao);
-            double cartTotal = 0;
-            for (CartItem item : cartItems) {
-                cartTotal += item.getSubtotal();
-            }
             request.setAttribute("cartItems", cartItems);
             request.setAttribute("cartTotal", cartTotal);
             
             request.getRequestDispatcher("/checkout.jsp").forward(request, response);
         } else {
-            // 3. Xử lý đặt hàng thành công (Trong thực tế sẽ lưu vào DB tại đây)
+            // 3. Lưu vào Database
+            User account = (User) session.getAttribute("acc");
             
-            // Xóa giỏ hàng sau khi đặt hàng thành công
-            session.removeAttribute(CartSupport.CART_SESSION_KEY);
-            CartSupport.syncCartSize(session);
+            Order order = new Order();
+            order.setUserId(account != null ? account.getId() : null);
+            order.setOrderDate(new java.sql.Date(System.currentTimeMillis()));
+            order.setTotalPrice(cartTotal);
+            order.setReceiverName(fullName);
+            order.setReceiverPhone(phone);
+            order.setReceiverAddress(address);
+            order.setCustomerNote(note);
+            order.setOrderStatus("Pending");
+            order.setPaymentMethod("COD");
             
-            // Chuyển hướng sang trang confirm
-            response.sendRedirect(request.getContextPath() + "/confirm.jsp");
+            int orderId = dao.addOrder(order);
+            
+            if (orderId > 0) {
+                // Lưu OrderDetail
+                for (CartItem item : cartItems) {
+                    OrderDetail detail = new OrderDetail();
+                    detail.setIdOrder(orderId);
+                    detail.setIdProduct(item.getProduct().getIdProduct());
+                    detail.setQuantity(item.getQuantity());
+                    detail.setUnitPrice(item.getProduct().getPrice());
+                    dao.addOrderDetail(detail);
+                }
+                
+                // Xóa giỏ hàng sau khi đặt thành công
+                session.removeAttribute(CartSupport.CART_SESSION_KEY);
+                CartSupport.syncCartSize(session);
+                
+                // Lưu ID đơn hàng vào session để trang confirm hiển thị (tùy chọn)
+                request.setAttribute("orderId", orderId);
+                
+                response.sendRedirect(request.getContextPath() + "/confirm.jsp?orderId=" + orderId);
+            } else {
+                request.setAttribute("errorGeneral", "Có lỗi xảy ra khi lưu đơn hàng. Vui lòng thử lại.");
+                request.setAttribute("cartItems", cartItems);
+                request.setAttribute("cartTotal", cartTotal);
+                request.getRequestDispatcher("/checkout.jsp").forward(request, response);
+            }
         }
     }
 }

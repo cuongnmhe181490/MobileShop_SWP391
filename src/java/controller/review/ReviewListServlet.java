@@ -2,6 +2,7 @@ package controller.review;
 
 import dao.ReviewDAO;
 import entity.Review;
+import entity.User;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -64,12 +65,70 @@ public class ReviewListServlet extends HttpServlet {
             req.setAttribute("selectedStar", star);
             req.setAttribute("pid", idProduct);
             
+            int qPage = 1;
+            try {
+                qPage = Math.max(1, Integer.parseInt(req.getParameter("qpage")));
+            } catch (Exception ignored) {
+            }
+            
+            List<Review> questions = dao.getQuestions(idProduct, qPage, PAGE_SIZE);
+            int totalQuestions = dao.countQuestions(idProduct);
+            int totalQPages = (int) Math.ceil((double) totalQuestions / PAGE_SIZE);
+            
+            req.setAttribute("questions", questions);
+            req.setAttribute("totalQuestions", totalQuestions);
+            req.setAttribute("totalQPages", totalQPages);
+            req.setAttribute("currentQPage", qPage);
+
             HttpSession session = req.getSession(false);
             boolean loggedIn = (session != null && session.getAttribute("acc") != null);
+            boolean hasPurchased = false;
+            
+            if (loggedIn) {
+                User acc = (User) session.getAttribute("acc");
+                hasPurchased = dao.hasPurchasedProduct(acc.getId(), idProduct);
+            }
+            
             req.setAttribute("loggedIn", loggedIn);
+            req.setAttribute("hasPurchased", hasPurchased);
             
             req.getRequestDispatcher("/reviewList.jsp").forward(req, resp);
 
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        String idProduct = req.getParameter("pid");
+        String questionContent = req.getParameter("questionContent");
+        
+        if (idProduct == null || idProduct.isBlank() || questionContent == null || questionContent.isBlank()) {
+            resp.sendRedirect(req.getContextPath() + "/reviews?pid=" + idProduct + "&error=empty");
+            return;
+        }
+
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("acc") == null) {
+            resp.sendRedirect(req.getContextPath() + "/reviews?pid=" + idProduct + "&error=login");
+            return;
+        }
+        
+        User acc = (User) session.getAttribute("acc");
+        
+        Review q = new Review();
+        q.setReviewType("PRODUCT"); // Used to pass CHK_ReviewType constraint
+        q.setIdProduct(idProduct);
+        q.setUserId(acc.getId());
+        q.setReviewContent(questionContent);
+        q.setReviewTopic("Q&A"); // Marker for question logic
+        q.setRanking(5); // Set to 5 to bypass DB CHECK (Ranking 1-5). Stars are hidden in UI for QUESTION.
+        
+        try {
+            dao.insertReview(q);
+            resp.sendRedirect(req.getContextPath() + "/reviews?pid=" + idProduct + "&success=asked#qa-tab");
         } catch (Exception e) {
             throw new ServletException(e);
         }

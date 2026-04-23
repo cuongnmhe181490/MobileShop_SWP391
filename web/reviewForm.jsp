@@ -160,8 +160,48 @@
             }
 
             .upload-manager:hover {
-                background: var(--rv-primary-soft);
+                background: #f1f5f9;
                 border-color: var(--rv-primary);
+            }
+
+            /* Error States */
+            .field-error {
+                color: #dc2626;
+                font-size: 13px;
+                font-weight: 700;
+                margin-top: 10px;
+                display: none;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 16px;
+                background: #fef2f2;
+                border-radius: 12px;
+                border: 1px solid #fee2e2;
+                animation: slideDown 0.3s ease;
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .field-error.show { display: flex; }
+            .rv-textarea.error {
+                border-color: #ef4444 !important;
+                background-color: #fff1f2 !important;
+                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+            }
+            .star-picker.error {
+                padding: 10px;
+                background: #fff1f2;
+                border-radius: 16px;
+                border: 1px solid #fecaca;
+            }
+            .star-picker.error label { color: #fecaca; }
+            
+            .char-counter {
+                font-size: 32px;
+                color: var(--rv-primary);
+                margin-bottom: 12px;
+                display: block;
             }
 
             .upload-icon {
@@ -393,12 +433,12 @@
 
                         <%-- Rating --%>
                         <div class="form-group">
-                            <label class="form-label">${type eq 'SERVICE' ? 'Chất lượng trải nghiệm' : 'Chất lượng sản phẩm'}</label>
+                            <label class="form-label">${type eq 'SERVICE' ? 'Chất lượng trải nghiệm' : 'Chất lượng sản phẩm'} <span style="color:#ef4444">*</span></label>
                             <div class="star-picker">
                                 <c:forEach begin="1" end="5" var="s">
                                     <c:set var="val" value="${6 - s}"/>
                                     <input type="radio" name="ranking" id="star${val}" value="${val}"
-                                           ${(isEdit && review.ranking == val) || (!isEdit && val == 5) ? 'checked' : ''} required/>
+                                           ${(isEdit && review.ranking == val) ? 'checked' : ''} required/>
                                     <label for="star${val}">★</label>
                                 </c:forEach>
                             </div>
@@ -420,7 +460,7 @@
                                     </c:forEach>
                                 </div>
                                 <div class="field-error" id="err-topics">
-                                    &#9888; Vui lòng chọn ít nhất một chủ đề.
+                                    <i class="fa-solid fa-circle-exclamation"></i> Vui lòng chọn ít nhất một khía cạnh bạn hài lòng.
                                 </div>
                             </div>
                         </c:if>
@@ -433,7 +473,7 @@
                                       oninput="onContentInput(this)">${isEdit ? review.reviewContent : ''}</textarea>
                             <div class="char-counter" id="charCounter">0 / 2000</div>
                             <div class="field-error" id="err-content">
-                                &#9888; Vui lòng nhập nội dung đánh giá (ít nhất 20 ký tự).
+                                <i class="fa-solid fa-circle-exclamation"></i> Nội dung đánh giá quá ngắn (tối thiểu 20 ký tự).
                             </div>
                         </div>
 
@@ -614,7 +654,7 @@
                         errStar = document.createElement('div');
                         errStar.id = 'err-star';
                         errStar.className = 'field-error show';
-                        errStar.innerHTML = '&#9888; Vui lòng chọn số sao đánh giá.';
+                        errStar.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Vui lòng chọn số sao đánh giá.';
                         starPicker.insertAdjacentElement('afterend', errStar);
                     } else {
                         errStar.classList.add('show');
