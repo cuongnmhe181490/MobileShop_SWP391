@@ -119,6 +119,24 @@
                 color: #991b1b;
             }
 
+            /* Tag badge */
+            .tag-badge {
+                display: inline-block;
+                padding: 1px 10px;
+                background: #EEF3FD; 
+                color: #3B6FE8;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+                margin-right: 8px;
+            }
+            .tag-badge--qa {
+                background: #FFF7ED;
+                color: #EA580C;
+            }
+
             /* Admin reply */
             .rv-reply {
                 margin-top: 10px;
@@ -343,7 +361,12 @@
 
                                         <%-- Nội dung --%>
                                         <div class="rv-card__body">
-                                            <div class="rv-card__product">${rv.productName}</div>
+                                            <div style="display: flex; align-items: center; margin-bottom: 2px;">
+                                                <span class="tag-badge ${rv.reviewContent.contains('?') ? 'tag-badge--qa' : ''}">
+                                                    ${rv.reviewContent.contains('?') ? 'Hỏi đáp' : 'Sản phẩm'}
+                                                </span>
+                                                <div class="rv-card__product" style="margin: 0;">${rv.productName}</div>
+                                            </div>
                                     <div class="rv-card__meta">
                                         <span class="stars">
                                             <c:forEach begin="1" end="5" var="s">
@@ -403,7 +426,10 @@
                                     <div class="rv-card">
                                         <div class="rv-card__thumb-placeholder" style="display:flex; align-items:center; justify-content:center; font-size:24px; color:#d1d5db; background:#f8fafc; border:1px solid #e2e8f0;">⭐</div>
                                         <div class="rv-card__body">
-                                            <div class="rv-card__product">Chất lượng dịch vụ</div>
+                                            <div style="display: flex; align-items: center; margin-bottom: 2px;">
+                                                <span class="tag-badge">Dịch vụ</span>
+                                                <div class="rv-card__product" style="margin: 0;">Chất lượng dịch vụ</div>
+                                            </div>
                                             <div class="rv-card__meta">
                                                 <span class="stars">
                                                     <c:forEach begin="1" end="5" var="s">
@@ -501,6 +527,18 @@
             document.getElementById('deleteModal').addEventListener('click', function (e) {
                 if (e.target === this)
                     closeModal();
+            });
+
+            // Auto-hide success alert
+            window.addEventListener('DOMContentLoaded', () => {
+                const alert = document.querySelector('.rv-alert--success');
+                if (alert) {
+                    setTimeout(() => {
+                        alert.style.transition = '0.5s opacity';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.style.display = 'none', 500);
+                    }, 3000);
+                }
             });
         </script>
     </body>
