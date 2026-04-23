@@ -234,8 +234,20 @@
         }
 
         // Realtime Validations
-        document.getElementById("username").addEventListener("blur", function () {
-            this.value.trim() === "" ? showError("username", "usernameError") : clearError("username", "usernameError");
+        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+        document.getElementById("username").addEventListener("input", function () {
+            const val = this.value.trim();
+            const err = document.getElementById("usernameError");
+            
+            if (val === "") {
+                err.textContent = "Tên đăng nhập không được để trống!";
+                showError("username", "usernameError");
+            } else if (!usernameRegex.test(val)) {
+                err.textContent = "Viết liền không dấu, không chứa khoảng trắng!";
+                showError("username", "usernameError");
+            } else {
+                clearError("username", "usernameError");
+            }
         });
 
         document.getElementById("password").addEventListener("input", function () {
@@ -270,7 +282,7 @@
             const today = new Date().toISOString().split("T")[0];
             
             const checks = [
-                { id: "username", errId: "usernameError", test: v => v.trim() !== "" },
+                { id: "username", errId: "usernameError", test: v => v.trim() !== "" && /^[a-zA-Z0-9_]+$/.test(v) },
                 { id: "password", errId: "passwordError", test: v => v.length >= 8 },
                 { id: "name",     errId: "nameError",     test: v => v.trim() !== "" && /^[\p{L}\s]+$/u.test(v) },
                 { id: "email",    errId: "emailError",    test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
