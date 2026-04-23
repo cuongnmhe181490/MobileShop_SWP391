@@ -16,6 +16,7 @@ public class LoadProduct extends HttpServlet {
 
     private static final int PAGE_SIZE = 9;
     private static final int PAGE_WINDOW = 4;
+    private static final int SEARCH_MAX_LENGTH = 100;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -23,6 +24,10 @@ public class LoadProduct extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         DAO dao = new DAO();
         String keyword = normalizeTextInput(request.getParameter("txt"));
+        if (keyword.length() > SEARCH_MAX_LENGTH) {
+            keyword = keyword.substring(0, SEARCH_MAX_LENGTH);
+            request.setAttribute("searchError", "Từ khóa tìm kiếm tối đa 100 ký tự.");
+        }
         String brand = normalizeTextInput(request.getParameter("brand"));
         String storage = normalizeTextInput(request.getParameter("storage"));
         String year = normalizeTextInput(request.getParameter("year"));

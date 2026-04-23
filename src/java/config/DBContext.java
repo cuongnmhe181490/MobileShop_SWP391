@@ -26,7 +26,7 @@ public class DBContext {
     private final String portNumber = readSetting("DB_PORT", "1433");
     private final String instance = readSetting("DB_INSTANCE", "");
     private final String userID = readSetting("DB_USER", "sa");
-    private final String password = readSetting("DB_PASSWORD", "phuc123");
+    private final String password = readSetting("DB_PASSWORD", "sa");
 
     private String readSetting(String key, String defaultValue) {
         String value = System.getenv(key);

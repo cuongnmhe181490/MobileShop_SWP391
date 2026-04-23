@@ -105,7 +105,7 @@
             <a href="#">Quản lý tài khoản</a>
             <a href="#" class="active">Quản lý home</a>
             <a href="#">Quản lý Review</a>
-            <a href="#">Quản lý sản phẩm</a>
+            <a href="${ctx}/admin/products">Quản lý sản phẩm</a>
             <a href="#">Quản lý blog</a>
             <a href="#">Về trang chủ</a>
             <a href="#" class="logout-link">Đăng xuất</a>

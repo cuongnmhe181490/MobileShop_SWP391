@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -33,6 +34,15 @@ public class ProductManageController extends HttpServlet {
     private static final long MAX_IMAGE_SIZE = 500 * 1024;
     private static final int PAGE_SIZE = 4;
     private static final int PAGE_WINDOW = 4;
+    private static final int PRODUCT_NAME_MIN_LENGTH = 2;
+    private static final int PRODUCT_NAME_MAX_LENGTH = 200;
+    private static final int SCREEN_MAX_LENGTH = 200;
+    private static final int OPERATING_SYSTEM_MAX_LENGTH = 100;
+    private static final int CPU_MAX_LENGTH = 100;
+    private static final int RAM_MAX_LENGTH = 50;
+    private static final int CAMERA_MAX_LENGTH = 200;
+    private static final int BATTERY_MAX_LENGTH = 5;
+    private static final int DESCRIPTION_MAX_LENGTH = 2000;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -180,7 +190,15 @@ public class ProductManageController extends HttpServlet {
             }
             product.setDiscount(existingProduct.getDiscount());
             product.setIsFeatured(existingProduct.getIsFeatured());
-            product.setOriginalQuantity(Math.max(existingProduct.getOriginalQuantity(), product.getCurrentQuantity()));
+
+            int existingCurrentQuantity = existingProduct.getCurrentQuantity();
+            int existingOriginalQuantity = existingProduct.getOriginalQuantity();
+            if (product.getCurrentQuantity() > existingCurrentQuantity) {
+                int restockDelta = product.getCurrentQuantity() - existingCurrentQuantity;
+                product.setOriginalQuantity(existingOriginalQuantity + restockDelta);
+            } else {
+                product.setOriginalQuantity(existingOriginalQuantity);
+            }
         }
 
         boolean duplicateProduct = !editMode
@@ -296,9 +314,13 @@ public class ProductManageController extends HttpServlet {
         Map<String, String> errors = new LinkedHashMap<>();
         Part imageFile = request.getPart("imageFile");
         boolean hasUploadedImage = imageFile != null && imageFile.getSize() > 0;
+        String rawPrice = trim(request.getParameter("price"));
+        String rawQuantity = trim(request.getParameter("quantity"));
+        String rawBattery = trim(request.getParameter("battery"));
 
         validateRequired(product.getProductName(), "productName", "Tên sản phẩm không được để trống.", errors);
         validateRequired(product.getIdSupplier(), "idSupplier", "Nhà cung cấp không được để trống.", errors);
+        validateRequired(rawBattery, "battery", "Pin không được để trống.", errors);
         if (!hasUploadedImage) {
             validateRequired(product.getImagePath(), "imagePath", "Vui lòng nhập URL ảnh hoặc tải ảnh lên.", errors);
         }
@@ -320,9 +342,18 @@ public class ProductManageController extends HttpServlet {
             errors.put("quantity", "Số lượng phải là số nguyên lớn hơn hoặc bằng 0.");
         }
 
+        validateLengthRange(product.getProductName(), PRODUCT_NAME_MIN_LENGTH, PRODUCT_NAME_MAX_LENGTH,
+                "productName", "Tn sn phm phi t 2 n 200 k t.", errors);
+        validatePrice(rawPrice, errors);
+        validateCurrentQuantity(rawQuantity, errors);
+        validateBattery(rawBattery, errors);
+
         if (!product.getReleaseDate().isBlank()) {
             try {
-                LocalDate.parse(product.getReleaseDate());
+                LocalDate releaseDate = LocalDate.parse(product.getReleaseDate());
+                if (releaseDate.isAfter(LocalDate.now())) {
+                    errors.put("releaseDate", "Ngày ra mắt không được lớn hơn ngày hiện tại.");
+                }
             } catch (Exception ex) {
                 errors.put("releaseDate", "Ngày ra mắt không hợp lệ.");
             }
@@ -445,8 +476,112 @@ public class ProductManageController extends HttpServlet {
     }
 
     private void validateMaxLength(String value, int maxLength, String field, String message, Map<String, String> errors) {
+        maxLength = effectiveMaxLength(field, maxLength);
+        message = effectiveMaxLengthMessage(field, message);
         if (value != null && value.length() > maxLength) {
             errors.put(field, message);
+        }
+    }
+
+    private int effectiveMaxLength(String field, int configuredMaxLength) {
+        switch (field) {
+            case "productName":
+                return PRODUCT_NAME_MAX_LENGTH;
+            case "screen":
+                return SCREEN_MAX_LENGTH;
+            case "operatingSystem":
+                return OPERATING_SYSTEM_MAX_LENGTH;
+            case "cpu":
+                return CPU_MAX_LENGTH;
+            case "ram":
+                return RAM_MAX_LENGTH;
+            case "camera":
+                return CAMERA_MAX_LENGTH;
+            case "battery":
+                return BATTERY_MAX_LENGTH;
+            case "description":
+                return DESCRIPTION_MAX_LENGTH;
+            default:
+                return configuredMaxLength;
+        }
+    }
+
+    private String effectiveMaxLengthMessage(String field, String configuredMessage) {
+        switch (field) {
+            case "productName":
+                return "Tên sản phẩm tối đa 200 ký tự.";
+            case "screen":
+                return "Màn hình tối đa 200 ký tự.";
+            case "operatingSystem":
+                return "Hệ điu hành tối đa 100 ký tự.";
+            case "cpu":
+                return "CPU tối đa 100 ký tự.";
+            case "ram":
+                return "RAM tối đa 50 ký tự.";
+            case "camera":
+                return "Camera tối đa 200 ký tự.";
+            case "battery":
+                return "Pin ti a 5 k t.";
+            case "description":
+                return "Mô tả tối đa 2000 ký tự.";
+            default:
+                return configuredMessage;
+        }
+    }
+
+    private void validateLengthRange(String value, int minLength, int maxLength, String field, String message, Map<String, String> errors) {
+        if (value != null && !value.isBlank() && (value.length() < minLength || value.length() > maxLength)) {
+            errors.put(field, message);
+        }
+    }
+
+    private void validatePrice(String rawPrice, Map<String, String> errors) {
+        if (rawPrice.isBlank()) {
+            errors.put("price", "Giá sản phẩm không được để trống.");
+            return;
+        }
+        if (!rawPrice.matches("\\d+")) {
+            errors.put("price", "Giá phải là số nguyên dương, không chứa chữ hoặc ký tự đặc biệt.");
+            return;
+        }
+        if (rawPrice.length() > 1 && rawPrice.startsWith("0")) {
+            errors.put("price", "Giá không được bắt đầu bằng số 0.");
+            return;
+        }
+        if (new BigInteger(rawPrice).compareTo(BigInteger.ZERO) <= 0) {
+            errors.put("price", "Giá phải là số dương.");
+        }
+    }
+
+    private void validateCurrentQuantity(String rawQuantity, Map<String, String> errors) {
+        if (rawQuantity.isBlank()) {
+            errors.put("quantity", "Số lượng hiện tại không được để trống.");
+            return;
+        }
+        if (!rawQuantity.matches("\\d+")) {
+            errors.put("quantity", "Số lượng phải là số nguyên lớn hơn hoặc bằng 0.");
+        }
+    }
+
+    private void validateBattery(String rawBattery, Map<String, String> errors) {
+        if (rawBattery.isBlank()) {
+            errors.put("battery", "Pin khng c  trng.");
+            return;
+        }
+        if (rawBattery.length() > BATTERY_MAX_LENGTH) {
+            errors.put("battery", "Pin ti a 5 k t.");
+            return;
+        }
+        if (!rawBattery.matches("\\d+")) {
+            errors.put("battery", "Pin phi l gi tr s hp l.");
+            return;
+        }
+        if (rawBattery.length() > 1 && rawBattery.startsWith("0")) {
+            errors.put("battery", "Pin khng c bt u bng s 0.");
+            return;
+        }
+        if (new BigInteger(rawBattery).compareTo(BigInteger.ZERO) <= 0) {
+            errors.put("battery", "Pin phi ln hn 0.");
         }
     }
 
@@ -475,3 +610,4 @@ public class ProductManageController extends HttpServlet {
         return "Admin product management";
     }
 }
+

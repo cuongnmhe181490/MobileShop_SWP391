@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.logging.Level;
@@ -1176,5 +1177,172 @@ public class DAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public int createOrder(int userId, String receiverName, String receiverPhone,
+            String receiverAddress, double totalPrice, List<entity.CartItem> items) throws Exception {
+        String orderSql = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus) "
+                + "VALUES (?, CAST(GETDATE() AS date), ?, ?, ?, ?, N'Đang giao hàng')";
+        String detailSql = "INSERT INTO OrderDetail (IdOrder, IdProduct, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = new DBContext().getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement orderPs = conn.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS)) {
+                orderPs.setInt(1, userId);
+                orderPs.setDouble(2, totalPrice);
+                orderPs.setString(3, receiverName);
+                orderPs.setString(4, receiverPhone);
+                orderPs.setString(5, receiverAddress);
+                orderPs.executeUpdate();
+
+                int orderId;
+                try (ResultSet keys = orderPs.getGeneratedKeys()) {
+                    if (!keys.next()) {
+                        throw new SQLException("Không lấy được IdOrder sau khi tạo đơn hàng.");
+                    }
+                    orderId = keys.getInt(1);
+                }
+
+                try (PreparedStatement detailPs = conn.prepareStatement(detailSql)) {
+                    for (entity.CartItem item : items) {
+                        detailPs.setInt(1, orderId);
+                        detailPs.setString(2, item.getProduct().getIdProduct());
+                        detailPs.setInt(3, item.getQuantity());
+                        detailPs.setDouble(4, item.getProduct().getPrice());
+                        detailPs.addBatch();
+                    }
+                    detailPs.executeBatch();
+                }
+
+                conn.commit();
+                return orderId;
+            } catch (Exception ex) {
+                conn.rollback();
+                throw ex;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
+    public List<Map<String, Object>> getOrdersByUser(int userId) {
+        List<Map<String, Object>> orders = new ArrayList<>();
+        String sql = "SELECT o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, "
+                + "o.ReceiverAddress, o.OrderStatus, COUNT(od.IdProduct) AS ItemCount "
+                + "FROM [Order] o LEFT JOIN OrderDetail od ON o.IdOrder = od.IdOrder "
+                + "WHERE o.UserId = ? "
+                + "GROUP BY o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, o.ReceiverAddress, o.OrderStatus "
+                + "ORDER BY o.OrderDate DESC, o.IdOrder DESC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapOrderRow(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public List<Map<String, Object>> getAdminOrders(String keyword, String status) {
+        List<Map<String, Object>> orders = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, ")
+                .append("o.ReceiverAddress, o.OrderStatus, COUNT(od.IdProduct) AS ItemCount ")
+                .append("FROM [Order] o LEFT JOIN OrderDetail od ON o.IdOrder = od.IdOrder WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (CAST(o.IdOrder AS varchar(20)) LIKE ? OR o.ReceiverName LIKE ? OR o.ReceiverPhone LIKE ?) ");
+            String like = "%" + keyword.trim() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+        if (isAllowedOrderStatus(status)) {
+            sql.append("AND o.OrderStatus = ? ");
+            params.add(status);
+        }
+        sql.append("GROUP BY o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, o.ReceiverAddress, o.OrderStatus ")
+                .append("ORDER BY o.OrderDate DESC, o.IdOrder DESC");
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapOrderRow(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public List<Map<String, Object>> getOrderDetails(int orderId) {
+        List<Map<String, Object>> details = new ArrayList<>();
+        String sql = "SELECT od.IdOrder, od.IdProduct, p.ProductName, p.ImagePath, od.Quantity, od.UnitPrice, "
+                + "(od.Quantity * od.UnitPrice) AS Subtotal "
+                + "FROM OrderDetail od LEFT JOIN ProductDetail p ON od.IdProduct = p.IdProduct "
+                + "WHERE od.IdOrder = ? ORDER BY od.IdProduct";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("idOrder", rs.getInt("IdOrder"));
+                    row.put("idProduct", rs.getString("IdProduct"));
+                    row.put("productName", rs.getString("ProductName"));
+                    row.put("imagePath", rs.getString("ImagePath"));
+                    row.put("quantity", rs.getInt("Quantity"));
+                    row.put("unitPrice", rs.getDouble("UnitPrice"));
+                    row.put("subtotal", rs.getDouble("Subtotal"));
+                    details.add(row);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return details;
+    }
+
+    public boolean updateOrderStatus(int orderId, String status) {
+        if (!isAllowedOrderStatus(status)) {
+            return false;
+        }
+        String sql = "UPDATE [Order] SET OrderStatus = ? WHERE IdOrder = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, orderId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isAllowedOrderStatus(String status) {
+        return "Đang giao hàng".equals(status) || "Đã hoàn thành".equals(status) || "Đã hủy".equals(status);
+    }
+
+    private Map<String, Object> mapOrderRow(ResultSet rs) throws SQLException {
+        Map<String, Object> row = new HashMap<>();
+        row.put("idOrder", rs.getInt("IdOrder"));
+        row.put("customerName", rs.getString("ReceiverName"));
+        row.put("receiverName", rs.getString("ReceiverName"));
+        row.put("receiverPhone", rs.getString("ReceiverPhone"));
+        row.put("receiverAddress", rs.getString("ReceiverAddress"));
+        row.put("orderDate", rs.getDate("OrderDate"));
+        row.put("totalPrice", rs.getDouble("TotalPrice"));
+        row.put("status", rs.getString("OrderStatus"));
+        row.put("itemCount", rs.getInt("ItemCount"));
+        return row;
     }
 }

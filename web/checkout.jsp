@@ -82,10 +82,15 @@
                     <p>Vui lòng kiểm tra lại thông tin nhận hàng và danh sách sản phẩm trước khi xác nhận đặt hàng.</p>
                 </div>
 
-                <form id="checkoutForm" action="${ctx}/checkout" method="post">
+                <form id="checkoutForm" action="${ctx}/order/place" method="post">
                     <div class="checkout-grid">
                         <section class="auth-form" style="padding: 32px;">
                             <h2 style="margin-bottom: 24px;">Thông tin giao hàng</h2>
+                            <c:if test="${not empty formError}">
+                                <div class="error-message" style="margin-bottom: 16px;">
+                                    <i class="fa-solid fa-circle-exclamation"></i> ${formError}
+                                </div>
+                            </c:if>
                             <div class="auth-form__stack">
                                 <!-- Họ tên -->
                                 <div class="filter-group">
@@ -150,6 +155,12 @@
                         <aside>
                             <div class="summary-card">
                                 <h2>Đơn hàng của bạn</h2>
+                                <c:if test="${not empty reservationExpiresAtMillis}">
+                                    <div class="error-message" style="background: rgba(255, 247, 237, .12); border: 1px solid rgba(251, 146, 60, .35); border-radius: 14px; padding: 12px; margin-bottom: 14px; color: #fed7aa;">
+                                        <i class="fa-solid fa-clock"></i>
+                                        Giữ hàng sắp hết trong <strong id="reservationCountdown" data-expires-at="${reservationExpiresAtMillis}">15:00</strong>
+                                    </div>
+                                </c:if>
                                 <div class="checkout-items-list" style="margin: 20px 0; max-height: 400px; overflow-y: auto;">
                                     <c:forEach items="${cartItems}" var="item">
                                         <div class="checkout-product-item">
@@ -187,5 +198,24 @@
         </main>
 
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
+        <script>
+            (function () {
+                const countdown = document.getElementById('reservationCountdown');
+                if (!countdown) return;
+                const expiresAt = Number(countdown.dataset.expiresAt);
+                function tick() {
+                    const remaining = Math.max(0, expiresAt - Date.now());
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    countdown.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                    if (remaining <= 0) {
+                        countdown.textContent = '00:00 - đã hết thời gian giữ hàng';
+                        return;
+                    }
+                    window.setTimeout(tick, 1000);
+                }
+                tick();
+            })();
+        </script>
     </body>
 </html>

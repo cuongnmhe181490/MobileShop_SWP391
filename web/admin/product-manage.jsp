@@ -23,42 +23,39 @@
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-chart-line"></i>Dashboard</a></li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="javascript:void(0)" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/products" class="menu-link active"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link"><i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn</a></li>
                     <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog / Tin tức</a></li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link"><i class="fa-solid fa-house-chimney-window"></i>Trang chủ</a></li>
                 </ul>
             </div>
 
-            <div class="nav-section">
-                <span class="nav-label">HỆ THỐNG</span>
+            <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
-                </ul>
-            </div>
-
-            <div style="margin-top: auto;">
-                <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-globe"></i>Xem Website</a></li>
+                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-power-off"></i>Đăng xuất</a></li>
                 </ul>
             </div>
         </aside>
@@ -72,7 +69,6 @@
                 </div>
                 <div class="header-actions">
                     <a href="${pageContext.request.contextPath}/admin/products?service=addProduct" class="btn-primary" style="text-decoration: none;">Thêm sản phẩm</a>
-                    <div class="notification"><i class="fa-regular fa-bell"></i></div>
                     <div class="user-profile">
                         <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
                         <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>
@@ -136,12 +132,12 @@
                             <thead>
                                 <tr>
                                     <th style="width: 140px;">Ảnh sản phẩm</th>
-                                    <th>Tên sản phẩm</th>
+                                    <th style="width: 280px;">Tên sản phẩm</th>
                                     <th style="width: 160px;">Giá</th>
                                     <th style="width: 120px;">Số lượng</th>
                                     <th style="width: 150px;">Ngày ra mắt</th>
                                     <th style="width: 150px;">Nhà cung cấp</th>
-                                    <th style="width: 190px;">Hành động</th>
+                                    <th style="width: 170px;">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>

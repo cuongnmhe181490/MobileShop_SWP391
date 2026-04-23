@@ -107,7 +107,7 @@
                     <div class="order-receipt">
                         <div class="order-receipt-row">
                             <span>Mã đơn hàng</span>
-                            <strong>#MS${System.currentTimeMillis() % 1000000}</strong>
+                            <strong>#ORD-${sessionScope.lastOrderId}</strong>
                         </div>
                         <div class="order-receipt-row">
                             <span>Ngày đặt hàng</span>

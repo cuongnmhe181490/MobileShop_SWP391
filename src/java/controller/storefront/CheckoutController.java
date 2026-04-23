@@ -1,7 +1,9 @@
 package controller.storefront;
 
 import dao.DAO;
+import dao.order.UserCartDAO;
 import entity.CartItem;
+import entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.List;
 import util.CartSupport;
 
@@ -19,87 +22,39 @@ public class CheckoutController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        DAO dao = new DAO();
-        
-        List<CartItem> cartItems = CartSupport.buildCartItems(session, dao);
+        User user = (User) session.getAttribute("acc");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        UserCartDAO cartDao = new UserCartDAO();
+        String reserveError = cartDao.reserveLowStockItems(user.getId());
+        List<CartItem> cartItems = CartSupport.buildCartItems(session, new DAO());
         if (cartItems.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/product");
             return;
         }
 
-        double cartTotal = 0;
-        for (CartItem item : cartItems) {
-            cartTotal += item.getSubtotal();
+        double cartTotal = calculateTotal(cartItems);
+        if (reserveError != null) {
+            request.setAttribute("formError", reserveError);
         }
-
+        Timestamp reservationExpiresAt = cartDao.getReservationExpiresAt(user.getId());
+        if (reservationExpiresAt != null) {
+            request.setAttribute("reservationExpiresAt", reservationExpiresAt);
+            request.setAttribute("reservationExpiresAtMillis", reservationExpiresAt.getTime());
+        }
         request.setAttribute("cartItems", cartItems);
         request.setAttribute("cartTotal", cartTotal);
         request.getRequestDispatcher("/checkout.jsp").forward(request, response);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        DAO dao = new DAO();
-        
-        // 1. Lấy dữ liệu từ form
-        String fullName = request.getParameter("fullName");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String address = request.getParameter("address");
-        String note = request.getParameter("note");
-        
-        boolean hasError = false;
-        
-        // 2. Validate dữ liệu
-        if (fullName == null || fullName.trim().isEmpty()) {
-            request.setAttribute("errorFullName", "Họ tên không được để trống");
-            hasError = true;
+    private double calculateTotal(List<CartItem> cartItems) {
+        double total = 0;
+        for (CartItem item : cartItems) {
+            total += item.getSubtotal();
         }
-        
-        if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            request.setAttribute("errorEmail", "Email không hợp lệ");
-            hasError = true;
-        }
-        
-        if (phone == null || !phone.matches("[0-9]{10,11}")) {
-            request.setAttribute("errorPhone", "Số điện thoại phải từ 10-11 chữ số");
-            hasError = true;
-        }
-        
-        if (address == null || address.trim().isEmpty()) {
-            request.setAttribute("errorAddress", "Vui lòng nhập địa chỉ nhận hàng");
-            hasError = true;
-        }
-        
-        if (hasError) {
-            // Lưu lại các giá trị đã nhập để không bị mất khi load lại trang
-            request.setAttribute("fullName", fullName);
-            request.setAttribute("email", email);
-            request.setAttribute("phone", phone);
-            request.setAttribute("address", address);
-            request.setAttribute("note", note);
-            
-            // Cần chuẩn bị lại dữ liệu giỏ hàng để hiển thị
-            List<CartItem> cartItems = CartSupport.buildCartItems(session, dao);
-            double cartTotal = 0;
-            for (CartItem item : cartItems) {
-                cartTotal += item.getSubtotal();
-            }
-            request.setAttribute("cartItems", cartItems);
-            request.setAttribute("cartTotal", cartTotal);
-            
-            request.getRequestDispatcher("/checkout.jsp").forward(request, response);
-        } else {
-            // 3. Xử lý đặt hàng thành công (Trong thực tế sẽ lưu vào DB tại đây)
-            
-            // Xóa giỏ hàng sau khi đặt hàng thành công
-            session.removeAttribute(CartSupport.CART_SESSION_KEY);
-            CartSupport.syncCartSize(session);
-            
-            // Chuyển hướng sang trang confirm
-            response.sendRedirect(request.getContextPath() + "/confirm.jsp");
-        }
+        return total;
     }
 }
