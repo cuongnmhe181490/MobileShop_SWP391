@@ -157,7 +157,7 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link">
                             <i class="fa-solid fa-user-gear"></i>Tài khoản
                         </a>
                     </li>

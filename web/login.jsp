@@ -29,6 +29,12 @@
 
                         <h2 style="font-size: 54px; line-height: 1.05; margin-top: 8px;">Chào mừng trở lại</h2>
                         
+                        <c:if test="${not empty sessionScope.errorMsg}">
+                            <div style="color: #ee5d50; background: #feebeb; padding: 12px; border-radius: 8px; margin-top: 16px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid #f5b7b1;">
+                                <i class="fa-solid fa-circle-exclamation"></i> ${sessionScope.errorMsg}
+                            </div>
+                            <c:remove var="errorMsg" scope="session" />
+                        </c:if>
 
                        <form class="auth-form__stack" action="login" method="post" style="margin-top: 34px;">
                             <label>
