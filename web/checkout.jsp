@@ -80,6 +80,11 @@
                     <span class="section-eyebrow">Thanh toán</span>
                     <h1>Hoàn tất đơn hàng của bạn.</h1>
                     <p>Vui lòng kiểm tra lại thông tin nhận hàng và danh sách sản phẩm trước khi xác nhận đặt hàng.</p>
+                    <c:if test="${not empty errorGeneral}">
+                        <div class="error-message" style="background: #fef2f2; padding: 12px; border-radius: 8px; margin-top: 15px;">
+                            <i class="fa-solid fa-circle-exclamation"></i> ${errorGeneral}
+                        </div>
+                    </c:if>
                 </div>
 
                 <form id="checkoutForm" action="${ctx}/checkout" method="post">
@@ -187,5 +192,60 @@
         </main>
 
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('checkoutForm');
+                const inputs = form.querySelectorAll('.auth-input');
+
+                const validators = {
+                    fullName: (val) => val.trim().length > 0 ? '' : 'Họ tên không được để trống',
+                    phone: (val) => /^[0-9]{10,11}$/.test(val) ? '' : 'Số điện thoại phải từ 10-11 chữ số',
+                    email: (val) => /^[A-Za-z0-9+_.-]+@(.+)$/.test(val) ? '' : 'Email không hợp lệ',
+                    address: (val) => val.trim().length > 0 ? '' : 'Vui lòng nhập địa chỉ nhận hàng'
+                };
+
+                function validateField(input) {
+                    const name = input.getAttribute('name');
+                    if (!validators[name]) return true;
+
+                    const error = validators[name](input.value);
+                    const container = input.closest('.filter-group');
+                    let errorEl = container.querySelector('.error-message');
+
+                    if (error) {
+                        input.classList.add('is-invalid');
+                        if (!errorEl) {
+                            errorEl = document.createElement('div');
+                            errorEl.className = 'error-message';
+                            container.appendChild(errorEl);
+                        }
+                        errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + error;
+                        return false;
+                    } else {
+                        input.classList.remove('is-invalid');
+                        if (errorEl) errorEl.remove();
+                        return true;
+                    }
+                }
+
+                inputs.forEach(input => {
+                    input.addEventListener('blur', () => validateField(input));
+                    input.addEventListener('input', () => {
+                        if (input.classList.contains('is-invalid')) {
+                            validateField(input);
+                        }
+                    });
+                });
+
+                form.addEventListener('submit', function(e) {
+                    let isValid = true;
+                    inputs.forEach(input => {
+                        if (!validateField(input)) isValid = false;
+                    });
+                    if (!isValid) e.preventDefault();
+                });
+            });
+        </script>
     </body>
 </html>

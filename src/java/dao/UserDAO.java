@@ -307,18 +307,38 @@ public class UserDAO extends DBContext{
         }
     }
     
-    public List<User> searchUsers(String keyword) {
+    public List<User> searchUsers(String keyword, String startDate, String endDate) {
         List<User> list = new ArrayList<>();
-        String sql = "SELECT u.*, r.RoleName FROM [User] u INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
-                     "WHERE (u.FullName LIKE ? OR u.Email LIKE ? OR u.PhoneNumber LIKE ?) " +
-                     "ORDER BY u.RoleId ASC, u.UserId DESC";
+        StringBuilder sql = new StringBuilder("SELECT u.*, r.RoleName FROM [User] u INNER JOIN [Role] r ON u.RoleId = r.RoleId WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (u.FullName LIKE ? OR u.Email LIKE ? OR u.PhoneNumber LIKE ? OR u.Username LIKE ?) ");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            sql.append("AND CAST(u.CreatedDate AS DATE) >= ? ");
+            params.add(java.sql.Date.valueOf(startDate));
+        }
+
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            sql.append("AND CAST(u.CreatedDate AS DATE) <= ? ");
+            params.add(java.sql.Date.valueOf(endDate));
+        }
+
+        sql.append("ORDER BY u.RoleId ASC, u.UserId DESC");
+
         try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             
-            String searchPattern = "%" + keyword + "%";
-            ps.setString(1, searchPattern);
-            ps.setString(2, searchPattern);
-            ps.setString(3, searchPattern);
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

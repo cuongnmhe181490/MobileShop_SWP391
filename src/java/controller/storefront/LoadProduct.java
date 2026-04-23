@@ -34,7 +34,10 @@ public class LoadProduct extends HttpServlet {
             currentPage = 1;
         }
 
-        List<Product> allProducts = dao.getCatalogProducts(keyword, brand, storage, year, minPrice, maxPrice, sort);
+        String startDate = normalizeTextInput(request.getParameter("startDate"));
+        String endDate = normalizeTextInput(request.getParameter("endDate"));
+        
+        List<Product> allProducts = dao.getCatalogProducts(keyword, brand, storage, year, minPrice, maxPrice, sort, startDate, endDate);
         int totalProducts = allProducts.size();
         int totalPages = Math.max(1, (int) Math.ceil(totalProducts / (double) PAGE_SIZE));
         if (currentPage > totalPages) {

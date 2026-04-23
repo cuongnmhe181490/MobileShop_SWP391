@@ -102,6 +102,8 @@ public class ProductManageController extends HttpServlet {
             throws ServletException, IOException {
         String keyword = trim(request.getParameter("keyword"));
         String supplierFilter = trim(request.getParameter("supplier"));
+        String startDate = trim(request.getParameter("startDate"));
+        String endDate = trim(request.getParameter("endDate"));
         String sortBy = trim(request.getParameter("sort"));
         int currentPage = parseIntOrDefault(request.getParameter("page"), 1);
         if (currentPage < 1) {
@@ -109,7 +111,7 @@ public class ProductManageController extends HttpServlet {
         }
 
         boolean productDataAvailable = dao.canAccessProductData();
-        int totalProducts = productDataAvailable ? dao.countProducts(keyword, supplierFilter) : 0;
+        int totalProducts = productDataAvailable ? dao.countProducts(keyword, supplierFilter, startDate, endDate) : 0;
         int totalPages = Math.max(1, (int) Math.ceil(totalProducts / (double) PAGE_SIZE));
         if (currentPage > totalPages) {
             currentPage = totalPages;
@@ -117,13 +119,15 @@ public class ProductManageController extends HttpServlet {
 
         int offset = (currentPage - 1) * PAGE_SIZE;
         List<Product> productList = productDataAvailable
-                ? dao.getProducts(keyword, supplierFilter, sortBy, offset, PAGE_SIZE)
+                ? dao.getProducts(keyword, supplierFilter, sortBy, offset, PAGE_SIZE, startDate, endDate)
                 : Collections.emptyList();
 
         request.setAttribute("productList", productList);
         request.setAttribute("supplierIds", productDataAvailable ? dao.getSupplierIds() : Collections.emptyList());
         request.setAttribute("keyword", keyword);
         request.setAttribute("supplierFilter", supplierFilter);
+        request.setAttribute("startDate", startDate);
+        request.setAttribute("endDate", endDate);
         request.setAttribute("sortBy", sortBy);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);

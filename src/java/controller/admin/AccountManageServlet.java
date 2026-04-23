@@ -62,11 +62,16 @@ public class AccountManageServlet extends HttpServlet {
         UserDAO dao = new UserDAO();
         List<User> list = dao.getAllUsers();
         String searchQuery = request.getParameter("search");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
         
-        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            list = dao.searchUsers(searchQuery.trim());
-            // Trả lại từ khóa về JSP để giữ nguyên chữ trong ô Input
-            request.setAttribute("searchQuery", searchQuery.trim()); 
+        if ((searchQuery != null && !searchQuery.trim().isEmpty()) || 
+            (startDate != null && !startDate.trim().isEmpty()) || 
+            (endDate != null && !endDate.trim().isEmpty())) {
+            list = dao.searchUsers(searchQuery != null ? searchQuery.trim() : "", startDate, endDate);
+            request.setAttribute("searchQuery", searchQuery);
+            request.setAttribute("startDate", startDate);
+            request.setAttribute("endDate", endDate);
         } else {
             list = dao.getAllUsers();
         }

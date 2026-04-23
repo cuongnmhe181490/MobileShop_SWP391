@@ -8,16 +8,21 @@ import entity.Product;
 import entity.ProductModel;
 import entity.Review;
 import entity.Role;
+import entity.Order;
+import entity.OrderDetail;
 import java.sql.SQLException;
+import java.sql.Statement;
 import entity.User;
 import java.util.*;
 import java.lang.*;
 import java.io.*;
+import java.text.NumberFormat;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.util.regex.Matcher;
+
 import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,7 +60,7 @@ public class DAO {
         ps.setString(8, birthday);
         ps.executeUpdate();
     } catch (Exception e) {
-        e.printStackTrace();
+        e.printStackTrace(); // Rất quan trọng: In lỗi ra để biết nếu SQL bị sai
     }
 }
     
@@ -104,6 +109,7 @@ public class DAO {
      * Lấy thông tin người dùng dựa trên Email (dùng cho Login/Reset Pass)
      */
     public User getUserByEmail(String email) {
+    // Truy vấn JOIN để lấy tên Role cùng lúc
     String sql = "SELECT u.*, r.RoleName " +
                  "FROM [User] u " +
                  "INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
@@ -362,7 +368,7 @@ public class DAO {
     /**
      * Hàm tìm kiếm và lọc sản phẩm tổng hợp (keyword, brand, ram, year, price, sort)
      */
-    public List<Product> getCatalogProducts(String keyword, String brand, String storage, String year, String minPrice, String maxPrice, String sort) {
+    public List<Product> getCatalogProducts(String keyword, String brand, String storage, String year, String minPrice, String maxPrice, String sort, String startDate, String endDate) {
         List<Product> products = new ArrayList<>();
         String normalizedKeyword = normalizeKeyword(keyword);
         String normalizedBrand = normalizeIdentifier(brand);
@@ -406,6 +412,16 @@ public class DAO {
         if (releaseYear > 0) {
             sql.append(" AND ReleaseDate LIKE ?");
             parameters.add("%" + releaseYear + "%");
+        }
+
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate >= ?");
+            parameters.add(startDate);
+        }
+
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate <= ?");
+            parameters.add(endDate);
         }
 
         if (minPriceValue != null) {
@@ -483,10 +499,10 @@ public class DAO {
     /**
      * Lấy danh sách sản phẩm có phân trang (dùng cho trang quản lý)
      */
-    public List<Product> getProducts(String keyword, String supplierId, String sortBy, int offset, int pageSize) {
+    public List<Product> getProducts(String keyword, String supplierId, String sortBy, int offset, int pageSize, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ProductDetail WHERE 1 = 1");
         List<Object> params = new ArrayList<>();
-        appendProductFilters(sql, params, keyword, supplierId);
+        appendProductFilters(sql, params, keyword, supplierId, startDate, endDate);
         sql.append(" ORDER BY ").append(resolveSortClause(sortBy)).append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
         params.add(offset);
         params.add(pageSize);
@@ -509,10 +525,10 @@ public class DAO {
     /**
      * Đếm tổng số sản phẩm dựa trên bộ lọc (dùng để tính số trang)
      */
-    public int countProducts(String keyword, String supplierId) {
+    public int countProducts(String keyword, String supplierId, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ProductDetail WHERE 1 = 1");
         List<Object> params = new ArrayList<>();
-        appendProductFilters(sql, params, keyword, supplierId);
+        appendProductFilters(sql, params, keyword, supplierId, startDate, endDate);
 
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -891,7 +907,7 @@ public class DAO {
     /**
      * Thêm các điều kiện lọc SQL cho sản phẩm
      */
-    private void appendProductFilters(StringBuilder sql, List<Object> params, String keyword, String supplierId) {
+    private void appendProductFilters(StringBuilder sql, List<Object> params, String keyword, String supplierId, String startDate, String endDate) {
         String safeKeyword = normalizeKeyword(keyword);
         String safeSupplier = normalizeIdentifier(supplierId);
 
@@ -902,6 +918,14 @@ public class DAO {
         if (!safeSupplier.isEmpty()) {
             sql.append(" AND IdSupplier = ?");
             params.add(safeSupplier);
+        }
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate >= ?");
+            params.add(startDate);
+        }
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate <= ?");
+            params.add(endDate);
         }
     }
 
@@ -1082,7 +1106,7 @@ public class DAO {
      * Lưu mã Token khôi phục mật khẩu và thời gian hết hạn (10 phút)
      */
     public void saveResetToken(String email, String token) {
-        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 10 phút từ giờ hiện tại
+        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
         String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1139,6 +1163,19 @@ public class DAO {
         }
     }
     /**
+     * Đếm tổng số lượng blog (bài viết) đang hiển thị
+     */
+    public int getTotalBlogs() {
+        String query = "SELECT COUNT(*) FROM Blog WHERE (Status = 'VISIBLE' OR Status IS NULL)";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /**
      * Đếm tổng số lượng sản phẩm trong kho
      */
     public int getTotalProducts() {
@@ -1169,17 +1206,21 @@ public class DAO {
     }
 
     /**
-     * Tính tổng doanh thu của tháng hiện tại (chỉ tính đơn Hoàn thành)
+     * Tính tổng doanh thu trong khoảng thời gian xác định (chỉ tính đơn Hoàn thành)
      */
-    public String getMonthlyRevenue() {
-        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+    public String getRevenueByDate(Date startDate, Date endDate) {
+        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE OrderDate >= ? AND OrderDate <= ? AND OrderStatus = N'Hoàn thành'";
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                double total = rs.getDouble(1);
-                if (total >= 1000000) return String.format("%.1fM", total / 1000000.0);
-                return String.format("%.0f", total);
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double total = rs.getDouble(1);
+                    if (total >= 1000000) return String.format("%.1fM", total / 1000000.0);
+                    if (total >= 1000) return String.format("%.0fK", total / 1000.0);
+                    return String.format("%.0f", total);
+                }
             }
         } catch (Exception e) { e.printStackTrace(); }
         return "0";
@@ -1217,25 +1258,39 @@ public class DAO {
      */
     public List<Map<String, String>> getBestSellers(int limit) {
         List<Map<String, String>> list = new ArrayList<>();
-        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, p.Quantity, SUM(od.Quantity) as Sold " +
-                      "FROM ProductDetail p JOIN OrderDetail od ON p.IdProduct = od.IdProduct " +
-                      "GROUP BY p.ProductName, p.IdSupplier, p.Quantity " +
-                      "ORDER BY Sold DESC";
+        // Lấy tất cả sản phẩm, sắp xếp theo lượng bán (Original - Current)
+        // Nếu kết quả ra 0 thì vẫn hiện để bạn kiểm tra giao diện
+        String query = "SELECT TOP (?) ProductName, IdSupplier, " +
+                      "ISNULL(OriginalQuantity - CurrentQuantity, 0) as Sold, " +
+                      "ISNULL((OriginalQuantity - CurrentQuantity) * Price, 0) as Revenue " +
+                      "FROM ProductDetail " +
+                      "ORDER BY Sold DESC, ProductName ASC";
+
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
+                java.text.NumberFormat nf = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
                 while (rs.next()) {
                     Map<String, String> map = new HashMap<>();
                     map.put("name", rs.getString("ProductName"));
                     map.put("brand", rs.getString("IdSupplier"));
-                    map.put("stock", "Còn " + rs.getInt("Quantity") + " máy");
+                    map.put("sold", String.valueOf(rs.getInt("Sold")));
+                    
+                    double rev = rs.getDouble("Revenue");
+                    if (rev >= 1000000) {
+                        map.put("revenue", String.format("%.1fM", rev / 1000000.0));
+                    } else {
+                        map.put("revenue", nf.format(rev));
+                    }
                     list.add(map);
                 }
             }
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
+
+
 
     /**
      * Lấy toàn bộ danh sách nhà cung cấp (Supplier)
@@ -1264,15 +1319,17 @@ public class DAO {
     }
     
     /**
-     * Đếm số sản phẩm mới được thêm trong 30 ngày qua
+     * Đếm số sản phẩm mới được ra mắt trong khoảng thời gian xác định
      */
-    public int getNewProductsThisMonthCount() {
-        // Đếm sản phẩm trong 30 ngày gần nhất để con số "nhảy" linh hoạt hơn
-        String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= DATEADD(day, -30, GETDATE())";
+    public int getNewProductsCount(Date startDate, Date endDate) {
+        String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= ? AND ReleaseDate <= ?";
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
@@ -1299,27 +1356,33 @@ public class DAO {
     }
 
     /**
-     * Đếm số người dùng mới đăng ký trong tháng này
+     * Đếm số người dùng mới đăng ký trong khoảng thời gian xác định
      */
-    public int getNewUsersThisMonthCount() {
-        String query = "SELECT COUNT(*) FROM [User] WHERE MONTH(CreatedDate) = MONTH(GETDATE()) AND YEAR(CreatedDate) = YEAR(GETDATE())"; 
+    public int getNewUsersCount(Date startDate, Date endDate) {
+        String query = "SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?"; 
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
 
     /**
-     * Đếm số đơn hàng mới trong 30 ngày qua
+     * Đếm số đơn hàng mới trong khoảng thời gian xác định
      */
-    public int getNewOrdersThisMonthCount() {
-        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= DATEADD(day, -30, GETDATE())";
+    public int getNewOrdersCount(Date startDate, Date endDate) {
+        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= ? AND OrderDate <= ?";
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
@@ -1353,12 +1416,111 @@ public class DAO {
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(rs.getString(1));
+                list.add(rs.getString("IdSupplier"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
+    }
+
+
+    public Map<String, Integer> getDashboardSummary(java.sql.Date start, java.sql.Date end) {
+        Map<String, Integer> summary = new HashMap<>();
+        // Tạm thời bỏ qua bảng [Order] nếu nó gây lỗi trắng trang do thiếu table trong DB
+        String sql = "SELECT " +
+                     "(SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= ? AND ReleaseDate <= ?) as products, " +
+                     "(SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?) as users, " +
+                     "(SELECT COUNT(*) FROM Blog WHERE (Status = 'VISIBLE' OR Status IS NULL)) as blogs";
+        
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, start);
+            ps.setDate(2, end);
+            ps.setDate(3, start);
+            ps.setDate(4, end);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    summary.put("products", rs.getInt("products"));
+                    summary.put("users", rs.getInt("users"));
+                    summary.put("blogs", rs.getInt("blogs"));
+                    summary.put("pending", 0); // Tạm thời
+                    summary.put("newProducts", 0);
+                    summary.put("newUsers", 0);
+                    summary.put("newOrders", 0);
+                }
+            }
+        } catch (Exception e) { 
+            System.err.println("Lỗi tại getDashboardSummary: " + e.getMessage());
+            e.printStackTrace(); 
+        }
+        return summary;
+    }
+
+    public int addOrder(Order order) {
+        // Query cơ bản theo database hiện tại của bạn
+        String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        // Nếu bạn đã chạy lệnh ALTER TABLE để thêm cột, hãy dùng query này:
+        // String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus, PaymentMethod, CustomerNote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = new DBContext().getConnection()) {
+            // Kiểm tra xem bảng đã có đủ cột chưa để tự động điều chỉnh query
+            boolean hasPayment = false;
+            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "Order", "PaymentMethod")) {
+                if (rs.next()) hasPayment = true;
+            }
+            
+            String finalQuery = hasPayment 
+                ? "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus, PaymentMethod, CustomerNote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                : "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            try (PreparedStatement ps = conn.prepareStatement(finalQuery, Statement.RETURN_GENERATED_KEYS)) {
+                int idx = 1;
+                if (order.getUserId() != null && order.getUserId() > 0) {
+                    ps.setInt(idx++, order.getUserId());
+                } else {
+                    ps.setNull(idx++, java.sql.Types.INTEGER);
+                }
+                ps.setDate(idx++, order.getOrderDate());
+                ps.setDouble(idx++, order.getTotalPrice());
+                ps.setString(idx++, order.getReceiverName());
+                ps.setString(idx++, order.getReceiverPhone());
+                ps.setString(idx++, order.getReceiverAddress());
+                ps.setString(idx++, order.getOrderStatus());
+                
+                if (hasPayment) {
+                    ps.setString(idx++, order.getPaymentMethod());
+                    ps.setString(idx++, order.getCustomerNote());
+                }
+                
+                int affectedRows = ps.executeUpdate();
+                if (affectedRows > 0) {
+                    try (ResultSet rs = ps.getGeneratedKeys()) {
+                        if (rs.next()) return rs.getInt(1);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi tại addOrder: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public boolean addOrderDetail(OrderDetail detail) {
+        String query = "INSERT INTO OrderDetail (IdOrder, IdProduct, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, detail.getIdOrder());
+            ps.setString(2, detail.getIdProduct());
+            ps.setInt(3, detail.getQuantity());
+            ps.setDouble(4, detail.getUnitPrice());
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -1416,7 +1578,7 @@ public class DAO {
         
         return stats;
     }
-       public int getTotalProductsByDate(Date startDate, Date endDate) {
+    public int getTotalProductsByDate(Date startDate, Date endDate) {
         String query = "SELECT COUNT(*) FROM ProductDetail \n" +
 "WHERE ReleaseDate >= ? AND ReleaseDate <= ?";
         try (Connection conn = new DBContext().getConnection();
@@ -1429,5 +1591,42 @@ public class DAO {
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
+
+    /**
+     * Lấy doanh thu theo từng tháng trong năm hiện tại
+     */
+    public Map<String, Double> getMonthlyRevenueData() {
+        Map<String, Double> stats = new LinkedHashMap<>();
+        
+        // Khởi tạo 12 tháng với giá trị 0 (T1, T2, ..., T12)
+        for (int i = 1; i <= 12; i++) {
+            stats.put("T" + i, 0.0);
+        }
+
+        String query = "SELECT MONTH(OrderDate) as Month, SUM(TotalPrice) as Revenue " +
+                      "FROM [Order] " +
+                      "WHERE OrderDate >= DATEFROMPARTS(YEAR(GETDATE()), 1, 1) " +
+                      "AND OrderDate <= DATEFROMPARTS(YEAR(GETDATE()), 12, 31) " +
+                      "AND OrderStatus = N'Hoàn thành' " +
+                      "GROUP BY MONTH(OrderDate) " +
+                      "ORDER BY Month ASC";
+
+                      
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                int month = rs.getInt("Month");
+                double revenue = rs.getDouble("Revenue");
+                stats.put("T" + month, revenue);
+            }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
+        
+        return stats;
+    }
+
     
 }
+

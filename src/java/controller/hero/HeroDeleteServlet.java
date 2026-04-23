@@ -26,44 +26,16 @@ public class HeroDeleteServlet extends HttpServlet {
 
     private final HeroBannerDAO dao = new HeroBannerDAO();
 
-    // ── GET: hiển thị trang xác nhận xoá ────────────────────────────
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // Truyền danh sách banner để admin chọn muốn xoá cái nào
-        List<HeroBanner> banners = new ArrayList<>();
-        try {
-            banners = dao.getAll();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        request.setAttribute("banners", banners);
-
-        // Nếu có id thì preselect banner đó
-        String idParam = request.getParameter("id");
-        if (idParam != null && !idParam.isEmpty()) {
-            try {
-                HeroBanner selected = dao.getById(Integer.parseInt(idParam));
-                request.setAttribute("selectedHero", selected);
-            } catch (Exception ignored) {}
-        }
-
-        request.getRequestDispatcher("hero_config/config-hero-delete.jsp").forward(request, response);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
 
         String idStr = request.getParameter("id");
         HttpSession session = request.getSession();
 
         if (idStr == null || idStr.isEmpty()) {
             session.setAttribute("flashError", "Không tìm thấy banner cần xoá.");
-            response.sendRedirect(request.getContextPath() + "/HeroDeleteServlet");
+            response.sendRedirect(request.getContextPath() + "/HeroListServlet");
             return;
         }
 
@@ -72,7 +44,7 @@ public class HeroDeleteServlet extends HttpServlet {
             id = Integer.parseInt(idStr);
         } catch (NumberFormatException e) {
             session.setAttribute("flashError", "ID banner không hợp lệ.");
-            response.sendRedirect(request.getContextPath() + "/HeroDeleteServlet");
+            response.sendRedirect(request.getContextPath() + "/HeroListServlet");
             return;
         }
 
@@ -89,6 +61,12 @@ public class HeroDeleteServlet extends HttpServlet {
             session.setAttribute("flashError", "Xoá Hero banner thất bại. Vui lòng thử lại.");
         }
 
-        response.sendRedirect(request.getContextPath() + "/AdminHomeConfigServlet");
+        response.sendRedirect(request.getContextPath() + "/HeroListServlet");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
     }
 }

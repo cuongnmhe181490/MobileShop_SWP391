@@ -1,6 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -201,6 +202,15 @@
             margin-top: 8px;
             font-weight: 500;
         }
+
+        /* White Chart Card (Reverted from dark) */
+        .card-light-chart {
+            background: white;
+            color: var(--text-main);
+        }
+        .card-light-chart h3 {
+            color: var(--text-main);
+        }
     </style>
 </head>
 <body>
@@ -235,8 +245,16 @@
                     </form>
 
                     <div class="user-profile">
-                        <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
-                        <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>
+                        <c:set var="adminName" value="${sessionScope.acc != null ? sessionScope.acc.name : 'Admin'}" />
+                        <div class="avatar">
+                            <c:choose>
+                                <c:when test="${not empty adminName}">
+                                    ${adminName.substring(0,1).toUpperCase()}
+                                </c:when>
+                                <c:otherwise>A</c:otherwise>
+                            </c:choose>
+                        </div>
+                        <span style="font-weight: 600;">${adminName}</span>
                     </div>
                 </div>
             </header>
@@ -266,7 +284,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fa-solid fa-trophy" style="color: #f59e0b; margin-right: 8px;"></i> Top 5 sản phẩm bán chạy nhất</h3>
-                        <a href="${pageContext.request.contextPath}/admin/product" class="view-all">Xem tất cả →</a>
+
                     </div>
                     <table class="dashboard-table">
                         <thead>
@@ -281,7 +299,7 @@
                             <c:forEach items="${bestSellers}" var="p" varStatus="loop">
                                 <tr>
                                     <td>
-                                        <div class="rank-circle ${loop.index < 3 ? 'rank-' + (loop.index + 1) : 'rank-default'}">
+                                        <div class="rank-circle rank-${loop.index < 3 ? loop.index + 1 : 'default'}">
                                             ${loop.index + 1}
                                         </div>
                                     </td>
@@ -304,7 +322,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fa-solid fa-bolt" style="color: #3b82f6; margin-right: 8px;"></i> Đơn hàng mới phát sinh</h3>
-                        <a href="${pageContext.request.contextPath}/admin/order" class="view-all">Xem tất cả →</a>
+
                     </div>
                     <table class="dashboard-table">
                         <thead>
@@ -316,7 +334,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <c:forEach items="${recentOrders}" var="o">
+                            <c:forEach items="${recentOrders}" var="o" end="4">
                                 <tr>
                                     <td style="font-weight: 700; color: var(--primary);">${o.id}</td>
                                     <td style="font-weight: 600;">${o.name}</td>
@@ -338,18 +356,24 @@
 
             <!-- Hàng mới: Biểu đồ thống kê -->
             <div class="content-grid" style="margin-top: 24px; grid-template-columns: 1.5fr 1fr;">
-                <!-- Biểu đồ Doanh thu theo ngày (Line Chart) -->
-                <div class="card">
+                <!-- Biểu đồ Doanh thu theo tháng (Bar Chart) - WHITE THEME -->
+                <div class="card card-light-chart">
                     <div class="card-header">
-                        <h3><i class="fa-solid fa-chart-line" style="color: var(--primary); margin-right: 8px;"></i> Doanh thu theo ngày</h3>
+                        <h3><i class="fa-solid fa-chart-simple" style="color: var(--primary); margin-right: 8px;"></i> Doanh thu theo tháng</h3>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="status-pill status-success" style="font-size: 0.7rem;">+12.4%</span>
+                            <span class="status-pill status-success" style="font-size: 0.75rem;">+12.4%</span>
                         </div>
                     </div>
                     <div style="height: 300px; width: 100%;">
                         <canvas id="revenueChart"></canvas>
                     </div>
+                    <div style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+                        <span style="width: 12px; height: 12px; background: var(--primary); border-radius: 2px;"></span>
+                        Doanh thu (triệu đồng)
+                    </div>
                 </div>
+
+
 
                 <!-- Biểu đồ Trạng thái đơn hàng (Doughnut Chart) -->
                 <div class="card">
@@ -382,60 +406,91 @@
     </div>
 
     <script>
-        // 1. Biểu đồ Doanh thu theo ngày (Line Chart)
+        // 1. Biểu đồ Doanh thu theo tháng (Bar Chart)
         const revCtx = document.getElementById('revenueChart').getContext('2d');
         
-        // Chuẩn bị dữ liệu từ Server
         const revLabels = [
-            <c:forEach items="${dailyRevenue}" var="entry" varStatus="loop">
+            <c:forEach items="${monthlyRevenueData}" var="entry" varStatus="loop">
                 '${entry.key}'${!loop.last ? ',' : ''}
             </c:forEach>
         ];
         const revData = [
-            <c:forEach items="${dailyRevenue}" var="entry" varStatus="loop">
-                ${entry.value}${!loop.last ? ',' : ''}
+            <c:forEach items="${monthlyRevenueData}" var="entry" varStatus="loop">
+                ${(entry.value != null ? entry.value : 0) / 1000000.0}${!loop.last ? ',' : ''}
             </c:forEach>
         ];
 
         new Chart(revCtx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: revLabels,
                 datasets: [{
-                    label: 'Doanh thu (₫)',
+                    label: 'Doanh thu',
                     data: revData,
-                    borderColor: '#4318ff',
-                    backgroundColor: 'rgba(67, 24, 255, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#4318ff',
-                    borderWidth: 3
+                    backgroundColor: '#4318ff',
+                    hoverBackgroundColor: '#3311cc',
+                    borderRadius: 5,
+                    borderSkipped: false,
+                    barThickness: 25
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1b2559',
+                        titleColor: '#fff',
+                        footerColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 12,
+                        cornerRadius: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                let val = context.parsed.y * 1000000;
+                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+                            }
+                        }
+
+                    }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { color: '#f0f0f0' },
+                        min: 0,
+                        suggestedMax: 1000,
+                        grid: { 
+                            color: '#f0f0f0',
+                            drawBorder: false
+                        },
                         ticks: {
+                            stepSize: 100,
+                            color: '#a3aed0',
+                            font: { size: 11, weight: '600' },
                             callback: function(value) {
-                                if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
-                                return value;
+                                if (value >= 1000) return (value / 1000).toFixed(0) + 'B';
+                                if (value === 0) return '0';
+                                return value + 'M';
                             }
                         }
                     },
+
                     x: {
-                        grid: { display: false }
+                        grid: { display: false },
+                        ticks: {
+                            color: '#a3aed0',
+                            font: { size: 12, weight: '600' }
+                        }
                     }
                 }
             }
         });
+
+
+
+
 
         // 2. Biểu đồ Trạng thái đơn hàng (Doughnut Chart)
         const orderCtx = document.getElementById('orderStatusChart').getContext('2d');
@@ -445,9 +500,9 @@
                 labels: ['Hoàn thành', 'Đã hủy', 'Chờ xử lý'],
                 datasets: [{
                     data: [
-                        ${orderStats['Hoàn thành'] != null ? orderStats['Hoàn thành'] : 0},
-                        ${orderStats['Đã hủy'] != null ? orderStats['Đã hủy'] : 0},
-                        ${orderStats['Chờ xử lý'] != null ? orderStats['Chờ xử lý'] : 0}
+                        ${(not empty orderStats and not empty orderStats['Hoàn thành']) ? orderStats['Hoàn thành'] : 0},
+                        ${(not empty orderStats and not empty orderStats['Đã hủy']) ? orderStats['Đã hủy'] : 0},
+                        ${(not empty orderStats and not empty orderStats['Chờ xử lý']) ? orderStats['Chờ xử lý'] : 0}
                     ],
                     backgroundColor: ['#05cd99', '#ee5d50', '#ffb81c'],
                     borderWidth: 0,

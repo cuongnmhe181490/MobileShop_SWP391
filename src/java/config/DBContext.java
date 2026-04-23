@@ -24,7 +24,6 @@ public class DBContext {
 
 
     private final String serverName = readSetting("DB_SERVER", "127.0.0.1");
-//    private final String serverName = readSetting("DB_SERVER", "localhost");
     private final String dbName = readSetting("DB_NAME", "MOBILESHOP_DEM05");
     private final String portNumber = readSetting("DB_PORT", "1433");
     private final String instance = readSetting("DB_INSTANCE", "");
