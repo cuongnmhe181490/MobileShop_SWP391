@@ -407,17 +407,8 @@
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
                             <div class="btn-group-custom">
-                                <%-- Lấy id từ active banner hoặc mặc định --%>
-                                <c:choose>
-                                    <c:when test="${not empty activeHero}">
-                                        <a href="${ctx}/HeroEditServlet?id=${activeHero.id}" class="btn-f btn-edit">Sửa</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${ctx}/HeroListServlet" class="btn-f btn-edit">Sửa</a>
-                                    </c:otherwise>
-                                </c:choose>
-                                <a href="${ctx}/HeroAddServlet" class="btn-f btn-add">Thêm</a>
-                                <a href="${ctx}/HeroListServlet" class="btn-f btn-list">Danh sách</a>
+                                <a href="${ctx}/HeroListServlet" class="btn-f btn-edit">Quản lý danh sách</a>
+                                <a href="${ctx}/HeroAddServlet" class="btn-f btn-add">Thêm mới</a>
                             </div>
                         </div>
                     </div>
@@ -429,16 +420,8 @@
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
                             <div class="btn-group-custom">
-                                <c:choose>
-                                    <c:when test="${not empty latestSupplier}">
-                                        <a href="${ctx}/BrandEditServlet?id=${latestSupplier.idSupplier}" class="btn-f btn-edit">Sửa</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a href="${ctx}/BrandListServlet" class="btn-f btn-edit">Sửa</a>
-                                    </c:otherwise>
-                                </c:choose>
-                                <a href="${ctx}/BrandAddServlet" class="btn-f btn-add">Thêm</a>
-                                <a href="${ctx}/BrandListServlet" class="btn-f btn-list">Danh sách</a>
+                                <a href="${ctx}/BrandListServlet" class="btn-f btn-edit">Quản lý danh sách</a>
+                                <a href="${ctx}/BrandAddServlet" class="btn-f btn-add">Thêm mới</a>
                             </div>
                         </div>
                     </div>
@@ -450,9 +433,8 @@
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
                             <div class="btn-group-custom">
-                                <a href="${ctx}/TopProductListServlet" class="btn-f btn-edit">Quản lý</a>
-                                <a href="${ctx}/TopProductAddServlet" class="btn-f btn-add">Thêm</a>
-                                <a href="${ctx}/TopProductListServlet" class="btn-f btn-list">Danh sách</a>
+                                <a href="${ctx}/TopProductListServlet" class="btn-f btn-edit">Quản lý danh sách</a>
+                                <a href="${ctx}/TopProductAddServlet" class="btn-f btn-add">Thêm mới</a>
                             </div>
                         </div>
                     </div>
@@ -464,9 +446,7 @@
                                 <div class="shape-white"></div><div class="shape-dark"></div>
                             </div>
                             <div class="btn-group-custom">
-                                <a href="${ctx}/TradeInConfigServlet?action=edit" class="btn-f btn-edit">Sửa</a>
-                                <a href="${ctx}/TradeInConfigServlet?action=add" class="btn-f btn-add">Thêm</a>
-                                <a href="${ctx}/TradeInConfigServlet" class="btn-f btn-list">Danh sách</a>
+                                <a href="${ctx}/TradeInConfigServlet" class="btn-f btn-edit">Quản lý cấu hình</a>
                             </div>
                         </div>
                     </div>

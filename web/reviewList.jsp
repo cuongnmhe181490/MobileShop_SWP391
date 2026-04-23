@@ -288,7 +288,151 @@
                 color: #0f172a;
             }
 
-            /* Pagination */
+            :root {
+                --color-primary: #0284c7;
+                --color-primary-hover: #0369a1;
+                --color-bg: #f8fafc;
+                --color-surface: #ffffff;
+                --color-text-main: #0f172a;
+                --color-text-secondary: #64748b;
+                --color-border: #e2e8f0;
+                --color-red: #d70018; /* Cellphones red */
+                --font-main: 'Inter', sans-serif;
+            }
+
+            /* ─── TABS ─── */
+            .rv-tabs {
+                display: flex;
+                gap: 30px;
+                border-bottom: 2px solid var(--color-border);
+                margin-bottom: 24px;
+            }
+            .rv-tab {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--color-text-secondary);
+                padding: 12px 0;
+                cursor: pointer;
+                position: relative;
+                transition: color 0.3s;
+            }
+            .rv-tab.active {
+                color: var(--color-primary);
+            }
+            .rv-tab::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 100%;
+                height: 2px;
+                background: var(--color-primary);
+                transform: scaleX(0);
+                transition: transform 0.3s;
+            }
+            .rv-tab.active::after {
+                transform: scaleX(1);
+            }
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+                animation: fadeIn 0.4s ease forwards;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* ─── Q&A FORM (CellphoneS Style) ─── */
+            .qa-box {
+                background: #ffffff;
+                border-radius: 12px;
+                border: 1px solid var(--color-border);
+                padding: 24px;
+                display: flex;
+                gap: 24px;
+                align-items: flex-start;
+                margin-bottom: 30px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            }
+            .qa-box__mascot {
+                width: 80px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--color-primary);
+                background: #e0f2fe;
+                border-radius: 50%;
+                height: 80px;
+                font-size: 32px;
+            }
+            .qa-box__main {
+                flex: 1;
+            }
+            .qa-box__title {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--color-text-main);
+                margin-bottom: 8px;
+            }
+            .qa-box__desc {
+                font-size: 13px;
+                color: var(--color-text-secondary);
+                line-height: 1.5;
+                margin-bottom: 16px;
+            }
+            .qa-box__input-group {
+                display: flex;
+                gap: 12px;
+            }
+            .qa-box__input {
+                flex: 1;
+                border: 1px solid var(--color-border);
+                border-radius: 8px;
+                padding: 12px 16px;
+                font-size: 14px;
+                outline: none;
+                transition: border-color 0.2s;
+            }
+            .qa-box__input:focus {
+                border-color: var(--color-primary);
+                box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+            }
+            .qa-box__btn {
+                background: var(--color-primary);
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                padding: 0 24px;
+                font-weight: 700;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .qa-box__btn:hover {
+                background: var(--color-primary-hover);
+                transform: translateY(-1px);
+            }
+            
+            /* Disabled writing button */
+            .btn-write.disabled {
+                background: #e2e8f0;
+                color: #94a3b8;
+                border-color: #cbd5e1;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+            .btn-write.disabled:hover {
+                transform: none;
+            }
+
+            /* ─── Custom Modal & Toast ─── */
             .pagination {
                 display: flex;
                 gap: 8px;
@@ -513,76 +657,86 @@
                     Đánh giá sản phẩm
                 </h1>
 
-                <%-- Summary: điểm + filter chips + nút viết --%>
-                <div class="rv-summary">
-                    <div class="rv-score">
-                        <div class="rv-score__num">
-                            <fmt:formatNumber value="${averageRating}" maxFractionDigits="1" minFractionDigits="1"/>
-                        </div>
-                        <div class="stars">
-                            <c:forEach begin="1" end="5" var="s">
-                                <span class="stars__s ${s <= averageRating ? 'on' : ''}">★</span>
-                            </c:forEach>
-                        </div>
-                        <div class="rv-score__sub">${reviewCount} đánh giá</div>
-                    </div>
-
-                    <div class="rv-chips">
-                        <a class="chip ${empty selectedStar ? 'active' : ''}"
-                           href="${ctx}/reviews?pid=${pid}">Tất cả · ${reviewCount}</a>
-                        <c:forEach items="${reviewCounts}" var="entry">
-                            <a class="chip ${selectedStar == entry.key ? 'active' : ''}"
-                               href="${ctx}/reviews?pid=${pid}&star=${entry.key}">
-                                ${entry.key} sao · ${entry.value}
-                            </a>
-                        </c:forEach>
-                    </div>
-
-                    <%-- Nút viết review: luôn hiện, nếu chưa login thì mở modal --%>
-                    <c:choose>
-                        <c:when test="${loggedIn}">
-                            <a class="btn-write" href="${ctx}/review/write?pid=${pid}">✦ Viết đánh giá</a>
-                        </c:when>
-                        <c:otherwise>
-                            <button class="btn-write" onclick="openLoginModal()">✦ Viết đánh giá</button>
-                        </c:otherwise>
-                    </c:choose>
+                <%-- Tabs Header --%>
+                <div class="rv-tabs">
+                    <div class="rv-tab ${empty param.success or param.success ne 'asked' ? 'active' : ''}" onclick="switchTab('reviews')">Đánh giá sản phẩm</div>
+                    <div class="rv-tab ${param.success eq 'asked' ? 'active' : ''}" onclick="switchTab('qa')">Hỏi và đáp</div>
                 </div>
 
-                <%-- Danh sách review --%>
-                <c:choose>
-                    <c:when test="${empty reviews}">
-                        <p style="color:var(--color-text-secondary);text-align:center;padding:40px 0">
-                            Chưa có đánh giá nào${not empty selectedStar ? ' ở mức sao này' : ''}.
-                        </p>
-                    </c:when>
-                    <c:otherwise>
-                        <c:forEach items="${reviews}" var="rv">
-                            <article class="rv-card">
-                                <div class="rv-card__top">
-                                    <div class="rv-card__user">
-                                        <div class="rv-card__avatar">
-                                            ${fn:substring(rv.reviewerName, 0, 1)}
-                                        </div>
-                                        <div>
-                                            <div class="rv-card__name">${rv.reviewerName}</div>
-                                            <div class="rv-card__meta">
-                                                <span class="stars stars--sm">
-                                                    <c:forEach begin="1" end="5" var="s">
-                                                        <span class="stars__s ${s <= rv.ranking ? 'on' : ''}">★</span>
-                                                    </c:forEach>
-                                                </span>
-                                                &nbsp;·&nbsp;
-                                                <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy"/>
+                <div id="tab-reviews" class="tab-content ${empty param.success or param.success ne 'asked' ? 'active' : ''}">
+                    <%-- Summary: điểm + filter chips + nút viết --%>
+                    <div class="rv-summary">
+                        <div class="rv-score">
+                            <div class="rv-score__num">
+                                <fmt:formatNumber value="${averageRating}" maxFractionDigits="1" minFractionDigits="1"/>
+                            </div>
+                            <div class="stars">
+                                <c:forEach begin="1" end="5" var="s">
+                                    <span class="stars__s ${s <= averageRating ? 'on' : ''}">★</span>
+                                </c:forEach>
+                            </div>
+                            <div class="rv-score__sub">${reviewCount} đánh giá</div>
+                        </div>
+
+                        <div class="rv-chips">
+                            <a class="chip ${empty selectedStar ? 'active' : ''}"
+                               href="${ctx}/reviews?pid=${pid}">Tất cả · ${reviewCount}</a>
+                            <c:forEach items="${reviewCounts}" var="entry">
+                                <a class="chip ${selectedStar == entry.key ? 'active' : ''}"
+                                   href="${ctx}/reviews?pid=${pid}&star=${entry.key}">
+                                    ${entry.key} sao · ${entry.value}
+                                </a>
+                            </c:forEach>
+                        </div>
+
+                        <%-- Nút viết review: Nếu chưa login -> modal. Nếu đã login, kiểm tra mua hàng --%>
+                        <c:choose>
+                            <c:when test="${!loggedIn}">
+                                <button class="btn-write" onclick="openLoginModal()">✦ Viết đánh giá</button>
+                            </c:when>
+                            <c:when test="${hasPurchased}">
+                                <a class="btn-write" href="${ctx}/review/write?pid=${pid}">✦ Viết đánh giá</a>
+                            </c:when>
+                            <c:otherwise>
+                                <button class="btn-write disabled" onclick="alert('Bạn cần mua và nhận sản phẩm này thành công để có thể viết đánh giá.')">✦ Viết đánh giá</button>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+
+                    <%-- Danh sách review --%>
+                    <c:choose>
+                        <c:when test="${empty reviews}">
+                            <p style="color:var(--color-text-secondary);text-align:center;padding:40px 0">
+                                Chưa có đánh giá nào${not empty selectedStar ? ' ở mức sao này' : ''}.
+                            </p>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach items="${reviews}" var="rv">
+                                <article class="rv-card">
+                                    <div class="rv-card__top">
+                                        <div class="rv-card__user">
+                                            <div class="rv-card__avatar">
+                                                ${fn:substring(rv.reviewerName, 0, 1)}
+                                            </div>
+                                            <div>
+                                                <div class="rv-card__name">${rv.reviewerName}</div>
+                                                <div class="rv-card__meta">
+                                                    <span class="stars stars--sm">
+                                                        <c:forEach begin="1" end="5" var="s">
+                                                            <span class="stars__s ${s <= rv.ranking ? 'on' : ''}">★</span>
+                                                        </c:forEach>
+                                                    </span>
+                                                    &nbsp;·&nbsp;
+                                                    <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy"/>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <%-- Nút Sửa nếu là review của user đang đăng nhập --%>
-                                    <c:if test="${sessionScope.acc != null && rv.userId == sessionScope.acc.id}">
-                                        <a class="btn-edit" href="${ctx}/review/write?id=${rv.reviewId}">Sửa</a>
-                                    </c:if>
-                                </div>
+                                        <%-- Nút Sửa nếu là review của user đang đăng nhập --%>
+                                        <c:if test="${sessionScope.acc != null && rv.userId == sessionScope.acc.id}">
+                                            <a class="btn-edit" href="${ctx}/review/write?id=${rv.reviewId}">Sửa</a>
+                                        </c:if>
+                                    </div>
 
                                 <p class="rv-card__content">${rv.reviewContent}</p>
 
@@ -622,6 +776,98 @@
                            href="${ctx}/reviews?pid=${pid}&star=${selectedStar}&page=${currentPage + 1}">Sau →</a>
                     </nav>
                 </c:if>
+
+                </div> <!-- End tab-reviews -->
+
+                <div id="tab-qa" class="tab-content ${param.success eq 'asked' ? 'active' : ''}">
+                    <%-- Q&A Form MobileShop Style --%>
+                    <div class="qa-box">
+                        <div class="qa-box__mascot">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <div class="qa-box__main">
+                            <div class="qa-box__title">Hãy đặt câu hỏi cho chúng tôi</div>
+                            <div class="qa-box__desc">
+                                Chúng tôi sẽ phản hồi trong vòng 1 giờ. Thông tin có thể thay đổi theo thời gian, vui lòng đặt câu hỏi để nhận được cập nhật mới nhất!
+                            </div>
+                            <c:choose>
+                                <c:when test="${loggedIn}">
+                                    <form action="${ctx}/reviews" method="POST" class="qa-box__input-group">
+                                        <input type="hidden" name="pid" value="${pid}">
+                                        <input type="text" name="questionContent" class="qa-box__input" placeholder="Viết câu hỏi của bạn tại đây" required maxlength="500">
+                                        <button type="submit" class="qa-box__btn">Gửi câu hỏi <i class="fa-regular fa-paper-plane"></i></button>
+                                    </form>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="qa-box__input-group">
+                                        <input type="text" class="qa-box__input" placeholder="Đăng nhập để đặt câu hỏi..." onclick="openLoginModal()" readonly style="cursor: pointer;">
+                                        <button type="button" class="qa-box__btn" onclick="openLoginModal()">Gửi câu hỏi <i class="fa-regular fa-paper-plane"></i></button>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+
+                    <%-- Danh sách Hỏi đáp --%>
+                    <c:choose>
+                        <c:when test="${empty questions}">
+                            <p style="color:var(--color-text-secondary);text-align:center;padding:40px 0">
+                                Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi!
+                            </p>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach items="${questions}" var="q">
+                                <article class="rv-card">
+                                    <div class="rv-card__top">
+                                        <div class="rv-card__user">
+                                            <div class="rv-card__avatar">
+                                                ${fn:substring(q.reviewerName, 0, 1)}
+                                            </div>
+                                            <div>
+                                                <div class="rv-card__name">${q.reviewerName}</div>
+                                                <div class="rv-card__meta">
+                                                    <span style="color:#0284c7; font-weight: 600; font-size: 11px; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;">Câu hỏi</span>
+                                                    &nbsp;·&nbsp;
+                                                    <fmt:formatDate value="${q.reviewDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p class="rv-card__content" style="font-weight: 600; font-size: 16px;">${q.reviewContent}</p>
+
+                                    <%-- Phản hồi Admin cho câu hỏi --%>
+                                    <c:if test="${not empty q.replyContent}">
+                                        <div class="rv-reply">
+                                            <div class="rv-reply__label">
+                                                <i class="fa-solid fa-headset"></i> Phản hồi từ Admin
+                                            </div>
+                                            <div class="rv-reply__text">
+                                                ${q.replyContent}
+                                            </div>
+                                        </div>
+                                    </c:if>
+                                </article>
+                            </c:forEach>
+                            
+                            <%-- Phân trang cho câu hỏi --%>
+                            <c:if test="${totalQPages > 1}">
+                                <div class="rv-pagination pagination">
+                                    <c:forEach begin="1" end="${totalQPages}" var="p">
+                                        <c:choose>
+                                            <c:when test="${p == currentQPage}">
+                                                <span class="page-btn active">${p}</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a class="page-btn" href="?pid=${pid}&qpage=${p}#qa-tab">${p}</a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+                                </div>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
+                </div> <!-- End tab-qa -->
 
             </div>
         </main>
@@ -684,6 +930,28 @@
             // Đóng khi bấm Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') closeLoginModal();
+            });
+
+            // ── Tabs Switcher ──
+            function switchTab(tabId) {
+                // Update tab buttons
+                document.querySelectorAll('.rv-tab').forEach(t => t.classList.remove('active'));
+                if(tabId === 'reviews') {
+                    document.querySelector('.rv-tab:nth-child(1)').classList.add('active');
+                } else if (tabId === 'qa') {
+                    document.querySelector('.rv-tab:nth-child(2)').classList.add('active');
+                }
+
+                // Update tab contents
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('tab-' + tabId).classList.add('active');
+            }
+
+            // Auto-switch based on hash URL or param success
+            window.addEventListener('DOMContentLoaded', () => {
+                if (window.location.hash === '#qa-tab') {
+                    switchTab('qa');
+                }
             });
         </script>
     </body>

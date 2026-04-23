@@ -78,7 +78,7 @@ public class HomePageServlet extends HttpServlet {
      * Tính điểm hài lòng trung bình từ DB.
      */
     private String getLiveSatisfactionRate() {
-        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) AS Average FROM ProductReview";
+        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) AS Average FROM GeneralReview WHERE [Status] = 'VISIBLE' AND (ReviewTopic IS NULL OR ReviewTopic != 'Q&A')";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 double avg = rs.getDouble("Average");
