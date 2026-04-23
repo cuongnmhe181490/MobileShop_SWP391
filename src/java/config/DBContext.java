@@ -22,7 +22,7 @@ public class DBContext {
 }
 
     private final String serverName = readSetting("DB_SERVER", "localhost");
-    private final String dbName = readSetting("DB_NAME", "MOBILESHOP_DEM05");
+    private final String dbName = readSetting("DB_NAME", "MOBILESHOP_DEMO5");
     private final String portNumber = readSetting("DB_PORT", "1433");
     private final String instance = readSetting("DB_INSTANCE", "");
     private final String userID = readSetting("DB_USER", "sa");

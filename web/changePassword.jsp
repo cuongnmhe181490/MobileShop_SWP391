@@ -65,9 +65,10 @@
                 <div class="user-name">${sessionScope.acc.name}</div>
             </div>
             <div class="nav-menu">
-                <a href="profile"        class="nav-item">Tài khoản</a>
-                <a href="myOrders"       class="nav-item">Đơn hàng</a>
-                <a href="changePassword" class="nav-item active">Đổi mật khẩu</a>
+                <a href="${ctx}/profile" class="nav-item">Tài khoản</a>
+                <a href="${ctx}/myOrders" class="nav-item">Đơn hàng</a>
+                <a href="${ctx}/review/mine" class="nav-item">Lịch sử đánh giá</a>
+                <a href="${ctx}/changePassword" class="nav-item active">Đổi mật khẩu</a>
             </div>
         </div>
 
