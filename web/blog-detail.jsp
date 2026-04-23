@@ -80,10 +80,14 @@
         .blog-content-wrapper {
             max-width: 800px;
             margin: 0 auto 100px;
+            font-family: 'Be Vietnam Pro', sans-serif !important;
             font-size: 1.15rem;
             line-height: 1.8;
-            color: #1e293b; /* Darker for sharpness */
+            color: #1e293b;
             text-align: left !important;
+        }
+        .blog-content-wrapper * {
+            font-family: 'Be Vietnam Pro', sans-serif !important;
         }
         .blog-content-wrapper p {
             margin-bottom: 20px;

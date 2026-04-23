@@ -244,7 +244,7 @@
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Tổng sản phẩm</div>
+                    <div class="stat-label">Sản phẩm ra mắt</div>
                     <div class="stat-value">${totalProducts}</div>
                 </div>
                 <div class="stat-card">

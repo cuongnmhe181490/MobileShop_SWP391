@@ -33,9 +33,6 @@ import entity.Supplier;
 public class DAO {
     private static final Pattern RELEASE_YEAR_PATTERN = Pattern.compile("(19|20)\\d{2}");
 
-    Connection conn = null; 
-    PreparedStatement ps = null; 
-    ResultSet rs = null; 
     
     
     /**
@@ -43,12 +40,11 @@ public class DAO {
      */
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
     // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
-    String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], "
-                 + "Email, PhoneNumber, FullName, Birthday, [RoleId], CreatedDate) \n"
-                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, GETDATE())"; // GETDATE() để lấy giờ hiện tại của SQL Server
-    try {
-        conn = new DBContext().getConnection();
-        ps = conn.prepareStatement(query);
+    String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], Email, "
+             + "PhoneNumber, FullName, Birthday, [RoleId], [Status], [CreatedDate], [LockReason]) \n"
+             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, N'Hoạt động', GETDATE(), NULL)";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(query)) {
         ps.setString(1, user);
         ps.setString(2, gender);
         ps.setString(3, pass);
@@ -59,7 +55,7 @@ public class DAO {
         ps.setString(8, birthday);
         ps.executeUpdate();
     } catch (Exception e) {
-        e.printStackTrace(); // Rất quan trọng: In lỗi ra để biết nếu SQL bị sai
+        e.printStackTrace();
     }
 }
     
@@ -71,34 +67,35 @@ public class DAO {
                  + "FROM [User] u \n"
                  + "INNER JOIN [Role] r ON u.RoleId = r.RoleId \n"
                  + "WHERE u.Username = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, user);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                // 2. Khởi tạo Role
-                Role r = new Role();
-                r.setRoleId(rs.getInt("RoleId"));
-                r.setRoleName(rs.getString("RoleName"));
-                
-                User u = new User();
-                u.setId(rs.getInt("UserId"));
-                u.setUser(rs.getString("Username"));
-                u.setGender(rs.getString("Gender"));
-                u.setPass(rs.getString("Password"));
-                u.setAddress(rs.getString("Address"));
-                u.setEmail(rs.getString("Email"));
-                u.setPhone(rs.getString("PhoneNumber"));
-                u.setName(rs.getString("FullName"));
-                u.setBirthday(rs.getDate("Birthday"));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Role r = new Role();
+                    r.setRoleId(rs.getInt("RoleId"));
+                    r.setRoleName(rs.getString("RoleName"));
+                    
+                    User u = new User();
+                    u.setId(rs.getInt("UserId"));
+                    u.setUser(rs.getString("Username"));
+                    u.setGender(rs.getString("Gender"));
+                    u.setPass(rs.getString("Password"));
+                    u.setAddress(rs.getString("Address"));
+                    u.setEmail(rs.getString("Email"));
+                    u.setPhone(rs.getString("PhoneNumber"));
+                    u.setName(rs.getString("FullName"));
+                    u.setBirthday(rs.getDate("Birthday"));
+                    u.setStatus(rs.getString("Status"));
+                    u.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    u.setLockReason(rs.getString("LockReason"));
+                    u.setRole(r);
 
-                // 4. Gắn Role vào User
-                u.setRole(r);
-
-            return u;
+                    return u;
+                }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -107,38 +104,35 @@ public class DAO {
      * Lấy thông tin người dùng dựa trên Email (dùng cho Login/Reset Pass)
      */
     public User getUserByEmail(String email) {
-    // Truy vấn JOIN để lấy tên Role cùng lúc
     String sql = "SELECT u.*, r.RoleName " +
                  "FROM [User] u " +
                  "INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
                  "WHERE u.Email = ?";
-    try {
-        conn = new DBContext().getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
         ps.setString(1, email);
-        ResultSet rs = ps.executeQuery();
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                Role role = new Role();
+                role.setRoleId(rs.getInt("RoleId"));
+                role.setRoleName(rs.getString("RoleName"));
 
-        if (rs.next()) {
-            // 1. Khởi tạo đối tượng Role từ dữ liệu JOIN
-            Role role = new Role();
-            role.setRoleId(rs.getInt("RoleId"));
-            role.setRoleName(rs.getString("RoleName"));
+                User user = new User();
+                user.setId(rs.getInt("UserId"));
+                user.setEmail(rs.getString("Email"));
+                user.setPass(rs.getString("Password")); 
+                user.setName(rs.getNString("FullName"));
+                user.setPhone(rs.getString("PhoneNumber"));
+                user.setAddress(rs.getNString("Address"));
+                user.setGender(rs.getString("Gender"));
+                user.setBirthday(rs.getDate("Birthday"));
+                user.setStatus(rs.getString("Status"));
+                user.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                user.setLockReason(rs.getString("LockReason"));
+                user.setRole(role);
 
-            // 2. Khởi tạo đối tượng User và gán các trường
-            User user = new User();
-            user.setId(rs.getInt("UserId"));
-            user.setEmail(rs.getString("Email"));
-            user.setPass(rs.getString("Password")); // Lấy pass đã mã hóa để check BCrypt
-            user.setName(rs.getNString("FullName"));
-            user.setPhone(rs.getString("PhoneNumber"));
-            user.setAddress(rs.getNString("Address"));
-            user.setGender(rs.getString("Gender"));
-            user.setBirthday(rs.getDate("Birthday"));
-            
-            // 3. GÁN ĐỐI TƯỢNG ROLE VÀO USER
-            user.setRole(role);
-
-            return user;
+                return user;
+            }
         }
     } catch (Exception e) {
         e.printStackTrace();
@@ -150,13 +144,13 @@ public class DAO {
      * Kiểm tra xem Email đã có người sử dụng chưa
      */
     public boolean checkEmailExist(String email) {
-        String query = "SELECT * FROM [User] WHERE Email = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
+        String query = "SELECT 1 FROM [User] WHERE Email = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, email);
-            rs = ps.executeQuery();
-            if (rs.next()) return true; // Có tồn tại
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -167,13 +161,13 @@ public class DAO {
      * Kiểm tra xem Số điện thoại đã có người sử dụng chưa
      */
     public boolean checkPhoneExist(String phone) {
-        String query = "SELECT * FROM [User] WHERE Phone = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
+        String query = "SELECT 1 FROM [User] WHERE PhoneNumber = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, phone);
-            rs = ps.executeQuery();
-            if (rs.next()) return true; // Có tồn tại
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1088,11 +1082,10 @@ public class DAO {
      * Lưu mã Token khôi phục mật khẩu và thời gian hết hạn (10 phút)
      */
     public void saveResetToken(String email, String token) {
-        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
+        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 10 phút từ giờ hiện tại
         String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, token);
             ps.setString(2, email);
             ps.executeUpdate();
@@ -1106,21 +1099,22 @@ public class DAO {
      * Tìm người dùng dựa trên Reset Token (để xác thực link đổi pass)
      */
     public User getUserByResetToken(String token) {
-        // Chỉ lấy User nếu Token khớp VÀ thời gian hiện tại vẫn nhỏ hơn thời gian hết hạn
-        // Sửa tạm để test
-        String sql = "SELECT * FROM [User] WHERE ResetToken = ?";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+
+        String sql = "SELECT * FROM [User] WHERE ResetToken = ? AND ResetTokenExpiry > GETDATE()";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, token);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                User u = new User();
-                u.setId(rs.getInt("UserId"));
-                u.setEmail(rs.getString("Email"));
-                u.setName(rs.getNString("FullName"));
-                // ... (bạn có thể set thêm các trường khác nếu cần)
-                return u;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User u = new User();
+                    u.setId(rs.getInt("UserId"));
+                    u.setEmail(rs.getString("Email"));
+                    u.setName(rs.getNString("FullName"));
+                    u.setStatus(rs.getString("Status"));
+                    u.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    u.setLockReason(rs.getString("LockReason"));
+                    return u;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1135,9 +1129,8 @@ public class DAO {
     public void updatePasswordAndClearToken(String email, String newHashedPassword) {
         // Đổi pass xong thì đưa Token về NULL để vô hiệu hóa link cũ
         String sql = "UPDATE [User] SET [Password] = ?, ResetToken = NULL, ResetTokenExpiry = NULL WHERE Email = ?";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newHashedPassword);
             ps.setString(2, email);
             ps.executeUpdate();
@@ -1250,23 +1243,22 @@ public class DAO {
     public List<Supplier> getAllSuppliers() throws SQLException, Exception{
         List<Supplier> list = new ArrayList<>();
         String query = "SELECT* FROM SUPPLIER";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
             while(rs.next()){
                 Supplier s = new Supplier(
-                rs.getString("IdSupplier"),
-                rs.getString("Name"),
-                rs.getString("Address"),
-                rs.getString("Email"),
-                rs.getString("PhoneNumber"),
-                rs.getString("LogoPath")
+                    rs.getString("IdSupplier"),
+                    rs.getString("Name"),
+                    rs.getString("Address"),
+                    rs.getString("Email"),
+                    rs.getString("PhoneNumber"),
+                    rs.getString("LogoPath")
                 );
                 list.add(s);
             }
-        }catch (Exception e){
-           e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return list;
     }
@@ -1310,7 +1302,7 @@ public class DAO {
      * Đếm số người dùng mới đăng ký trong tháng này
      */
     public int getNewUsersThisMonthCount() {
-        String query = "SELECT COUNT(*) FROM [User] WHERE MONTH(Birthday) = MONTH(GETDATE())"; 
+        String query = "SELECT COUNT(*) FROM [User] WHERE MONTH(CreatedDate) = MONTH(GETDATE()) AND YEAR(CreatedDate) = YEAR(GETDATE())"; 
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
@@ -1351,7 +1343,6 @@ public class DAO {
         } catch (Exception e) { e.printStackTrace(); }
         return 0.0;
     }
-
     /**
      * Lấy danh sách tên các thương hiệu (Supplier) đang có sản phẩm
      */
@@ -1395,6 +1386,7 @@ public class DAO {
         }
         return list;
     }
+
     /**
      * Lấy doanh thu theo từng ngày trong khoảng thời gian xác định
      */
@@ -1424,4 +1416,18 @@ public class DAO {
         
         return stats;
     }
+       public int getTotalProductsByDate(Date startDate, Date endDate) {
+        String query = "SELECT COUNT(*) FROM ProductDetail \n" +
+"WHERE ReleaseDate >= ? AND ReleaseDate <= ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+    
 }

@@ -52,7 +52,7 @@ public class AdminDashboardController extends HttpServlet {
         long diffDays = diff / (1000 * 60 * 60 * 24);
 
         // 4. Lấy dữ liệu thống kê (Sử dụng các hàm có tham số ngày)
-        int totalProducts = dao.getTotalProducts();
+        int totalProducts = dao.getTotalProductsByDate(sDate, eDate);
         int totalUsers = userDAO.getTotalUsersByDate(sDate, eDate);
         int totalBlogs = blogDAO.getTotalBlogs();
         int pendingOrders = dao.getPendingOrdersCount();

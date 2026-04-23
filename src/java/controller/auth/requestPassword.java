@@ -88,7 +88,6 @@ public class requestPassword extends HttpServlet {
             // 3. Tạo link kèm Token
             String contextPath = request.getContextPath(); // Tự lấy "/MobileShop_SWP391"
             String resetLink = "http://localhost:8080" + contextPath + "/resetPassword?token=" + token;
-
             
             // 4. Gửi Mail bằng SendGrid
             SendGridEmailService emailService = new SendGridEmailService();

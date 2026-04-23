@@ -79,38 +79,36 @@ public class LoginControl extends HttpServlet {
         UserDAO udao = new UserDAO();
         User loginUser = udao.getAccountByUser(user);
         
-        // 3. Kiểm tra User có tồn tại và Mật khẩu có khớp không (Dùng BCrypt)
-        // 3. Kiểm tra User có tồn tại và Mật khẩu có khớp không
-        boolean isCorrectPassword = false;
         if (loginUser != null) {
+            // Kiểm tra trạng thái tài khoản
+            if ("Bị khóa".equals(loginUser.getStatus())) {
+                request.setAttribute("errorMsg", "Tài khoản của bạn đã bị khóa!<br>Lý do: " + loginUser.getLockReason());
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                return;
+            }
+
+            // Kiểm tra mật khẩu (BCrypt)
+            boolean isCorrectPassword = false;
             String storedPass = loginUser.getPass();
-            // Thử kiểm tra bằng BCrypt trước
             try {
                 if (storedPass.startsWith("$2a$") || storedPass.startsWith("$2b$")) {
                     isCorrectPassword = BCrypt.checkpw(pass, storedPass);
                 } else {
-                    // Nếu không phải hash BCrypt thì so sánh trực tiếp
                     isCorrectPassword = pass.equals(storedPass);
                 }
             } catch (Exception e) {
-                // Nếu có lỗi khi check BCrypt (vd: data lỗi), quay về so sánh trực tiếp
                 isCorrectPassword = pass.equals(storedPass);
             }
-        }
 
-        if (loginUser != null && isCorrectPassword) {
+            if (isCorrectPassword) {
 
-            // Đăng nhập thành công -> Lưu nguyên Object User vào Session
-            HttpSession session = request.getSession();
-            session.setAttribute("acc", loginUser);
-
-            // 4. Đăng nhập xong -> Tất cả đều về trang chủ (Home)
-            // Admin sẽ thấy nút "Quản trị" ở Home để tự bấm vào sau
-            response.sendRedirect("home"); 
-        } else {
-            // Đăng nhập thất bại -> Báo lỗi và quay lại trang login
-            request.setAttribute("mess", "Email hoặc mật khẩu không chính xác!");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+                HttpSession session = request.getSession();
+                session.setAttribute("acc", loginUser);
+                response.sendRedirect("home"); 
+            } else {
+                request.setAttribute("mess", "Email hoặc mật khẩu không chính xác!");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+            }
         }
     }
 

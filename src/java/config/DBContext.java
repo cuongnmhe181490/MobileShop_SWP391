@@ -22,12 +22,16 @@ public class DBContext {
     return DriverManager.getConnection(url, userID, password);
 }
 
+
     private final String serverName = readSetting("DB_SERVER", "127.0.0.1");
+//    private final String serverName = readSetting("DB_SERVER", "localhost");
     private final String dbName = readSetting("DB_NAME", "MOBILESHOP_DEM05");
     private final String portNumber = readSetting("DB_PORT", "1433");
     private final String instance = readSetting("DB_INSTANCE", "");
     private final String userID = readSetting("DB_USER", "sa");
     private final String password = readSetting("DB_PASSWORD", "123");
+    
+
 
     private String readSetting(String key, String defaultValue) {
         String value = System.getenv(key);
@@ -36,6 +40,7 @@ public class DBContext {
         }
         return value == null || value.trim().isEmpty() ? defaultValue : value.trim();
     }
+
 
     public static void main(String[] args) {
         try {
@@ -54,4 +59,5 @@ public class DBContext {
             e.printStackTrace();
         }
     }
+
 }
