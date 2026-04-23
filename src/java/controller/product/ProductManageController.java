@@ -1,6 +1,6 @@
-package controller;
+package controller.product;
 
-import dao.DAO;
+import dao.product.ProductAdminDAO;
 import entity.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,7 +62,7 @@ public class ProductManageController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        DAO dao = new DAO();
+        ProductAdminDAO dao = new ProductAdminDAO();
         String service = trim(request.getParameter("service"));
         if (service.isBlank()) {
             service = "listAll";
@@ -94,7 +95,7 @@ public class ProductManageController extends HttpServlet {
         }
     }
 
-    private void showExistingProductForm(HttpServletRequest request, HttpServletResponse response, DAO dao, boolean viewMode)
+    private void showExistingProductForm(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao, boolean viewMode)
             throws ServletException, IOException {
         String id = trim(request.getParameter("id"));
         Product product = dao.getProductByID(id);
@@ -106,7 +107,7 @@ public class ProductManageController extends HttpServlet {
         showForm(request, response, dao, product, new LinkedHashMap<>(), true, viewMode, null);
     }
 
-    private void showProductList(HttpServletRequest request, HttpServletResponse response, DAO dao)
+    private void showProductList(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao)
             throws ServletException, IOException {
         String keyword = trim(request.getParameter("keyword"));
         String supplierFilter = trim(request.getParameter("supplier"));
@@ -171,7 +172,7 @@ public class ProductManageController extends HttpServlet {
         request.setAttribute("showTrailingEllipsis", endPage < totalPages - 1);
     }
 
-    private void handleSave(HttpServletRequest request, HttpServletResponse response, DAO dao, boolean editMode)
+    private void handleSave(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao, boolean editMode)
             throws ServletException, IOException {
         Product product = buildProductFromRequest(request, dao);
         Product existingProduct = editMode ? dao.getProductByID(product.getIdProduct()) : null;
@@ -255,7 +256,7 @@ public class ProductManageController extends HttpServlet {
         );
     }
 
-    private void handleDelete(HttpServletRequest request, HttpServletResponse response, DAO dao)
+    private void handleDelete(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao)
             throws IOException {
         String id = trim(request.getParameter("id"));
         boolean success = !id.isBlank() && dao.deleteProduct(id);
@@ -266,7 +267,7 @@ public class ProductManageController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/products");
     }
 
-    private void showForm(HttpServletRequest request, HttpServletResponse response, DAO dao,
+    private void showForm(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao,
             Product product, Map<String, String> errors, boolean editMode, boolean viewMode, String formError)
             throws ServletException, IOException {
         String resolvedImagePath = product != null && product.getImagePath() != null && !product.getImagePath().isBlank()
@@ -281,15 +282,16 @@ public class ProductManageController extends HttpServlet {
         request.setAttribute("supplierIds", dao.getSupplierIds());
         request.setAttribute("formError", formError);
         request.setAttribute("resolvedImagePath", resolvedImagePath);
+        request.setAttribute("todayDate", LocalDate.now().toString());
         request.getRequestDispatcher("/admin/editProduct.jsp").forward(request, response);
     }
 
-    private Product buildProductFromRequest(HttpServletRequest request, DAO dao) throws IOException, ServletException {
+    private Product buildProductFromRequest(HttpServletRequest request, ProductAdminDAO dao) throws IOException, ServletException {
         Product product = new Product();
         product.setIdProduct(trim(request.getParameter("idProduct")));
         product.setProductName(trim(request.getParameter("productName")));
         product.setIdSupplier(trim(request.getParameter("idSupplier")));
-        product.setReleaseDate(trim(request.getParameter("releaseDate")));
+        product.setReleaseDate(normalizeReleaseDate(trim(request.getParameter("releaseDate"))));
         product.setScreen(trim(request.getParameter("screen")));
         product.setOperatingSystem(trim(request.getParameter("operatingSystem")));
         product.setCpu(trim(request.getParameter("cpu")));
@@ -587,6 +589,18 @@ public class ProductManageController extends HttpServlet {
 
     private String trim(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String normalizeReleaseDate(String rawValue) {
+        String normalized = trim(rawValue);
+        if (normalized.isBlank()) {
+            return "";
+        }
+        try {
+            return LocalDate.parse(normalized).toString();
+        } catch (DateTimeParseException ex) {
+            return normalized;
+        }
     }
 
     private int parseIntOrDefault(String value, int defaultValue) {

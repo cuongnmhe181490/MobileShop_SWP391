@@ -1,4 +1,4 @@
-package controller.storefront;
+package controller.product;
 
 import dao.order.UserCartDAO;
 import entity.User;

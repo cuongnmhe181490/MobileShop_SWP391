@@ -1,6 +1,6 @@
-package controller.storefront;
+package controller.product;
 
-import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,7 +21,7 @@ public class DetailControl extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         String id = request.getParameter("pid");
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         Product product = dao.getProductByID(id);
         if (product == null) {
             response.sendRedirect(request.getContextPath() + "/product");
