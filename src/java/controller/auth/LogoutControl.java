@@ -1,5 +1,7 @@
 package controller.auth;
 
+import dao.order.UserCartDAO;
+import entity.User;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -8,6 +10,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import util.CartSupport;
 
 /**
  *
@@ -29,7 +32,13 @@ public class LogoutControl extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("acc");
+        if (user != null) {
+            new UserCartDAO().releaseReservations(user.getId());
+        }
         session.removeAttribute("acc");
+        session.removeAttribute(CartSupport.CART_SESSION_KEY);
+        session.setAttribute(CartSupport.CART_SIZE_SESSION_KEY, 0);
         response.sendRedirect("home");
     }
 

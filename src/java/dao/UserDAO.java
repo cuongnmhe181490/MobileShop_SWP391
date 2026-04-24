@@ -45,9 +45,6 @@ public class UserDAO extends DBContext{
                     u.setBirthday(rs.getDate("Birthday"));
                     u.setCreatedDate(rs.getTimestamp("CreatedDate"));
                     u.setRole(r);
-                    u.setStatus(rs.getString("Status"));
-                    u.setCreatedDate(rs.getTimestamp("CreatedDate"));
-                    u.setLockReason(rs.getString("LockReason"));
                     return u;
                 }
             }

@@ -41,24 +41,32 @@ public class AdminDashboardController extends HttpServlet {
 
         long diffDays = Math.abs(eDate.getTime() - sDate.getTime()) / (1000 * 60 * 60 * 24);
 
+        dao.order.OrderDAO orderDAO = new dao.order.OrderDAO();
+        dao.product.ProductAdminDAO productDAO = new dao.product.ProductAdminDAO();
+        
+        if ("true".equals(request.getParameter("syncInventory"))) {
+            productDAO.syncInventory();
+            request.setAttribute("syncMessage", "Đã đồng bộ lại tồn kho dựa trên các đơn hàng.");
+        }
+
         try {
             // 3. Các thống kê và chỉ số theo khoảng ngày đã chọn
             request.setAttribute("totalProducts", dao.getNewProductsCount(sDate, eDate));
             request.setAttribute("totalUsers", dao.getNewUsersCount(sDate, eDate));
-            request.setAttribute("pendingOrders", dao.getPendingOrdersCount());
-            request.setAttribute("monthlyRevenue", dao.getRevenueByDate(sDate, eDate));
+            request.setAttribute("soldOrders", orderDAO.getSoldOrdersCount(sDate, eDate));
+            request.setAttribute("monthlyRevenue", orderDAO.getRevenueByDate(sDate, eDate));
             
             // Các dữ liệu khác có thể vẫn giữ nguyên hoặc lọc thêm nếu cần
             request.setAttribute("totalBlogs", dao.getTotalBlogs());
-            request.setAttribute("recentOrders", dao.getRecentOrders(5));
-            request.setAttribute("bestSellers", dao.getBestSellers(5));
-            request.setAttribute("monthlyRevenueData", dao.getMonthlyRevenueData());
-            request.setAttribute("orderStats", dao.getOrderStatusStatistics());
+            request.setAttribute("recentOrders", orderDAO.getRecentOrdersDashboard(5));
+            request.setAttribute("bestSellers", dao.getBestSellers(5, sDate, eDate));
+            request.setAttribute("monthlyRevenueData", orderDAO.getMonthlyRevenueData());
+            request.setAttribute("orderStats", orderDAO.getOrderStatusStatistics());
             
-            // Thống kê phụ (tương tự như trên nhưng dùng cho nhãn hiển thị khác nếu có)
+            // Thống kê phụ
             request.setAttribute("newProductsMonth", dao.getNewProductsCount(sDate, eDate));
             request.setAttribute("newUsersMonth", dao.getNewUsersCount(sDate, eDate));
-            request.setAttribute("newOrdersMonth", dao.getNewOrdersCount(sDate, eDate));
+            request.setAttribute("newOrdersMonth", orderDAO.getNewOrdersCount(sDate, eDate));
         } catch (Exception e) {
             System.err.println("CRITICAL ERROR IN AdminDashboardController:");
             e.printStackTrace();
@@ -67,7 +75,7 @@ public class AdminDashboardController extends HttpServlet {
             request.setAttribute("totalProducts", 0);
             request.setAttribute("totalUsers", 0);
             request.setAttribute("totalBlogs", 0);
-            request.setAttribute("pendingOrders", 0);
+            request.setAttribute("soldOrders", 0);
             request.setAttribute("monthlyRevenue", "0");
             request.setAttribute("revenueGrowth", 0.0);
             request.setAttribute("recentOrders", new java.util.ArrayList<>());

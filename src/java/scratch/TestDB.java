@@ -13,11 +13,21 @@ public class TestDB {
             Connection conn = DriverManager.getConnection(url, "sa", "123");
             long end = System.currentTimeMillis();
             if (conn != null) {
-                System.out.println("✅ Connected in " + (end - start) + "ms");
+                System.out.println("Connected in " + (end - start) + "ms");
+                
+                String query2 = "SELECT IdProduct, ProductName FROM ProductDetail WHERE TRY_CAST(IdProduct AS INT) IN (1, 2, 3, 49, 58, 74)";
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(query2)) {
+                    System.out.println("--- ProductDetail IDs ---");
+                    while (rs.next()) {
+                        System.out.println("PID in DB: '" + rs.getString("IdProduct") + "' | Name: " + rs.getString("ProductName"));
+                    }
+                }
+                
                 conn.close();
             }
         } catch (Exception e) {
-            System.out.println("❌ Failed: " + e.getMessage());
+            System.out.println("Failed: " + e.getMessage());
         }
     }
 }

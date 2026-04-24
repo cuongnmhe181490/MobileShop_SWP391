@@ -211,13 +211,16 @@
         .card-light-chart h3 {
             color: var(--text-main);
         }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <c:set var="activePage" value="dashboard" />
         <%@ include file="/WEB-INF/jspf/admin/sidebar.jspf" %>
-
         <main class="main-content">
             <header class="header">
                 <div class="welcome">
@@ -230,6 +233,11 @@
                     </p>
                 </div>
                 <div class="header-actions">
+                    <!-- Nút đồng bộ tồn kho -->
+                    <a href="${pageContext.request.contextPath}/admin/dashboard?syncInventory=true&startDate=${startDate}&endDate=${endDate}" class="btn-refresh-dash" style="background: var(--primary); text-decoration: none;">
+                        <i class="fa-solid fa-sync"></i> Đồng bộ tồn kho
+                    </a>
+
                     <!-- Form lọc thời gian mới -->
                     <form action="${pageContext.request.contextPath}/admin/dashboard" method="GET" style="display: flex; align-items: center;">
                         <div class="header-filter">
@@ -259,6 +267,13 @@
                 </div>
             </header>
 
+            <c:if test="${not empty syncMessage}">
+                <div style="background: var(--success); color: white; padding: 15px 25px; border-radius: 16px; margin-bottom: 24px; font-weight: 600; box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; animation: slideDown 0.5s ease;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 1.2rem;"></i> 
+                    ${syncMessage}
+                </div>
+            </c:if>
+
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -271,7 +286,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Đơn hàng đã bán</div>
-                    <div class="stat-value">${pendingOrders}</div>
+                    <div class="stat-value">${soldOrders}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Doanh thu tháng</div>
@@ -340,7 +355,7 @@
                                     <td style="font-weight: 600;">${o.name}</td>
                                     <td style="font-weight: 700;">${o.price}</td>
                                     <td>
-                                        <span class="badge-status ${o.status == 'Hoàn thành' ? 'status-success-badge' : (o.status == 'Chờ xử lý' ? 'status-pending-badge' : 'status-canceled-badge')}">
+                                        <span class="badge-status ${o.status == 'Đã hoàn thành' ? 'status-success-badge' : (o.status == 'Đang giao hàng' ? 'status-pending-badge' : 'status-canceled-badge')}">
                                             ${o.status}
                                         </span>
                                     </td>
@@ -360,9 +375,6 @@
                 <div class="card card-light-chart">
                     <div class="card-header">
                         <h3><i class="fa-solid fa-chart-simple" style="color: var(--primary); margin-right: 8px;"></i> Doanh thu theo tháng</h3>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="status-pill status-success" style="font-size: 0.75rem;">+12.4%</span>
-                        </div>
                     </div>
                     <div style="height: 300px; width: 100%;">
                         <canvas id="revenueChart"></canvas>
@@ -396,7 +408,7 @@
                             </div>
                             <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600;">
                                 <span style="width: 10px; height: 10px; border-radius: 2px; background: #ffb81c;"></span>
-                                <span>Chờ xử lý</span>
+                                <span>Đang giao hàng</span>
                             </div>
                         </div>
                     </div>
@@ -497,12 +509,12 @@
         new Chart(orderCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Hoàn thành', 'Đã hủy', 'Chờ xử lý'],
+                labels: ['Thành công', 'Đã hủy', 'Đang giao hàng'],
                 datasets: [{
                     data: [
-                        ${(not empty orderStats and not empty orderStats['Hoàn thành']) ? orderStats['Hoàn thành'] : 0},
+                        ${(not empty orderStats and not empty orderStats['Đã hoàn thành']) ? orderStats['Đã hoàn thành'] : 0},
                         ${(not empty orderStats and not empty orderStats['Đã hủy']) ? orderStats['Đã hủy'] : 0},
-                        ${(not empty orderStats and not empty orderStats['Chờ xử lý']) ? orderStats['Chờ xử lý'] : 0}
+                        ${(not empty orderStats and not empty orderStats['Đang giao hàng']) ? orderStats['Đang giao hàng'] : 0}
                     ],
                     backgroundColor: ['#05cd99', '#ee5d50', '#ffb81c'],
                     borderWidth: 0,

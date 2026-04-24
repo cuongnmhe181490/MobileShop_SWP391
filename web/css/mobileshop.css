@@ -1944,6 +1944,42 @@ select {
     font-size: 20px;
 }
 
+.summary-actions__checkout {
+    flex: 1 1 100%;
+    min-height: 48px;
+}
+
+.summary-note {
+    margin: 14px 0 0;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.checkout-placeholder {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(18, 32, 74, 0.08);
+    padding: 32px;
+}
+
+.checkout-placeholder h1 {
+    margin: 18px 0 12px;
+    font-size: clamp(32px, 4vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+}
+
+.checkout-placeholder p {
+    margin: 0;
+    max-width: 760px;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.checkout-placeholder__actions {
+    margin-top: 24px;
+}
+
 .info-card {
     margin-top: 18px;
 }

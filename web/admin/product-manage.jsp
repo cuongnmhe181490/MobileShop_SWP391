@@ -26,7 +26,6 @@
                 </div>
                 <div class="header-actions">
                     <a href="${pageContext.request.contextPath}/admin/products?service=addProduct" class="btn-primary" style="text-decoration: none;">Thêm sản phẩm</a>
-                    <div class="notification"><i class="fa-regular fa-bell"></i></div>
                     <div class="user-profile">
                         <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
                         <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>
@@ -90,12 +89,12 @@
                             <thead>
                                 <tr>
                                     <th style="width: 140px;">Ảnh sản phẩm</th>
-                                    <th>Tên sản phẩm</th>
+                                    <th style="width: 280px;">Tên sản phẩm</th>
                                     <th style="width: 160px;">Giá</th>
                                     <th style="width: 120px;">Số lượng</th>
                                     <th style="width: 150px;">Ngày ra mắt</th>
                                     <th style="width: 150px;">Nhà cung cấp</th>
-                                    <th style="width: 190px;">Hành động</th>
+                                    <th style="width: 170px;">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>

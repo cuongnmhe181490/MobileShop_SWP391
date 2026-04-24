@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.regex.Matcher;
 
 import java.util.regex.Pattern;
@@ -41,13 +42,13 @@ public class DAO {
     
     
     /**
-     * Đăng ký tài khoản người dùng mới
+     * ÄÄƒng kÃ½ tÃ i khoáº£n ngÆ°á»i dÃ¹ng má»›i
      */
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
-    // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
+    // ÄÃ£ thÃªm danh sÃ¡ch cá»™t rÃµ rÃ ng Ä‘á»ƒ trÃ¡nh lá»—i IDENTITY cá»§a SQL Server
     String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], Email, "
              + "PhoneNumber, FullName, Birthday, [RoleId], [Status], [CreatedDate], [LockReason]) \n"
-             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, N'Hoạt động', GETDATE(), NULL)";
+             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, N'Hoáº¡t Ä‘á»™ng', GETDATE(), NULL)";
     try (Connection conn = new DBContext().getConnection();
          PreparedStatement ps = conn.prepareStatement(query)) {
         ps.setString(1, user);
@@ -60,12 +61,12 @@ public class DAO {
         ps.setString(8, birthday);
         ps.executeUpdate();
     } catch (Exception e) {
-        e.printStackTrace(); // Rất quan trọng: In lỗi ra để biết nếu SQL bị sai
+        e.printStackTrace(); // Ráº¥t quan trá»ng: In lá»—i ra Ä‘á»ƒ biáº¿t náº¿u SQL bá»‹ sai
     }
 }
     
     /**
-     * Kiểm tra xem Username đã tồn tại chưa, nếu có thì trả về đối tượng User đầy đủ kèm Role
+     * Kiá»ƒm tra xem Username Ä‘Ã£ tá»“n táº¡i chÆ°a, náº¿u cÃ³ thÃ¬ tráº£ vá» Ä‘á»‘i tÆ°á»£ng User Ä‘áº§y Ä‘á»§ kÃ¨m Role
      */
     public User checkUserExist(String user) {
         String query = "SELECT u.*, r.RoleName \n"
@@ -106,10 +107,10 @@ public class DAO {
     }
     
     /**
-     * Lấy thông tin người dùng dựa trên Email (dùng cho Login/Reset Pass)
+     * Láº¥y thÃ´ng tin ngÆ°á»i dÃ¹ng dá»±a trÃªn Email (dÃ¹ng cho Login/Reset Pass)
      */
     public User getUserByEmail(String email) {
-    // Truy vấn JOIN để lấy tên Role cùng lúc
+    // Truy váº¥n JOIN Ä‘á»ƒ láº¥y tÃªn Role cÃ¹ng lÃºc
     String sql = "SELECT u.*, r.RoleName " +
                  "FROM [User] u " +
                  "INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
@@ -147,7 +148,7 @@ public class DAO {
 }
     
     /**
-     * Kiểm tra xem Email đã có người sử dụng chưa
+     * Kiá»ƒm tra xem Email Ä‘Ã£ cÃ³ ngÆ°á»i sá»­ dá»¥ng chÆ°a
      */
     public boolean checkEmailExist(String email) {
         String query = "SELECT 1 FROM [User] WHERE Email = ?";
@@ -164,7 +165,7 @@ public class DAO {
     }
 
     /**
-     * Kiểm tra xem Số điện thoại đã có người sử dụng chưa
+     * Kiá»ƒm tra xem Sá»‘ Ä‘iá»‡n thoáº¡i Ä‘Ã£ cÃ³ ngÆ°á»i sá»­ dá»¥ng chÆ°a
      */
     public boolean checkPhoneExist(String phone) {
         String query = "SELECT 1 FROM [User] WHERE PhoneNumber = ?";
@@ -181,7 +182,7 @@ public class DAO {
     }
 
     /**
-     * Chuyển đổi dữ liệu từ ResultSet sang đối tượng Product
+     * Chuyá»ƒn Ä‘á»•i dá»¯ liá»‡u tá»« ResultSet sang Ä‘á»‘i tÆ°á»£ng Product
      */
     private Product mapProduct(ResultSet rs) throws SQLException {
         return new Product(
@@ -208,7 +209,7 @@ public class DAO {
     
 
     /**
-     * Chuyển đổi dữ liệu từ ResultSet sang đối tượng ProductReview (Đánh giá)
+     * Chuyá»ƒn Ä‘á»•i dá»¯ liá»‡u tá»« ResultSet sang Ä‘á»‘i tÆ°á»£ng ProductReview (ÄÃ¡nh giÃ¡)
      */
 
 
@@ -225,7 +226,7 @@ public class DAO {
 
 
     /**
-     * Hàm chung để thực thi các câu lệnh SELECT và trả về danh sách sản phẩm
+     * HÃ m chung Ä‘á»ƒ thá»±c thi cÃ¡c cÃ¢u lá»‡nh SELECT vÃ  tráº£ vá» danh sÃ¡ch sáº£n pháº©m
      */
     private List<Product> queryProducts(String sql, SqlConsumer<PreparedStatement> binder) {
         List<Product> list = new ArrayList<>();
@@ -244,7 +245,7 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách sản phẩm nổi bật (theo ngày phát hành và giá)
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m ná»•i báº­t (theo ngÃ y phÃ¡t hÃ nh vÃ  giÃ¡)
      */
     public List<ProductModel> getFeaturedProducts(int limit) {
         return new ArrayList<>(queryProducts(
@@ -254,14 +255,14 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách sản phẩm mới nhất
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m má»›i nháº¥t
      */
     public List<ProductModel> getLatestProducts(int limit) {
         return getFeaturedProducts(limit);
     }
 
     /**
-     * Tìm sản phẩm theo ID
+     * TÃ¬m sáº£n pháº©m theo ID
      */
     public Product getProductByID(String id) {
         String query = "SELECT * FROM ProductDetail WHERE IdProduct = ?";
@@ -280,7 +281,7 @@ public class DAO {
     }
 
     /**
-     * Tìm sản phẩm theo hãng và tên (Dùng cho Trade-in hoặc gợi ý)
+     * TÃ¬m sáº£n pháº©m theo hÃ£ng vÃ  tÃªn (DÃ¹ng cho Trade-in hoáº·c gá»£i Ã½)
      */
     public Product getProductByBrandAndName(String brand, String modelName) {
         String query = "SELECT TOP 1 * FROM ProductDetail WHERE IdSupplier = ? AND ProductName LIKE ?";
@@ -300,7 +301,7 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách tất cả các hãng hiện có trong hệ thống
+     * Láº¥y danh sÃ¡ch táº¥t cáº£ cÃ¡c hÃ£ng hiá»‡n cÃ³ trong há»‡ thá»‘ng
      */
     public List<String> getAvailableBrands() {
         List<String> brands = new ArrayList<>();
@@ -319,7 +320,7 @@ public class DAO {
     }
 
     /**
-     * Lấy các tùy chọn RAM hiện có (để làm bộ lọc)
+     * Láº¥y cÃ¡c tÃ¹y chá»n RAM hiá»‡n cÃ³ (Ä‘á»ƒ lÃ m bá»™ lá»c)
      */
     public List<Integer> getAvailableRamOptions() {
         List<Integer> ramOptions = new ArrayList<>();
@@ -341,7 +342,7 @@ public class DAO {
     }
 
     /**
-     * Lấy các năm phát hành hiện có (để làm bộ lọc)
+     * Láº¥y cÃ¡c nÄƒm phÃ¡t hÃ nh hiá»‡n cÃ³ (Ä‘á»ƒ lÃ m bá»™ lá»c)
      */
     public List<Integer> getAvailableReleaseYears(int limit) {
         Set<Integer> yearSet = new TreeSet<>(Comparator.reverseOrder());
@@ -366,7 +367,7 @@ public class DAO {
     }
 
     /**
-     * Hàm tìm kiếm và lọc sản phẩm tổng hợp (keyword, brand, ram, year, price, sort)
+     * HÃ m tÃ¬m kiáº¿m vÃ  lá»c sáº£n pháº©m tá»•ng há»£p (keyword, brand, ram, year, price, sort)
      */
     public List<Product> getCatalogProducts(String keyword, String brand, String storage, String year, String minPrice, String maxPrice, String sort, String startDate, String endDate) {
         List<Product> products = new ArrayList<>();
@@ -468,7 +469,7 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách sản phẩm liên quan (cùng hãng)
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m liÃªn quan (cÃ¹ng hÃ£ng)
      */
     public List<Product> getRelatedProducts(String supplier, String excludeId, int limit) {
         return queryProducts(
@@ -483,7 +484,7 @@ public class DAO {
     }
 
     /**
-     * Kiểm tra xem database có dữ liệu sản phẩm không
+     * Kiá»ƒm tra xem database cÃ³ dá»¯ liá»‡u sáº£n pháº©m khÃ´ng
      */
     public boolean canAccessProductData() {
         String query = "SELECT TOP 1 1 FROM ProductDetail";
@@ -497,7 +498,7 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách sản phẩm có phân trang (dùng cho trang quản lý)
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m cÃ³ phÃ¢n trang (dÃ¹ng cho trang quáº£n lÃ½)
      */
     public List<Product> getProducts(String keyword, String supplierId, String sortBy, int offset, int pageSize, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ProductDetail WHERE 1 = 1");
@@ -523,7 +524,7 @@ public class DAO {
     }
 
     /**
-     * Đếm tổng số sản phẩm dựa trên bộ lọc (dùng để tính số trang)
+     * Äáº¿m tá»•ng sá»‘ sáº£n pháº©m dá»±a trÃªn bá»™ lá»c (dÃ¹ng Ä‘á»ƒ tÃ­nh sá»‘ trang)
      */
     public int countProducts(String keyword, String supplierId, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ProductDetail WHERE 1 = 1");
@@ -545,7 +546,7 @@ public class DAO {
     }
 
     /**
-     * Thêm sản phẩm mới vào database
+     * ThÃªm sáº£n pháº©m má»›i vÃ o database
      */
     public boolean addProduct(Product product) {
         boolean splitQuantitySchema = hasProductDetailColumn("OriginalQuantity") && hasProductDetailColumn("CurrentQuantity");
@@ -572,7 +573,7 @@ public class DAO {
     }
 
     /**
-     * Cập nhật thông tin sản phẩm hiện có
+     * Cáº­p nháº­t thÃ´ng tin sáº£n pháº©m hiá»‡n cÃ³
      */
     public boolean updateProduct(Product product) {
         Product existing = getProductByID(product.getIdProduct());
@@ -608,7 +609,7 @@ public class DAO {
     }
 
     /**
-     * Xóa sản phẩm khỏi database
+     * XÃ³a sáº£n pháº©m khá»i database
      */
     public boolean deleteProduct(String idProduct) {
         String query = "DELETE FROM ProductDetail WHERE IdProduct = ?";
@@ -623,7 +624,7 @@ public class DAO {
     }
 
     /**
-     * Kiểm tra xem sản phẩm đã tồn tại theo tên và hãng chưa
+     * Kiá»ƒm tra xem sáº£n pháº©m Ä‘Ã£ tá»“n táº¡i theo tÃªn vÃ  hÃ£ng chÆ°a
      */
     public boolean productExistsByNameAndSupplier(String productName, String supplierId) {
         String query = "SELECT 1 FROM ProductDetail WHERE ProductName = ? AND IdSupplier = ?";
@@ -641,7 +642,7 @@ public class DAO {
     }
 
     /**
-     * Cập nhật số lượng tồn kho (Restock) cho sản phẩm đã có
+     * Cáº­p nháº­t sá»‘ lÆ°á»£ng tá»“n kho (Restock) cho sáº£n pháº©m Ä‘Ã£ cÃ³
      */
     public boolean restockExistingProduct(String productName, String supplierId, int delta) {
         boolean splitQuantitySchema = hasProductDetailColumn("OriginalQuantity") && hasProductDetailColumn("CurrentQuantity");
@@ -667,7 +668,7 @@ public class DAO {
     }
 
     /**
-     * Ánh xạ tên hãng sang ID danh mục (Hardcoded)
+     * Ãnh xáº¡ tÃªn hÃ£ng sang ID danh má»¥c (Hardcoded)
      */
     public Integer getCategoryIdBySupplier(String supplierId) {
         if (supplierId == null) {
@@ -694,7 +695,7 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách ID các nhà cung cấp
+     * Láº¥y danh sÃ¡ch ID cÃ¡c nhÃ  cung cáº¥p
      */
     public List<String> getSupplierIds() {
         List<String> suppliers = new ArrayList<>();
@@ -712,7 +713,7 @@ public class DAO {
     }
 
     /**
-     * Sinh ID tiếp theo cho sản phẩm mới (ví dụ: 0005)
+     * Sinh ID tiáº¿p theo cho sáº£n pháº©m má»›i (vÃ­ dá»¥: 0005)
      */
     public String getNextProductId() {
         String query = "SELECT RIGHT('0000' + CAST(ISNULL(MAX(TRY_CAST(IdProduct AS INT)), 0) + 1 AS VARCHAR), 4) AS NextId FROM ProductDetail";
@@ -731,7 +732,7 @@ public class DAO {
 
     
     /**
-     * Đếm số lượng đánh giá của một sản phẩm (có thể lọc theo số sao)
+     * Äáº¿m sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ cá»§a má»™t sáº£n pháº©m (cÃ³ thá»ƒ lá»c theo sá»‘ sao)
      */
     public int countProductReviews(String productId, Integer ranking) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS Total FROM ProductReview WHERE IdProduct = ? ");
@@ -758,7 +759,7 @@ public class DAO {
     
 
     /**
-     * Lấy danh sách đánh giá của sản phẩm có phân trang
+     * Láº¥y danh sÃ¡ch Ä‘Ã¡nh giÃ¡ cá»§a sáº£n pháº©m cÃ³ phÃ¢n trang
      */
  
 
@@ -796,7 +797,7 @@ public class DAO {
     }
 
     /**
-     * Thống kê số lượng đánh giá theo từng mức sao (1-5 sao)
+     * Thá»‘ng kÃª sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ theo tá»«ng má»©c sao (1-5 sao)
      */
     public Map<Integer, Integer> getReviewCountsByRating(String productId) {
         Map<Integer, Integer> counts = new LinkedHashMap<>();
@@ -820,7 +821,7 @@ public class DAO {
     }
     
     /**
-     * Tính điểm đánh giá trung bình của sản phẩm
+     * TÃ­nh Ä‘iá»ƒm Ä‘Ã¡nh giÃ¡ trung bÃ¬nh cá»§a sáº£n pháº©m
      */
     public double getAverageRating(String productId) {
         String query = "SELECT COALESCE(AVG(CAST(Ranking AS FLOAT)), 0) AS AverageRating FROM ProductReview WHERE IdProduct = ?";
@@ -839,7 +840,7 @@ public class DAO {
     }
     
     /**
-     * Tổng số lượng đánh giá của một sản phẩm
+     * Tá»•ng sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ cá»§a má»™t sáº£n pháº©m
      */
     public int getReviewCount(String productId) {
         String query = "SELECT COUNT(*) AS TotalReview FROM ProductReview WHERE IdProduct = ?";
@@ -858,7 +859,7 @@ public class DAO {
     }
 
     /**
-     * Gán dữ liệu sản phẩm vào PreparedStatement để thực thi SQL
+     * GÃ¡n dá»¯ liá»‡u sáº£n pháº©m vÃ o PreparedStatement Ä‘á»ƒ thá»±c thi SQL
      */
     private void bindProduct(PreparedStatement ps, Product product, boolean updateMode, boolean splitQuantitySchema, boolean hasFeaturedColumn) throws Exception {
         int index = 1;
@@ -905,7 +906,7 @@ public class DAO {
     }
 
     /**
-     * Thêm các điều kiện lọc SQL cho sản phẩm
+     * ThÃªm cÃ¡c Ä‘iá»u kiá»‡n lá»c SQL cho sáº£n pháº©m
      */
     private void appendProductFilters(StringBuilder sql, List<Object> params, String keyword, String supplierId, String startDate, String endDate) {
         String safeKeyword = normalizeKeyword(keyword);
@@ -930,7 +931,7 @@ public class DAO {
     }
 
     /**
-     * Gán các tham số vào PreparedStatement theo kiểu dữ liệu tương ứng
+     * GÃ¡n cÃ¡c tham sá»‘ vÃ o PreparedStatement theo kiá»ƒu dá»¯ liá»‡u tÆ°Æ¡ng á»©ng
      */
     private void bindParams(PreparedStatement ps, List<Object> params) throws SQLException {
         for (int i = 0; i < params.size(); i++) {
@@ -947,7 +948,7 @@ public class DAO {
     }
 
     /**
-     * Xử lý chuỗi ORDER BY cho SQL dựa trên lựa chọn sắp xếp
+     * Xá»­ lÃ½ chuá»—i ORDER BY cho SQL dá»±a trÃªn lá»±a chá»n sáº¯p xáº¿p
      */
     private String resolveSortClause(String sortBy) {
         String quantityColumn = hasProductDetailColumn("CurrentQuantity") ? "CurrentQuantity" : "Quantity";
@@ -969,7 +970,7 @@ public class DAO {
     }
 
     /**
-     * Kiểm tra xem bảng ProductDetail có cột cụ thể nào không (để xử lý linh hoạt các version DB)
+     * Kiá»ƒm tra xem báº£ng ProductDetail cÃ³ cá»™t cá»¥ thá»ƒ nÃ o khÃ´ng (Ä‘á»ƒ xá»­ lÃ½ linh hoáº¡t cÃ¡c version DB)
      */
     private boolean hasProductDetailColumn(String columnName) {
         try (Connection conn = new DBContext().getConnection();
@@ -981,14 +982,14 @@ public class DAO {
     }
 
     /**
-     * Chuẩn hóa chuỗi (xóa khoảng trắng thừa)
+     * Chuáº©n hÃ³a chuá»—i (xÃ³a khoáº£ng tráº¯ng thá»«a)
      */
     private String normalizeIdentifier(String value) {
         return value == null ? "" : value.trim();
     }
 
     /**
-     * Chuẩn hóa từ khóa tìm kiếm (lowercase, xóa dấu cách thừa, xử lý từ viết liền)
+     * Chuáº©n hÃ³a tá»« khÃ³a tÃ¬m kiáº¿m (lowercase, xÃ³a dáº¥u cÃ¡ch thá»«a, xá»­ lÃ½ tá»« viáº¿t liá»n)
      */
     private String normalizeKeyword(String value) {
         if (value == null) {
@@ -1007,14 +1008,14 @@ public class DAO {
     }
 
     /**
-     * Chuyển đổi từ khóa sang định dạng phù hợp với câu lệnh LIKE trong SQL
+     * Chuyá»ƒn Ä‘á»•i tá»« khÃ³a sang Ä‘á»‹nh dáº¡ng phÃ¹ há»£p vá»›i cÃ¢u lá»‡nh LIKE trong SQL
      */
     private String toSqlLikeKeyword(String value) {
         return normalizeKeyword(value).replace(" ", "").replace("-", "");
     }
 
     /**
-     * Chuyển đổi chuỗi dung lượng (ví dụ "128GB") sang số nguyên (128)
+     * Chuyá»ƒn Ä‘á»•i chuá»—i dung lÆ°á»£ng (vÃ­ dá»¥ "128GB") sang sá»‘ nguyÃªn (128)
      */
     private int parseMemoryValue(String value) {
         String normalized = normalizeIdentifier(value);
@@ -1033,7 +1034,7 @@ public class DAO {
     }
 
     /**
-     * Trích xuất năm phát hành từ chuỗi văn bản bằng Regex
+     * TrÃ­ch xuáº¥t nÄƒm phÃ¡t hÃ nh tá»« chuá»—i vÄƒn báº£n báº±ng Regex
      */
     private int parseReleaseYear(String value) {
         String normalized = normalizeIdentifier(value);
@@ -1052,7 +1053,7 @@ public class DAO {
     }
 
     /**
-     * Chuyển đổi chuỗi giá tiền sang kiểu Double
+     * Chuyá»ƒn Ä‘á»•i chuá»—i giÃ¡ tiá»n sang kiá»ƒu Double
      */
     private Double parsePriceValue(String value) {
         String normalized = normalizeIdentifier(value);
@@ -1072,7 +1073,7 @@ public class DAO {
     }
 
     /**
-     * Đọc giá trị số lượng từ ResultSet (hỗ trợ nhiều tên cột khác nhau)
+     * Äá»c giÃ¡ trá»‹ sá»‘ lÆ°á»£ng tá»« ResultSet (há»— trá»£ nhiá»u tÃªn cá»™t khÃ¡c nhau)
      */
     private int readQuantity(ResultSet rs, String... columnNames) throws SQLException {
         for (String columnName : columnNames) {
@@ -1086,7 +1087,7 @@ public class DAO {
     }
 
     /**
-     * Đọc giá trị kiểu Double từ ResultSet an toàn
+     * Äá»c giÃ¡ trá»‹ kiá»ƒu Double tá»« ResultSet an toÃ n
      */
     private double readDouble(ResultSet rs, String columnName) throws SQLException {
         try {
@@ -1101,12 +1102,12 @@ public class DAO {
         void accept(T value) throws Exception;
     }
     
-    // 1. Hàm tạo và lưu Token mới (Có hiệu lực 10 phút)
+    // 1. HÃ m táº¡o vÃ  lÆ°u Token má»›i (CÃ³ hiá»‡u lá»±c 10 phÃºt)
     /**
-     * Lưu mã Token khôi phục mật khẩu và thời gian hết hạn (10 phút)
+     * LÆ°u mÃ£ Token khÃ´i phá»¥c máº­t kháº©u vÃ  thá»i gian háº¿t háº¡n (10 phÃºt)
      */
     public void saveResetToken(String email, String token) {
-        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
+        // DATEADD(minute, 10, GETDATE()) lÃ  lá»‡nh cá»§a SQL Server Ä‘á»ƒ cá»™ng thÃªm 15 phÃºt tá»« giá» hiá»‡n táº¡i
         String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1118,9 +1119,9 @@ public class DAO {
         }
     }
 
-    // 2. Hàm kiểm tra Token khi khách hàng click vào link
+    // 2. HÃ m kiá»ƒm tra Token khi khÃ¡ch hÃ ng click vÃ o link
     /**
-     * Tìm người dùng dựa trên Reset Token (để xác thực link đổi pass)
+     * TÃ¬m ngÆ°á»i dÃ¹ng dá»±a trÃªn Reset Token (Ä‘á»ƒ xÃ¡c thá»±c link Ä‘á»•i pass)
      */
     public User getUserByResetToken(String token) {
 
@@ -1146,12 +1147,12 @@ public class DAO {
         return null;
     }
 
-    // 3. Hàm lưu mật khẩu mới và Xóa Token (Chỉ dùng 1 lần)
+    // 3. HÃ m lÆ°u máº­t kháº©u má»›i vÃ  XÃ³a Token (Chá»‰ dÃ¹ng 1 láº§n)
     /**
-     * Cập nhật mật khẩu mới và xóa Token khôi phục
+     * Cáº­p nháº­t máº­t kháº©u má»›i vÃ  xÃ³a Token khÃ´i phá»¥c
      */
     public void updatePasswordAndClearToken(String email, String newHashedPassword) {
-        // Đổi pass xong thì đưa Token về NULL để vô hiệu hóa link cũ
+        // Äá»•i pass xong thÃ¬ Ä‘Æ°a Token vá» NULL Ä‘á»ƒ vÃ´ hiá»‡u hÃ³a link cÅ©
         String sql = "UPDATE [User] SET [Password] = ?, ResetToken = NULL, ResetTokenExpiry = NULL WHERE Email = ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1163,7 +1164,7 @@ public class DAO {
         }
     }
     /**
-     * Đếm tổng số lượng blog (bài viết) đang hiển thị
+     * Äáº¿m tá»•ng sá»‘ lÆ°á»£ng blog (bÃ i viáº¿t) Ä‘ang hiá»ƒn thá»‹
      */
     public int getTotalBlogs() {
         String query = "SELECT COUNT(*) FROM Blog WHERE (Status = 'VISIBLE' OR Status IS NULL)";
@@ -1176,7 +1177,7 @@ public class DAO {
     }
 
     /**
-     * Đếm tổng số lượng sản phẩm trong kho
+     * Äáº¿m tá»•ng sá»‘ lÆ°á»£ng sáº£n pháº©m trong kho
      */
     public int getTotalProducts() {
         String query = "SELECT COUNT(*) FROM ProductDetail";
@@ -1193,10 +1194,11 @@ public class DAO {
     }
 
     /**
-     * Đếm số lượng đơn hàng đang chờ xử lý
+     * Äáº¿m sá»‘ lÆ°á»£ng Ä‘Æ¡n hÃ ng Ä‘ang chá» xá»­ lÃ½
      */
     public int getPendingOrdersCount() {
-        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Chờ xử lý'";
+        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Äang giao hÃ ng' OR OrderStatus = 'Pending'";
+
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
@@ -1206,10 +1208,11 @@ public class DAO {
     }
 
     /**
-     * Tính tổng doanh thu trong khoảng thời gian xác định (chỉ tính đơn Hoàn thành)
+     * TÃ­nh tá»•ng doanh thu trong khoáº£ng thá»i gian xÃ¡c Ä‘á»‹nh (chá»‰ tÃ­nh Ä‘Æ¡n HoÃ n thÃ nh)
      */
     public String getRevenueByDate(Date startDate, Date endDate) {
-        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE OrderDate >= ? AND OrderDate <= ? AND OrderStatus = N'Hoàn thành'";
+        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE OrderDate >= ? AND OrderDate <= ? AND OrderStatus = N'ÄÃ£ hoÃ n thÃ nh'";
+
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setDate(1, startDate);
@@ -1227,7 +1230,7 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách các đơn hàng gần đây để hiển thị Dashboard
+     * Láº¥y danh sÃ¡ch cÃ¡c Ä‘Æ¡n hÃ ng gáº§n Ä‘Ã¢y Ä‘á»ƒ hiá»ƒn thá»‹ Dashboard
      */
     public List<Map<String, String>> getRecentOrders(int limit) {
         List<Map<String, String>> list = new ArrayList<>();
@@ -1254,21 +1257,31 @@ public class DAO {
     }
 
     /**
-     * Lấy danh sách sản phẩm bán chạy nhất
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m bÃ¡n cháº¡y nháº¥t
      */
-    public List<Map<String, String>> getBestSellers(int limit) {
+    public List<Map<String, String>> getBestSellers(int limit, java.sql.Date startDate, java.sql.Date endDate) {
         List<Map<String, String>> list = new ArrayList<>();
-        // Lấy tất cả sản phẩm, sắp xếp theo lượng bán (Original - Current)
-        // Nếu kết quả ra 0 thì vẫn hiện để bạn kiểm tra giao diện
-        String query = "SELECT TOP (?) ProductName, IdSupplier, " +
-                      "ISNULL(OriginalQuantity - CurrentQuantity, 0) as Sold, " +
-                      "ISNULL((OriginalQuantity - CurrentQuantity) * Price, 0) as Revenue " +
-                      "FROM ProductDetail " +
-                      "ORDER BY Sold DESC, ProductName ASC";
+        // Truy vấn dựa trên thực tế bán hàng từ OrderDetail và Order
+        // Sử dụng TRY_CAST để khớp ID sản phẩm dù có hay không có số 0 ở đầu (0001 vs 1)
+        // Bao gồm cả đơn đã hoàn thành và đang giao hàng để dữ liệu đầy đủ hơn
+        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, " +
+                      "SUM(od.Quantity) as Sold, " +
+                      "SUM(od.Quantity * od.UnitPrice) as Revenue " +
+                      "FROM OrderDetail od " +
+                      "JOIN [Order] o ON od.IdOrder = o.IdOrder " +
+                      "JOIN ProductDetail p ON TRY_CAST(od.IdProduct AS INT) = TRY_CAST(p.IdProduct AS INT) " +
+                      "WHERE o.OrderStatus IN (?, ?) " +
+                      "AND o.OrderDate >= ? AND o.OrderDate <= ? " +
+                      "GROUP BY p.ProductName, p.IdSupplier " +
+                      "ORDER BY Sold DESC, p.ProductName ASC";
 
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, limit);
+            ps.setString(2, dao.order.OrderDAO.STATUS_COMPLETED);
+            ps.setString(3, dao.order.OrderDAO.STATUS_DELIVERING);
+            ps.setDate(4, startDate);
+            ps.setDate(5, endDate);
             try (ResultSet rs = ps.executeQuery()) {
                 java.text.NumberFormat nf = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
                 while (rs.next()) {
@@ -1290,10 +1303,20 @@ public class DAO {
         return list;
     }
 
+    /**
+     * Overload cũ để tương thích nếu cần
+     */
+    public List<Map<String, String>> getBestSellers(int limit) {
+        // Mặc định lấy 30 ngày gần nhất nếu không có ngày
+        java.sql.Date endDate = new java.sql.Date(System.currentTimeMillis());
+        java.sql.Date startDate = new java.sql.Date(System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000));
+        return getBestSellers(limit, startDate, endDate);
+    }
+
 
 
     /**
-     * Lấy toàn bộ danh sách nhà cung cấp (Supplier)
+     * Láº¥y toÃ n bá»™ danh sÃ¡ch nhÃ  cung cáº¥p (Supplier)
      */
     public List<Supplier> getAllSuppliers() throws SQLException, Exception{
         List<Supplier> list = new ArrayList<>();
@@ -1319,7 +1342,7 @@ public class DAO {
     }
     
     /**
-     * Đếm số sản phẩm mới được ra mắt trong khoảng thời gian xác định
+     * Äáº¿m sá»‘ sáº£n pháº©m má»›i Ä‘Æ°á»£c ra máº¯t trong khoáº£ng thá»i gian xÃ¡c Ä‘á»‹nh
      */
     public int getNewProductsCount(Date startDate, Date endDate) {
         String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= ? AND ReleaseDate <= ?";
@@ -1335,14 +1358,16 @@ public class DAO {
     }
 
     /**
-     * Lấy thống kê số lượng đơn hàng theo từng trạng thái
+     * Láº¥y thá»‘ng kÃª sá»‘ lÆ°á»£ng Ä‘Æ¡n hÃ ng theo tá»«ng tráº¡ng thÃ¡i
      */
     public Map<String, Integer> getOrderStatusStatistics() {
         Map<String, Integer> stats = new HashMap<>();
-        // Khởi tạo các trạng thái mặc định
-        stats.put("Hoàn thành", 0);
-        stats.put("Chờ xử lý", 0);
-        stats.put("Đã hủy", 0);
+        // Khá»Ÿi táº¡o cÃ¡c tráº¡ng thÃ¡i máº·c Ä‘á»‹nh
+        stats.put("ÄÃ£ hoÃ n thÃ nh", 0);
+        stats.put("Äang giao hÃ ng", 0);
+        stats.put("Pending", 0);
+        stats.put("ÄÃ£ há»§y", 0);
+
         
         String query = "SELECT OrderStatus, COUNT(*) as Total FROM [Order] GROUP BY OrderStatus";
         try (Connection conn = new DBContext().getConnection();
@@ -1356,7 +1381,7 @@ public class DAO {
     }
 
     /**
-     * Đếm số người dùng mới đăng ký trong khoảng thời gian xác định
+     * Äáº¿m sá»‘ ngÆ°á»i dÃ¹ng má»›i Ä‘Äƒng kÃ½ trong khoáº£ng thá»i gian xÃ¡c Ä‘á»‹nh
      */
     public int getNewUsersCount(Date startDate, Date endDate) {
         String query = "SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?"; 
@@ -1372,7 +1397,7 @@ public class DAO {
     }
 
     /**
-     * Đếm số đơn hàng mới trong khoảng thời gian xác định
+     * Äáº¿m sá»‘ Ä‘Æ¡n hÃ ng má»›i trong khoáº£ng thá»i gian xÃ¡c Ä‘á»‹nh
      */
     public int getNewOrdersCount(Date startDate, Date endDate) {
         String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= ? AND OrderDate <= ?";
@@ -1388,11 +1413,13 @@ public class DAO {
     }
 
     /**
-     * Tính toán tỷ lệ tăng trưởng doanh thu so với tháng trước
+     * TÃ­nh toÃ¡n tá»· lá»‡ tÄƒng trÆ°á»Ÿng doanh thu so vá»›i thÃ¡ng trÆ°á»›c
      */
     public double getRevenueGrowth() {
-        String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'Hoàn thành'";
-        String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+        String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'ÄÃ£ hoÃ n thÃ nh'";
+
+        String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'ÄÃ£ hoÃ n thÃ nh'";
+
         try (Connection conn = new DBContext().getConnection()) {
             double prev = 0, curr = 0;
             try (PreparedStatement ps = conn.prepareStatement(sqlPrev); ResultSet rs = ps.executeQuery()) {
@@ -1407,7 +1434,7 @@ public class DAO {
         return 0.0;
     }
     /**
-     * Lấy danh sách tên các thương hiệu (Supplier) đang có sản phẩm
+     * Láº¥y danh sÃ¡ch tÃªn cÃ¡c thÆ°Æ¡ng hiá»‡u (Supplier) Ä‘ang cÃ³ sáº£n pháº©m
      */
     public List<String> getActiveSuppliers() {
         List<String> list = new ArrayList<>();
@@ -1427,7 +1454,7 @@ public class DAO {
 
     public Map<String, Integer> getDashboardSummary(java.sql.Date start, java.sql.Date end) {
         Map<String, Integer> summary = new HashMap<>();
-        // Tạm thời bỏ qua bảng [Order] nếu nó gây lỗi trắng trang do thiếu table trong DB
+        // Táº¡m thá»i bá» qua báº£ng [Order] náº¿u nÃ³ gÃ¢y lá»—i tráº¯ng trang do thiáº¿u table trong DB
         String sql = "SELECT " +
                      "(SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= ? AND ReleaseDate <= ?) as products, " +
                      "(SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?) as users, " +
@@ -1444,88 +1471,19 @@ public class DAO {
                     summary.put("products", rs.getInt("products"));
                     summary.put("users", rs.getInt("users"));
                     summary.put("blogs", rs.getInt("blogs"));
-                    summary.put("pending", 0); // Tạm thời
+                    summary.put("pending", 0); // Táº¡m thá»i
                     summary.put("newProducts", 0);
                     summary.put("newUsers", 0);
                     summary.put("newOrders", 0);
                 }
             }
         } catch (Exception e) { 
-            System.err.println("Lỗi tại getDashboardSummary: " + e.getMessage());
+            System.err.println("Lá»—i táº¡i getDashboardSummary: " + e.getMessage());
             e.printStackTrace(); 
         }
         return summary;
     }
 
-    public int addOrder(Order order) {
-        // Query cơ bản theo database hiện tại của bạn
-        String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
-        // Nếu bạn đã chạy lệnh ALTER TABLE để thêm cột, hãy dùng query này:
-        // String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus, PaymentMethod, CustomerNote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try (Connection conn = new DBContext().getConnection()) {
-            // Kiểm tra xem bảng đã có đủ cột chưa để tự động điều chỉnh query
-            boolean hasPayment = false;
-            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "Order", "PaymentMethod")) {
-                if (rs.next()) hasPayment = true;
-            }
-            
-            String finalQuery = hasPayment 
-                ? "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus, PaymentMethod, CustomerNote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                : "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-            try (PreparedStatement ps = conn.prepareStatement(finalQuery, Statement.RETURN_GENERATED_KEYS)) {
-                int idx = 1;
-                if (order.getUserId() != null && order.getUserId() > 0) {
-                    ps.setInt(idx++, order.getUserId());
-                } else {
-                    ps.setNull(idx++, java.sql.Types.INTEGER);
-                }
-                ps.setDate(idx++, order.getOrderDate());
-                ps.setDouble(idx++, order.getTotalPrice());
-                ps.setString(idx++, order.getReceiverName());
-                ps.setString(idx++, order.getReceiverPhone());
-                ps.setString(idx++, order.getReceiverAddress());
-                ps.setString(idx++, order.getOrderStatus());
-                
-                if (hasPayment) {
-                    ps.setString(idx++, order.getPaymentMethod());
-                    ps.setString(idx++, order.getCustomerNote());
-                }
-                
-                int affectedRows = ps.executeUpdate();
-                if (affectedRows > 0) {
-                    try (ResultSet rs = ps.getGeneratedKeys()) {
-                        if (rs.next()) return rs.getInt(1);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi tại addOrder: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    public boolean addOrderDetail(OrderDetail detail) {
-        String query = "INSERT INTO OrderDetail (IdOrder, IdProduct, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setInt(1, detail.getIdOrder());
-            ps.setString(2, detail.getIdProduct());
-            ps.setInt(3, detail.getQuantity());
-            ps.setDouble(4, detail.getUnitPrice());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * Lấy danh sách sản phẩm theo thương hiệu
-     */
     public List<ProductModel> getProductsByBrand(String brandId) {
         List<ProductModel> list = new ArrayList<>();
         String sql = "SELECT * FROM ProductDetail WHERE IdSupplier = ? ORDER BY ProductName";
@@ -1543,90 +1501,118 @@ public class DAO {
                     list.add(pm);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
 
-    /**
-     * Lấy doanh thu theo từng ngày trong khoảng thời gian xác định
-     */
-    public Map<String, Double> getDailyRevenue(java.sql.Date startDate, java.sql.Date endDate) {
-        Map<String, Double> stats = new LinkedHashMap<>();
-        
-        // Tạo câu lệnh SQL lấy doanh thu theo ngày
-        String query = "SELECT CAST(OrderDate AS DATE) as OrderDay, SUM(TotalPrice) as Revenue " +
-                      "FROM [Order] " +
-                      "WHERE OrderDate >= ? AND OrderDate <= ? AND OrderStatus = N'Hoàn thành' " +
-                      "GROUP BY CAST(OrderDate AS DATE) " +
-                      "ORDER BY OrderDay ASC";
-                      
+    public int addOrder(Order order) {
+        String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setDate(1, startDate);
-            ps.setDate(2, endDate);
-            try (ResultSet rs = ps.executeQuery()) {
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM");
-                while (rs.next()) {
-                    stats.put(sdf.format(rs.getDate("OrderDay")), rs.getDouble("Revenue"));
+             PreparedStatement ps = conn.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            if (order.getUserId() != null && order.getUserId() > 0) {
+                ps.setInt(1, order.getUserId());
+            } else {
+                ps.setNull(1, java.sql.Types.INTEGER);
+            }
+            ps.setDate(2, order.getOrderDate());
+            ps.setDouble(3, order.getTotalPrice());
+            ps.setString(4, order.getReceiverName());
+            ps.setString(5, order.getReceiverPhone());
+            ps.setString(6, order.getReceiverAddress());
+            ps.setString(7, order.getOrderStatus());
+            if (ps.executeUpdate() > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) return rs.getInt(1);
                 }
             }
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-        }
-        
-        return stats;
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1;
     }
-    public int getTotalProductsByDate(Date startDate, Date endDate) {
-        String query = "SELECT COUNT(*) FROM ProductDetail \n" +
-"WHERE ReleaseDate >= ? AND ReleaseDate <= ?";
+
+    public List<Map<String, Object>> getAdminOrders(String keyword, String status) {
+        List<Map<String, Object>> orders = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, ")
+                .append("o.ReceiverAddress, o.OrderStatus, COUNT(od.IdProduct) AS ItemCount ")
+                .append("FROM [Order] o LEFT JOIN OrderDetail od ON o.IdOrder = od.IdOrder WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (CAST(o.IdOrder AS varchar(20)) LIKE ? OR o.ReceiverName LIKE ? OR o.ReceiverPhone LIKE ?) ");
+            String like = "%" + keyword.trim() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+        if (isAllowedOrderStatus(status)) {
+            sql.append("AND o.OrderStatus = ? ");
+            params.add(status);
+        }
+        sql.append("GROUP BY o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, o.ReceiverAddress, o.OrderStatus ")
+                .append("ORDER BY o.OrderDate DESC, o.IdOrder DESC");
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setDate(1, startDate);
-            ps.setDate(2, endDate);
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
+                while (rs.next()) {
+                    orders.add(mapOrderRow(rs));
+                }
             }
         } catch (Exception e) { e.printStackTrace(); }
-        return 0;
+        return orders;
     }
 
-    /**
-     * Lấy doanh thu theo từng tháng trong năm hiện tại
-     */
-    public Map<String, Double> getMonthlyRevenueData() {
-        Map<String, Double> stats = new LinkedHashMap<>();
-        
-        // Khởi tạo 12 tháng với giá trị 0 (T1, T2, ..., T12)
-        for (int i = 1; i <= 12; i++) {
-            stats.put("T" + i, 0.0);
-        }
-
-        String query = "SELECT MONTH(OrderDate) as Month, SUM(TotalPrice) as Revenue " +
-                      "FROM [Order] " +
-                      "WHERE OrderDate >= DATEFROMPARTS(YEAR(GETDATE()), 1, 1) " +
-                      "AND OrderDate <= DATEFROMPARTS(YEAR(GETDATE()), 12, 31) " +
-                      "AND OrderStatus = N'Hoàn thành' " +
-                      "GROUP BY MONTH(OrderDate) " +
-                      "ORDER BY Month ASC";
-
-                      
+    public List<Map<String, Object>> getOrderDetails(int orderId) {
+        List<Map<String, Object>> details = new ArrayList<>();
+        String sql = "SELECT od.IdOrder, od.IdProduct, p.ProductName, p.ImagePath, od.Quantity, od.UnitPrice, (od.Quantity * od.UnitPrice) AS Subtotal FROM OrderDetail od LEFT JOIN ProductDetail p ON od.IdProduct = p.IdProduct WHERE od.IdOrder = ? ORDER BY od.IdProduct";
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                int month = rs.getInt("Month");
-                double revenue = rs.getDouble("Revenue");
-                stats.put("T" + month, revenue);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("idOrder", rs.getInt("IdOrder"));
+                    row.put("idProduct", rs.getString("IdProduct"));
+                    row.put("productName", rs.getString("ProductName"));
+                    row.put("imagePath", rs.getString("ImagePath"));
+                    row.put("quantity", rs.getInt("Quantity"));
+                    row.put("unitPrice", rs.getDouble("UnitPrice"));
+                    row.put("subtotal", rs.getDouble("Subtotal"));
+                    details.add(row);
+                }
             }
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-        }
-        
-        return stats;
+        } catch (Exception e) { e.printStackTrace(); }
+        return details;
     }
 
-    
-}
+    public boolean updateOrderStatus(int orderId, String status) {
+        if (!isAllowedOrderStatus(status)) return false;
+        String sql = "UPDATE [Order] SET OrderStatus = ? WHERE IdOrder = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, orderId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
 
+    public boolean isAllowedOrderStatus(String status) {
+        return "Đang giao hàng".equals(status) || "Đã hoàn thành".equals(status) || "Đã hủy".equals(status);
+    }
+
+    private Map<String, Object> mapOrderRow(ResultSet rs) throws java.sql.SQLException {
+        Map<String, Object> row = new HashMap<>();
+        row.put("idOrder", rs.getInt("IdOrder"));
+        row.put("customerName", rs.getString("ReceiverName"));
+        row.put("receiverName", rs.getString("ReceiverName"));
+        row.put("receiverPhone", rs.getString("ReceiverPhone"));
+        row.put("receiverAddress", rs.getString("ReceiverAddress"));
+        row.put("orderDate", rs.getDate("OrderDate"));
+        row.put("totalPrice", rs.getDouble("TotalPrice"));
+        row.put("status", rs.getString("OrderStatus"));
+        row.put("itemCount", rs.getInt("ItemCount"));
+        return row;
+    }
+}

@@ -17,8 +17,8 @@
                 <section class="tradein-hero">
                     <div class="tradein-hero__copy">
                         <span class="hero-card__eyebrow">Định giá</span>
-                        <h1>Thu cũ đổi mới, định giá ngay.</h1>
-                        <p>Chọn hãng, tên máy và mức độ mới để xem mức định giá tạm tính ngay bên dưới. Đây là bước nhanh để người dùng biết mình đang ở đâu trước khi chốt nâng cấp.</p>
+                        <h1>Kiểm tra nhanh giá trị máy của bạn</h1>
+                        <p>Chọn hãng, tên máy và mức độ mới để xem mức định giá tạm tính ngay bên dưới. Đây là bước nhanh để người dùng biết mình đang ở đâu trước khi chốt nâng cấp. </p>
                     </div>
                 </section>
 
@@ -27,7 +27,7 @@
                         <div class="section-heading section-heading--compact">
                             <div>
                                 <span class="section-eyebrow">Định giá ngay</span>
-                                <h2>Nhập nhanh thông tin máy cũ</h2>
+                                <h2>Cho chúng tôi biết về máy của bạn</h2>
                             </div>
                         </div>
 
