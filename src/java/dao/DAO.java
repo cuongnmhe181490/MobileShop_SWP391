@@ -26,7 +26,7 @@ public class DAO {
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
         String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], Email, "
                  + "PhoneNumber, FullName, Birthday, [RoleId], [Status], [CreatedDate], [LockReason]) \n"
-                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, N'Hoáº¡t Ä‘á»™ng', GETDATE(), NULL)";
+                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, N'Hoạt Động', GETDATE(), NULL)";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, user);

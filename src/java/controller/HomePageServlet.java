@@ -78,32 +78,13 @@ public class HomePageServlet extends HttpServlet {
      * Tính điểm hài lòng trung bình từ DB.
      */
     private String getLiveSatisfactionRate() {
-        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) AS Average FROM GeneralReview WHERE [Status] = 'VISIBLE' AND (ReviewTopic IS NULL OR ReviewTopic != 'Q&A')";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                double avg = rs.getDouble("Average");
-                if (avg > 0) {
-                    return String.format("%.1f/5", avg);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "0.0/5";
+        return heroBannerDAO.getLiveSatisfactionRate();
     }
 
     /**
      * Đếm tổng số sản phẩm từ DB.
      */
     private int getLiveProductCount() {
-        String sql = "SELECT COUNT(*) FROM ProductDetail";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return heroBannerDAO.getLiveProductCount();
     }
 }

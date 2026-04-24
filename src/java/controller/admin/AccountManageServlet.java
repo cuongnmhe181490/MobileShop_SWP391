@@ -59,25 +59,37 @@ public class AccountManageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        UserDAO dao = new UserDAO();
-        List<User> list = dao.getAllUsers();
-        String searchQuery = request.getParameter("search");
-        String startDate = request.getParameter("startDate");
-        String endDate = request.getParameter("endDate");
         
-        if ((searchQuery != null && !searchQuery.trim().isEmpty()) || 
-            (startDate != null && !startDate.trim().isEmpty()) || 
-            (endDate != null && !endDate.trim().isEmpty())) {
-            list = dao.searchUsers(searchQuery != null ? searchQuery.trim() : "", startDate, endDate);
-            request.setAttribute("searchQuery", searchQuery);
-            request.setAttribute("startDate", startDate);
-            request.setAttribute("endDate", endDate);
-        } else {
-            list = dao.getAllUsers();
+        String searchQuery = request.getParameter("search");
+        if (searchQuery != null) searchQuery = searchQuery.trim();
+        
+        int page = 1;
+        String pageStr = request.getParameter("page");
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageStr);
+                if (page < 1) page = 1;
+            } catch (Exception e) {
+                page = 1;
+            }
         }
+        
+        int pageSize = 6;
+        UserDAO dao = new UserDAO();
+        
+        int totalUsers = dao.getTotalUsersCount(searchQuery);
+        int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
+        
+        if (page > totalPages && totalPages > 0) page = totalPages;
+
+        List<User> list = dao.getUsersWithPagination(searchQuery, page, pageSize);
         request.setAttribute("userList", list);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("searchQuery", searchQuery); // Giữ lại từ khóa tìm kiếm
+        
         request.getRequestDispatcher("/admin/account-manage.jsp").forward(request, response);
-    } 
+    }
 
     /** 
      * Handles the HTTP <code>POST</code> method.

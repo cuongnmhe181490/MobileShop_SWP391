@@ -366,4 +366,86 @@ public class UserDAO extends DBContext{
         }
         return list;
     }
+    
+    // 1. Đếm tổng số lượng người dùng (Hỗ trợ cả khi đang tìm kiếm)
+    public int getTotalUsersCount(String keyword) {
+        String sql = "SELECT COUNT(*) FROM [User] u INNER JOIN [Role] r ON u.RoleId = r.RoleId ";
+        boolean hasSearch = keyword != null && !keyword.trim().isEmpty();
+        
+        if (hasSearch) {
+            sql += "WHERE (u.FullName LIKE ? OR u.Email LIKE ? OR u.PhoneNumber LIKE ?) ";
+        }
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            if (hasSearch) {
+                String searchPattern = "%" + keyword.trim() + "%";
+                ps.setString(1, searchPattern);
+                ps.setString(2, searchPattern);
+                ps.setString(3, searchPattern);
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<User> getUsersWithPagination(String keyword, int page, int pageSize) {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT u.*, r.RoleName FROM [User] u INNER JOIN [Role] r ON u.RoleId = r.RoleId ";
+        
+        boolean hasSearch = keyword != null && !keyword.trim().isEmpty();
+        if (hasSearch) {
+            sql += "WHERE (u.FullName LIKE ? OR u.Email LIKE ? OR u.PhoneNumber LIKE ?) ";
+        }
+        
+        sql += "ORDER BY u.RoleId ASC, u.UserId DESC ";
+        sql += "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            int paramIndex = 1;
+            if (hasSearch) {
+                String searchPattern = "%" + keyword.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            
+            // Công thức tính Offset: (Trang hiện tại - 1) * Số item mỗi trang
+            ps.setInt(paramIndex++, (page - 1) * pageSize);
+            ps.setInt(paramIndex++, pageSize); // Lấy 6 dòng
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Role r = new Role();
+                    r.setRoleId(rs.getInt("RoleId"));
+                    r.setRoleName(rs.getString("RoleName"));
+
+                    User u = new User();
+                    u.setId(rs.getInt("UserId"));
+                    u.setUser(rs.getString("Username"));
+                    u.setEmail(rs.getString("Email"));
+                    u.setPhone(rs.getString("PhoneNumber"));
+                    u.setName(rs.getString("FullName"));
+                    u.setRole(r);
+                    u.setStatus(rs.getString("Status"));
+                    u.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    u.setLockReason(rs.getString("LockReason"));
+                    list.add(u);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
