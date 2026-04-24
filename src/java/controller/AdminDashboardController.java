@@ -44,10 +44,7 @@ public class AdminDashboardController extends HttpServlet {
         dao.order.OrderDAO orderDAO = new dao.order.OrderDAO();
         dao.product.ProductAdminDAO productDAO = new dao.product.ProductAdminDAO();
         
-        if ("true".equals(request.getParameter("syncInventory"))) {
-            productDAO.syncInventory();
-            request.setAttribute("syncMessage", "Đã đồng bộ lại tồn kho dựa trên các đơn hàng.");
-        }
+
 
         try {
             // 3. Các thống kê và chỉ số theo khoảng ngày đã chọn

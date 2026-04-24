@@ -233,10 +233,7 @@
                     </p>
                 </div>
                 <div class="header-actions">
-                    <!-- Nút đồng bộ tồn kho -->
-                    <a href="${pageContext.request.contextPath}/admin/dashboard?syncInventory=true&startDate=${startDate}&endDate=${endDate}" class="btn-refresh-dash" style="background: var(--primary); text-decoration: none;">
-                        <i class="fa-solid fa-sync"></i> Đồng bộ tồn kho
-                    </a>
+
 
                     <!-- Form lọc thời gian mới -->
                     <form action="${pageContext.request.contextPath}/admin/dashboard" method="GET" style="display: flex; align-items: center;">
@@ -267,12 +264,7 @@
                 </div>
             </header>
 
-            <c:if test="${not empty syncMessage}">
-                <div style="background: var(--success); color: white; padding: 15px 25px; border-radius: 16px; margin-bottom: 24px; font-weight: 600; box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; animation: slideDown 0.5s ease;">
-                    <i class="fa-solid fa-circle-check" style="font-size: 1.2rem;"></i> 
-                    ${syncMessage}
-                </div>
-            </c:if>
+
 
             <!-- Stats Grid -->
             <div class="stats-grid">
