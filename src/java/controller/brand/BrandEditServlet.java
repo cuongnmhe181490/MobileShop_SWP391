@@ -12,6 +12,7 @@ import java.util.List;
 import dao.SupplierDAO;
 import entity.Supplier;
 import jakarta.servlet.annotation.MultipartConfig;
+import java.util.Map;
 import util.CloudinaryUtil;
 
 @WebServlet(name = "BrandEditServlet", urlPatterns = {"/BrandEditServlet"})
@@ -69,14 +70,30 @@ public class BrandEditServlet extends HttpServlet {
         String email = trim(request.getParameter("email"));
         String phoneNumber = trim(request.getParameter("phoneNumber"));
 
-        StringBuilder errors = new StringBuilder();
+        Map<String, String> errors = new java.util.HashMap<>();
         
-        if (name == null || name.isEmpty()) {
-            errors.append("Tên thương hiệu không được để trống. ");
+        if (name == null || name.isBlank()) {
+            errors.put("name", "Tên thương hiệu không được để trống.");
+        } else if (name.length() < 2 || name.length() > 100) {
+            errors.put("name", "Tên thương hiệu phải từ 2-100 ký tự.");
         }
 
-        if (email == null || email.isEmpty()) {
-            errors.append("Email không được để trống. ");
+        if (email == null || email.isBlank()) {
+            errors.put("email", "Email không được để trống.");
+        } else if (email.length() > 100) {
+            errors.put("email", "Email tối đa 100 ký tự.");
+        } else if (!util.ValidationUtil.isValidEmail(email)) {
+            errors.put("email", "Định dạng email không hợp lệ.");
+        }
+
+        if (phoneNumber != null && !phoneNumber.isBlank() && phoneNumber.length() > 15) {
+            errors.put("phoneNumber", "Số điện thoại tối đa 15 ký tự.");
+        } else if (phoneNumber != null && !phoneNumber.isBlank() && !util.ValidationUtil.isValidPhone(phoneNumber)) {
+            errors.put("phoneNumber", "Số điện thoại không hợp lệ.");
+        }
+
+        if (address != null && address.length() > 255) {
+            errors.put("address", "Địa chỉ tối đa 255 ký tự.");
         }
 
         // Handle File Upload (Optional)
@@ -84,25 +101,36 @@ public class BrandEditServlet extends HttpServlet {
         String logoPath = oldSupplier.getLogoPath(); // Default to old
 
         if (filePart != null && filePart.getSize() > 0) {
-            if (filePart.getSize() > 500 * 1024) {
-                errors.append("Logo quá lớn! Vui lòng chọn file dưới 500KB. ");
+            String contentType = filePart.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                errors.put("logoFile", "File logo không hợp lệ. Vui lòng chọn ảnh.");
+            } else if (filePart.getSize() > 500 * 1024) {
+                errors.put("logoFile", "Logo quá lớn! Vui lòng chọn file dưới 500KB.");
             } else {
-                String uploadedUrl = CloudinaryUtil.upload(filePart);
+                String uploadedUrl = CloudinaryUtil.upload(filePart, 400, 400, "fill");
                 if (uploadedUrl != null) {
                     logoPath = uploadedUrl;
                 } else {
-                    errors.append("Lỗi tải logo lên Cloudinary. ");
+                    errors.put("logoFile", "Lỗi tải logo lên Cloudinary.");
                 }
             }
         }
 
-        if (errors.length() > 0) {
-            request.setAttribute("error", errors.toString().trim());
+        if (!errors.isEmpty()) {
+            request.setAttribute("errors", errors);
             request.setAttribute("brands", dao.getAllSuppliers());
-            request.setAttribute("brand", oldSupplier);
+            // Reconstruct with current input
+            Supplier currentEdit = new Supplier(idSupplier, name, address, email, phoneNumber, logoPath);
+            request.setAttribute("brand", currentEdit);
             request.getRequestDispatcher("brand_config/config-brand-edit.jsp").forward(request, response);
             return;
         }
+
+        // Sanitization
+        name = util.ValidationUtil.escapeHtml(name);
+        address = util.ValidationUtil.escapeHtml(address);
+        email = util.ValidationUtil.escapeHtml(email);
+        phoneNumber = util.ValidationUtil.escapeHtml(phoneNumber);
 
         Supplier updated = new Supplier(idSupplier, name, address, email, phoneNumber, logoPath);
         boolean success = dao.updateSupplier(updated);

@@ -6,16 +6,18 @@ target/
 *.war
 *.ear
 
-# Bỏ qua cấu hình cá nhân và các file tự động sinh ra của NetBeans (Nguyên nhân gây Conflict)
+# Bỏ qua cấu hình cá nhân và các file tự động sinh ra của NetBeans
 nbproject/private/
 nbproject/genfiles.properties
 nbproject/build-impl.xml
 nbproject/Makefile-*.properties
 nbbuild/
 nbdist/
+
+
 .nb-gradle/
 
-# Bỏ qua file chứa API Key, Mật khẩu Database (Rất quan trọng để bảo mật)
+# Bỏ qua file chứa API Key, Mật khẩu Database (Bảo mật)
 config.properties
 
 # Bỏ qua các file hệ thống máy tính tự sinh ra

@@ -21,7 +21,7 @@ public class User {
     private String resetToken;
     private Date resetTokenExpiry;
     private String status;
-    private Timestamp createdDate;
+    private java.sql.Timestamp createdDate; 
     private String lockReason;
 
     public User() {
@@ -134,6 +134,14 @@ public class User {
         return resetTokenExpiry;
     }
 
+    public java.sql.Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(java.sql.Timestamp createdDate) {
+        this.createdDate = createdDate;
+    }
+
     public void setResetTokenExpiry(Date resetTokenExpiry) {
         this.resetTokenExpiry = resetTokenExpiry;
     }
@@ -146,13 +154,6 @@ public class User {
         this.status = status;
     }
 
-    public Timestamp getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Timestamp createdDate) {
-        this.createdDate = createdDate;
-    }
     
     public String getLockReason() {
         return lockReason; 

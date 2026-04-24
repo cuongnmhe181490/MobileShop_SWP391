@@ -1,6 +1,6 @@
 package util;
 
-import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.Product;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -24,7 +24,7 @@ public final class CatalogViewSupport {
     }
 
     public static void prepareCatalogRequest(HttpServletRequest request, List<Product> products) {
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         HttpSession session = request.getSession(false);
         List<String> brandOptions = dao.getAvailableBrands();
         request.setAttribute("brandOptions", brandOptions);
@@ -43,7 +43,7 @@ public final class CatalogViewSupport {
         request.setAttribute("selectedMaxPrice", firstNotBlank(request.getAttribute("validatedMaxPrice"), request.getParameter("maxPrice")));
     }
 
-    private static List<Integer> resolveRecentYears(DAO dao, List<Product> products) {
+    private static List<Integer> resolveRecentYears(ProductStorefrontDAO dao, List<Product> products) {
         List<Integer> years = dao.getAvailableReleaseYears(3);
         if (!years.isEmpty()) {
             return years;

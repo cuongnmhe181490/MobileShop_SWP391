@@ -413,16 +413,17 @@
 
                         <div class="field">
                             <label>Logo Thương Hiệu (Tải lên từ máy - tùy chọn)</label>
-                            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
-                                <c:if test="${not empty brand.logoPath}">
-                                    <div style="width: 60px; height: 60px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); background: white; display: flex; align-items: center; justify-content: center; padding: 4px;">
-                                        <img src="${brand.logoPath}" style="max-width: 100%; max-height: 100%; object-fit: contain;" alt="Current Logo">
-                                    </div>
-                                </c:if>
-                                <input class="input" type="file" name="logoFile" id="logoFile" accept="image/*">
-                                <div class="error-feedback"></div>
+                            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 8px;">
+                                <div style="width: 120px; height: 120px; border-radius: 20px; overflow: hidden; border: 2px solid #e2e8f0; background: white; display: flex; align-items: center; justify-content: center; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                                    <img id="logoPreview" src="${not empty brand.logoPath ? brand.logoPath : ctx.concat('/img/no-image.png')}" 
+                                         style="width: 100%; height: 100%; object-fit: contain;" alt="Brand Logo">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                                    <input class="input" type="file" name="logoFile" id="logoFile" accept="image/*" style="flex: 1;">
+                                    <div class="error-feedback"></div>
+                                </div>
                             </div>
-                            <small style="font-size: 11px; color: #7e8eb8; display: block;">
+                            <small style="font-size: 11px; color: #7e8eb8; display: block; margin-top: 8px;">
                                 Bỏ trống nếu muốn giữ logo cũ. Định dạng: JPG, PNG, WEBP, SVG. Dung lượng: < 500 KB.<br>
                                 Kích thước khuyên dùng: <b>400 x 400 px</b> (Tỷ lệ 1:1).
                             </small>
@@ -444,8 +445,8 @@
             // Real-time Validation
             const validationRules = {
                 name: { required: true, max: 100, label: 'Tên thương hiệu' },
-                email: { required: true, max: 100, format: 'email', label: 'Email liên hệ' },
-                phoneNumber: { max: 15, label: 'Số điện thoại' },
+                 email: { required: true, max: 100, format: 'email', label: 'Email liên hệ' },
+                phoneNumber: { max: 15, format: 'phone', label: 'Số điện thoại' },
                 address: { max: 255, label: 'Địa chỉ' },
                 logoFile: { required: false, label: 'Logo thương hiệu' }
             };
@@ -467,6 +468,11 @@
                     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!re.test(value)) {
                         errorMsg = 'Định dạng email không hợp lệ.';
+                    }
+                } else if (value && rules.format === 'phone') {
+                    const re = /^[\d +()]{7,20}$/;
+                    if (!re.test(value)) {
+                        errorMsg = 'Định dạng số điện thoại không hợp lệ.';
                     }
                 }
 
@@ -541,16 +547,43 @@
 
             document.getElementById('logoFile').addEventListener('change', function(e) {
                 const file = e.target.files[0];
+                const preview = document.getElementById('logoPreview');
+                const fieldId = 'logoFile';
+                const field = document.getElementById(fieldId);
+                const fieldContainer = field.closest('.field');
+                const errorDiv = fieldContainer.querySelector('.error-feedback');
+
                 if (file) {
                     if (file.size > 500 * 1024) {
                         showToast('Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB.', 'error');
                         e.target.value = '';
+                        fieldContainer.classList.add('has-error');
+                        errorDiv.textContent = 'Dung lượng logo tối đa 500KB.';
                     } else {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            preview.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        
                         const img = new Image();
                         img.onload = function() {
-                            if (this.width > 800 || this.height > 800) {
-                                showToast('Kích thước logo quá lớn! Khuyên dùng 400x400px.', 'error');
+                            const ratio = this.width / this.height;
+                            let errorMsg = '';
+                            if (this.width > 1000 || this.height > 1000) {
+                                errorMsg = 'Độ phân giải logo quá lớn! Tối đa 1000x1000px.';
+                            } else if (ratio < 0.8 || ratio > 1.2) {
+                                errorMsg = 'Vui lòng chọn ảnh vuông! Tỷ lệ chuẩn 1:1 (400x400px).';
+                            }
+
+                            if (errorMsg) {
+                                showToast(errorMsg, 'error');
                                 e.target.value = '';
+                                fieldContainer.classList.add('has-error');
+                                errorDiv.textContent = errorMsg;
+                            } else {
+                                fieldContainer.classList.remove('has-error');
+                                errorDiv.textContent = '';
                             }
                         };
                         img.src = URL.createObjectURL(file);

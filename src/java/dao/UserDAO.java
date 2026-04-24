@@ -43,10 +43,8 @@ public class UserDAO extends DBContext{
                     u.setPhone(rs.getString("PhoneNumber"));
                     u.setName(rs.getString("FullName"));
                     u.setBirthday(rs.getDate("Birthday"));
-                    u.setRole(r);
-                    u.setStatus(rs.getString("Status"));
                     u.setCreatedDate(rs.getTimestamp("CreatedDate"));
-                    u.setLockReason(rs.getString("LockReason"));
+                    u.setRole(r);
                     return u;
                 }
             }
@@ -89,18 +87,33 @@ public class UserDAO extends DBContext{
             return false;
         }
     }
- 
+
+    /**
+     * Đếm tổng số người dùng (Không lọc theo ngày - Dùng cho con số tổng quát)
+     */
     public int getTotalUsers() {
         String query = "SELECT COUNT(*) FROM [User]";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    /**
+     * Đếm số lượng người dùng đăng ký mới trong khoảng thời gian xác định
+     */
+    public int getTotalUsersByDate(java.sql.Date startDate, java.sql.Date endDate) {
+        String query = "SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
     
@@ -291,18 +304,38 @@ public class UserDAO extends DBContext{
         }
     }
     
-    public List<User> searchUsers(String keyword) {
+    public List<User> searchUsers(String keyword, String startDate, String endDate) {
         List<User> list = new ArrayList<>();
-        String sql = "SELECT u.*, r.RoleName FROM [User] u INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
-                     "WHERE (u.FullName LIKE ? OR u.Email LIKE ? OR u.PhoneNumber LIKE ?) " +
-                     "ORDER BY u.RoleId ASC, u.UserId DESC";
+        StringBuilder sql = new StringBuilder("SELECT u.*, r.RoleName FROM [User] u INNER JOIN [Role] r ON u.RoleId = r.RoleId WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (u.FullName LIKE ? OR u.Email LIKE ? OR u.PhoneNumber LIKE ? OR u.Username LIKE ?) ");
+            String searchPattern = "%" + keyword.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            sql.append("AND CAST(u.CreatedDate AS DATE) >= ? ");
+            params.add(java.sql.Date.valueOf(startDate));
+        }
+
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            sql.append("AND CAST(u.CreatedDate AS DATE) <= ? ");
+            params.add(java.sql.Date.valueOf(endDate));
+        }
+
+        sql.append("ORDER BY u.RoleId ASC, u.UserId DESC");
+
         try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             
-            String searchPattern = "%" + keyword + "%";
-            ps.setString(1, searchPattern);
-            ps.setString(2, searchPattern);
-            ps.setString(3, searchPattern);
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

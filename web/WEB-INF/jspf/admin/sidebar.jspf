@@ -1,0 +1,224 @@
+<%@page pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<style>
+    /* ===== UNIFIED ADMIN SIDEBAR STYLES ===== */
+    :root {
+        --bg-sidebar: #1e293b;
+        --sidebar-active: #aff22f;
+        --sidebar-text: #94a3b8;
+        --sidebar-label: #64748b;
+    }
+
+    .sidebar {
+        width: 260px;
+        background: var(--bg-sidebar);
+        padding: 24px 0;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0; left: 0;
+        height: 100vh;
+        z-index: 1000;
+        color: white;
+        overflow-y: auto;
+        box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    }
+
+    .sidebar .brand {
+        padding: 0 24px;
+        margin-bottom: 40px;
+        text-decoration: none;
+        color: white;
+        display: block;
+    }
+
+    .sidebar .brand h2 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .sidebar .brand p {
+        font-size: 0.75rem;
+        color: var(--sidebar-text);
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    .nav-section {
+        margin-bottom: 32px;
+    }
+
+    .nav-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--sidebar-label);
+        letter-spacing: 1.5px;
+        margin-bottom: 12px;
+        display: block;
+        padding: 0 24px;
+        font-weight: 700;
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        color: var(--sidebar-text);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .menu-link i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .menu-link:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .menu-link.active {
+        background: rgba(175, 242, 47, 0.1);
+        color: var(--sidebar-active);
+        border-left-color: var(--sidebar-active);
+        font-weight: 700;
+    }
+
+    .menu-link.active i {
+        color: var(--sidebar-active);
+    }
+
+    /* Scrollbar for sidebar */
+    .sidebar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+    }
+</style>
+
+<aside class="sidebar">
+    <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
+        <h2>MobileShop</h2>
+        <p>Quản trị hệ thống</p>
+    </a>
+
+    <!-- 1. TỔNG QUAN -->
+    <div class="nav-section">
+        <span class="nav-label">TỔNG QUAN</span>
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link ${activePage == 'dashboard' ? 'active' : ''}">
+                    <i class="fa-solid fa-chart-line"></i>Dashboard
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 2. QUẢN LÝ BÁN HÀNG -->
+    <div class="nav-section">
+        <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/admin/orders" class="menu-link ${activePage == 'orders' ? 'active' : ''}">
+                    <i class="fa-solid fa-receipt"></i>Đơn hàng
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/admin/products" class="menu-link ${activePage == 'products' ? 'active' : ''}">
+                    <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link ${activePage == 'users' ? 'active' : ''}">
+                    <i class="fa-solid fa-user-gear"></i>Tài khoản
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
+    <div class="nav-section">
+        <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link ${activePage == 'contacts' ? 'active' : ''}">
+                    <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link ${activePage == 'reviews' ? 'active' : ''}">
+                    <i class="fa-solid fa-star"></i>Đánh giá
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link ${activePage == 'blog' ? 'active' : ''}">
+                    <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 4. CẤU HÌNH GIAO DIỆN -->
+    <div class="nav-section">
+        <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link ${activePage == 'config_home' ? 'active' : ''}">
+                    <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link ${activePage == 'config_hero' ? 'active' : ''}">
+                    <i class="fa-solid fa-image"></i>Biểu ngữ chính
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link ${activePage == 'config_brand' ? 'active' : ''}">
+                    <i class="fa-solid fa-tags"></i>Thương hiệu
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link ${activePage == 'config_top' ? 'active' : ''}">
+                    <i class="fa-solid fa-star"></i>Sản phẩm nổi bật
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link ${activePage == 'config_tradein' ? 'active' : ''}">
+                    <i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 5. HỆ THỐNG -->
+    <div style="margin-top: auto; padding-bottom: 24px;">
+        <ul class="sidebar-menu">
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                    <i class="fa-solid fa-globe"></i>Xem Website
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                    <i class="fa-solid fa-power-off"></i>Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>

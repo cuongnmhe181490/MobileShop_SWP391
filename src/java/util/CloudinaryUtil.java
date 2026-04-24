@@ -13,25 +13,18 @@ public class CloudinaryUtil {
     private CloudinaryUtil() {
     }
 
-
-    private static final Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
-            "cloud_name", "dovcx8lxl",
-            "api_key", "686417178596178",
-            "api_secret", "wgqV0cS4ia7kjW8fNJ-n21216hc",
-            "secure", true
-    ));
-
-    /**
-     * Hàm xử lý upload file từ Servlet Part lên Cloudinary
-     * @param filePart Đối tượng Part nhận từ request.getPart()
-     * @return String URL của ảnh sau khi upload thành công, hoặc null nếu lỗi
-     */
-
     public static String upload(Part filePart) {
-        return uploadImage(filePart);
+        return uploadImage(filePart, 0, 0, null);
     }
 
-    public static String uploadImage(Part filePart) {
+    /**
+     * Upload with transformation (Resize/Crop)
+     */
+    public static String upload(Part filePart, int width, int height, String cropMode) {
+        return uploadImage(filePart, width, height, cropMode);
+    }
+
+    private static String uploadImage(Part filePart, int width, int height, String cropMode) {
         if (filePart == null || filePart.getSize() == 0) {
             return null;
         }
@@ -55,11 +48,24 @@ public class CloudinaryUtil {
                 }
             }
 
+            // Transformation options
+            Map params = ObjectUtils.emptyMap();
+            if (width > 0 && height > 0) {
+                params = ObjectUtils.asMap(
+                    "transformation", new com.cloudinary.Transformation()
+                        .width(width)
+                        .height(height)
+                        .crop(cropMode != null ? cropMode : "fill")
+                        .gravity("center")
+                );
+            }
+
             @SuppressWarnings("rawtypes")
-            Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
+            Map uploadResult = cloudinary.uploader().upload(tempFile, params);
             Object secureUrl = uploadResult.get("secure_url");
             return secureUrl == null ? null : secureUrl.toString();
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         } finally {
             if (tempFile != null && tempFile.exists()) {

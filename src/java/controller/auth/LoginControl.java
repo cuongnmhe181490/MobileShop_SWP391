@@ -6,6 +6,7 @@ package controller.auth;
 
 import dao.DAO;
 import dao.UserDAO;
+import dao.order.UserCartDAO;
 import entity.User;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.mindrot.jbcrypt.BCrypt;
+import util.CartSupport;
 
 /**
  *
@@ -22,6 +24,8 @@ import org.mindrot.jbcrypt.BCrypt;
  */
 @WebServlet(name = "LoginControl", urlPatterns = {"/login"})
 public class LoginControl extends HttpServlet {
+
+    private static final String INVALID_LOGIN_MESSAGE = "Email hoặc mật khẩu không chính xác!";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -80,21 +84,40 @@ public class LoginControl extends HttpServlet {
         User loginUser = udao.getAccountByUser(user);
         
         if (loginUser != null) {
+            // Kiểm tra trạng thái tài khoản
             if ("Bị khóa".equals(loginUser.getStatus())) {
                 request.setAttribute("errorMsg", "Tài khoản của bạn đã bị khóa!<br>Lý do: " + loginUser.getLockReason());
                 request.getRequestDispatcher("login.jsp").forward(request, response);
                 return;
             }
-        
-            if (loginUser != null && BCrypt.checkpw(pass, loginUser.getPass())) {
+
+            // Kiểm tra mật khẩu (BCrypt)
+            boolean isCorrectPassword = false;
+            String storedPass = loginUser.getPass();
+            try {
+                if (storedPass.startsWith("$2a$") || storedPass.startsWith("$2b$")) {
+                    isCorrectPassword = BCrypt.checkpw(pass, storedPass);
+                } else {
+                    isCorrectPassword = pass.equals(storedPass);
+                }
+            } catch (Exception e) {
+                isCorrectPassword = pass.equals(storedPass);
+            }
+
+            if (isCorrectPassword) {
 
                 HttpSession session = request.getSession();
                 session.setAttribute("acc", loginUser);
+                new UserCartDAO().releaseExpiredReservations();
+                CartSupport.syncCartSize(session);
                 response.sendRedirect("home"); 
             } else {
-                request.setAttribute("mess", "Email hoặc mật khẩu không chính xác!");
+                request.setAttribute("mess", INVALID_LOGIN_MESSAGE);
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }
+        } else {
+            request.setAttribute("mess", INVALID_LOGIN_MESSAGE);
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
 

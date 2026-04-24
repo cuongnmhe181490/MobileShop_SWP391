@@ -13,7 +13,7 @@
             }
 
             .review-shell {
-                max-width: 900px;
+                max-width: 760px;
                 margin: 40px auto;
                 padding: 40px;
                 background: #ffffff;
@@ -26,7 +26,7 @@
                 font-size: 28px;
                 font-weight: 800;
                 margin-bottom: 32px;
-                color: #0f172a;
+                color: var(--brand);
                 letter-spacing: -0.5px;
             }
 
@@ -38,30 +38,32 @@
                 flex-wrap: wrap;
                 margin-bottom: 40px;
                 padding: 32px;
-                background: linear-gradient(145deg, #ffffff, #f8fafc);
-                border-radius: 20px;
-                border: 1px solid #e2e8f0;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+                background: #ffffff;
+                border-radius: 24px;
+                border: 1px solid rgba(59, 130, 246, 0.2);
+                box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+                display: grid;
+                grid-template-columns: auto 1fr;
+                gap: 24px 48px;
+                align-items: center;
+                padding: 32px 40px;
             }
             .rv-score {
                 text-align: center;
-                min-width: 140px;
-                padding-right: 40px;
-                border-right: 1px solid #e2e8f0;
+                padding-right: 48px;
+                border-right: 1px solid #f1f5f9;
             }
             .rv-score__num {
                 font-size: 64px;
                 font-weight: 800;
                 line-height: 1;
-                background: linear-gradient(135deg, #0ea5e9, #3b82f6);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
+                color: #3b82f6; /* Xanh dương sáng nổi bật */
             }
             .rv-score__sub {
                 font-size: 14px;
                 color: #64748b;
                 margin-top: 12px;
-                font-weight: 500;
+                font-weight: 700;
             }
 
             /* Stars */
@@ -86,31 +88,42 @@
             /* Filter chips */
             .rv-chips {
                 display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                flex: 1;
-                align-items: center;
+                flex-wrap: wrap; 
+                gap: 10px;
+                grid-column: 2;
+                grid-row: 1;
             }
+            .rv-summary__btn-container {
+                grid-column: 2;
+                grid-row: 2;
+                display: flex;
+                justify-content: flex-end;
+                margin-top: -8px;
+            }
+            .rv-chips::-webkit-scrollbar { height: 4px; }
+            .rv-chips::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+            
             .chip {
-                padding: 10px 20px;
-                border-radius: 999px;
-                font-size: 14px;
-                font-weight: 600;
-                border: 2px solid transparent;
-                background: #f1f5f9;
-                color: #475569;
+                padding: 10px 24px;
+                border-radius: 999px; /* Pill style */
+                font-size: 13px;
+                font-weight: 700;
+                border: 1px solid #e2e8f0;
+                background: #fff;
+                color: #1e293b;
                 text-decoration: none;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: all 0.2s ease;
+                white-space: nowrap;
             }
             .chip:hover {
-                transform: translateY(-2px);
-                background: #e2e8f0;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                background: #f1f5f9;
+                border-color: #cbd5e1;
             }
             .chip.active {
-                background: linear-gradient(135deg, #0f172a, #1e293b);
+                background: #1e293b;
                 color: #ffffff;
-                box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);
+                border-color: #1e293b;
+                box-shadow: 0 4px 12px rgba(30, 41, 59, 0.2);
             }
 
             /* Write button */
@@ -118,23 +131,22 @@
                 display: inline-flex;
                 align-items: center;
                 gap: 8px;
-                padding: 14px 28px;
-                border-radius: 999px;
-                background: linear-gradient(135deg, #0284c7, #2563eb);
-                color: #fff;
-                font-size: 15px;
-                font-weight: 600;
+                padding: 12px 32px;
+                border-radius: 999px; /* Pill style */
+                background: #fff;
+                color: #1e293b;
+                font-size: 14px;
+                font-weight: 700;
                 text-decoration: none;
-                margin-left: auto;
-                white-space: nowrap;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-                border: none;
+                transition: all 0.3s ease;
+                border: 1px solid #e2e8f0;
                 cursor: pointer;
             }
-            .btn-write:hover {
+            .btn-write:hover:not(.disabled) {
+                background: #1e293b;
+                color: #fff;
                 transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+                box-shadow: 0 8px 25px rgba(30, 41, 59, 0.15);
             }
 
             /* Alert */
@@ -161,14 +173,16 @@
                 padding: 32px;
                 border-radius: 20px;
                 background: #ffffff;
-                border: 1px solid #f1f5f9;
-                margin-bottom: 20px;
+                border: 1px solid rgba(59, 130, 246, 0.2); /* Ánh xanh nhẹ */
+                margin-bottom: 24px;
                 transition: all 0.3s ease;
+                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.03);
+                position: relative;
             }
             .rv-card:hover {
-                box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-                transform: translateY(-2px);
-                border-color: #e2e8f0;
+                box-shadow: 0 10px 40px rgba(59, 130, 246, 0.12);
+                transform: translateY(-4px);
+                border-color: rgba(59, 130, 246, 0.4);
             }
             .rv-card__top {
                 display: flex;
@@ -288,7 +302,190 @@
                 color: #0f172a;
             }
 
-            /* Pagination */
+            :root {
+                --color-primary: #0284c7;
+                --color-primary-hover: #0369a1;
+                --color-bg: #f8fafc;
+                --color-surface: #ffffff;
+                --color-text-main: #0f172a;
+                --color-text-secondary: #64748b;
+                --color-border: #e2e8f0;
+                --color-red: #d70018; /* Cellphones red */
+                --font-main: 'Inter', sans-serif;
+            }
+
+            /* ─── TABS PILL STYLE ─── */
+            .rv-tabs {
+                display: inline-flex;
+                gap: 5px;
+                background: #fff;
+                padding: 6px;
+                border-radius: 12px;
+                margin-bottom: 32px;
+                border: 1px solid #e2e8f0;
+            }
+            .rv-tab {
+                font-size: 14px;
+                font-weight: 700;
+                color: #64748b;
+                padding: 10px 24px;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: all 0.3s;
+            }
+            .rv-tab.active {
+                background: linear-gradient(135deg, #172544 50%, #13203f 48%, #223f84 100%);
+                color: #ffffff;
+            }
+
+            .tab-content {
+                display: none;
+            }
+            .tab-content.active {
+                display: block;
+                animation: fadeIn 0.4s ease forwards;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* ─── Q&A FORM (Figma Dark Style) ─── */
+            .qa-box {
+                background: linear-gradient(135deg, #172544 0%, #13203f 48%, #223f84 100%);;
+                border-radius: 20px;
+                padding: 32px;
+                display: flex;
+                gap: 24px;
+                align-items: center;
+                margin-bottom: 40px;
+                color: #fff;
+                position: relative;
+                overflow: hidden;
+            }
+            .qa-box::after {
+                content: '';
+                position: absolute;
+                width: 200px;
+                height: 200px;
+                background: rgba(255,255,255,0.05);
+                border-radius: 50%;
+                top: -50px;
+                right: -50px;
+            }
+            .qa-box__mascot {
+                width: 64px;
+                height: 64px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                color: #fff;
+                flex-shrink: 0;
+            }
+            .qa-box__main {
+                flex: 1;
+                z-index: 1;
+            }
+            .qa-box__title {
+                font-size: 18px;
+                font-weight: 800;
+                margin-bottom: 8px;
+            }
+            .qa-box__desc {
+                font-size: 12px;
+                color: rgba(255,255,255,0.6);
+                line-height: 1.5;
+                margin-bottom: 20px;
+                max-width: 500px;
+            }
+            .qa-box__input-group {
+                display: flex;
+                gap: 12px;
+                max-width: 800px;
+            }
+            .qa-box__input {
+                flex: 1;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 10px;
+                padding: 14px 20px;
+                font-size: 14px;
+                color: #fff;
+                outline: none;
+                transition: all 0.3s;
+            }
+            .qa-box__input::placeholder {
+                color: rgba(255,255,255,0.3);
+            }
+            .qa-box__input:focus {
+                background: rgba(255,255,255,0.1);
+                border-color: rgba(255,255,255,0.3);
+            }
+            .qa-box__btn {
+                background: #ffffff;
+                color: #1e293b;
+                border: none;
+                border-radius: 10px;
+                padding: 0 24px;
+                font-weight: 800;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.3s;
+                white-space: nowrap;
+            }
+            .qa-box__btn:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
+
+            .qa-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            .qa-header h2 {
+                font-size: 18px;
+                font-weight: 800;
+                color: #1e293b;
+            }
+            .qa-count {
+                font-size: 12px;
+                color: #3b82f6;
+                font-weight: 700;
+                background: #eff6ff;
+                padding: 4px 10px;
+                border-radius: 8px;
+            }
+
+            .badge-qa {
+                background: #f1f5f9;
+                color: #64748b;
+                font-size: 11px;
+                font-weight: 700;
+                padding: 4px 12px;
+                border-radius: 999px;
+                position: absolute;
+                top: 32px;
+                right: 32px;
+            }
+            
+            /* Disabled writing button */
+            .btn-write.disabled {
+                background: #e2e8f0;
+                color: #94a3b8;
+                border-color: #cbd5e1;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+            .btn-write.disabled:hover {
+                transform: none;
+            }
+
+            /* ─── Custom Modal & Toast ─── */
             .pagination {
                 display: flex;
                 gap: 8px;
@@ -498,7 +695,10 @@
                             <c:choose>
                                 <c:when test="${param.success eq 'created'}">Cảm ơn! Đánh giá của bạn đã được gửi thành công ✨</c:when>
                                 <c:when test="${param.success eq 'updated'}">Cập nhật đánh giá thành công!</c:when>
-                                <c:otherwise>Bạn đã đánh giá sản phẩm này rồi.</c:otherwise>
+                                <c:when test="${param.error eq 'duplicate'}">
+                                    ${param.type eq 'SERVICE' ? 'Bạn đã gửi đánh giá dịch vụ trước đó rồi.' : 'Bạn đã đánh giá sản phẩm này rồi.'}
+                                </c:when>
+                                <c:otherwise>Đã có lỗi xảy ra. Hãy thử lại sau.</c:otherwise>
                             </c:choose>
                         </span>
                         <button class="toast__close" onclick="hideToast()">&#x2715;</button>
@@ -510,79 +710,100 @@
 
                 <%-- Tiêu đề --%>
                 <h1 class="rv-title">
-                    Đánh giá sản phẩm
+                    <c:choose>
+                        <c:when test="${isServiceReview}">Đánh giá dịch vụ</c:when>
+                        <c:otherwise>Đánh giá sản phẩm</c:otherwise>
+                    </c:choose>
                 </h1>
 
-                <%-- Summary: điểm + filter chips + nút viết --%>
-                <div class="rv-summary">
-                    <div class="rv-score">
-                        <div class="rv-score__num">
-                            <fmt:formatNumber value="${averageRating}" maxFractionDigits="1" minFractionDigits="1"/>
+                <%-- Tabs Header --%>
+                <c:if test="${!isServiceReview}">
+                    <div class="tabs-container">
+                        <div class="rv-tabs">
+                            <div class="rv-tab ${empty param.qpage and (empty param.success or param.success ne 'asked') ? 'active' : ''}" onclick="switchTab('reviews')">Đánh giá sản phẩm</div>
+                            <div class="rv-tab ${param.success eq 'asked' ? 'active' : ''}" onclick="switchTab('qa')">Hỏi và đáp</div>
                         </div>
-                        <div class="stars">
-                            <c:forEach begin="1" end="5" var="s">
-                                <span class="stars__s ${s <= averageRating ? 'on' : ''}">★</span>
-                            </c:forEach>
+                    </div>
+                </c:if>
+
+                <div id="tab-reviews" class="tab-content ${empty param.qpage and (empty param.success or param.success ne 'asked') ? 'active' : ''}">
+                    <%-- Summary: điểm + filter chips + nút viết --%>
+                    <div class="rv-summary">
+                        <div class="rv-score">
+                            <div class="rv-score__num">
+                                <fmt:formatNumber value="${averageRating}" maxFractionDigits="1" minFractionDigits="1"/>
+                            </div>
+                            <div class="stars">
+                                <c:forEach begin="1" end="5" var="s">
+                                    <span class="stars__s ${s <= averageRating ? 'on' : ''}">★</span>
+                                </c:forEach>
+                            </div>
+                            <div class="rv-score__sub">${reviewCount} đánh giá</div>
                         </div>
-                        <div class="rv-score__sub">${reviewCount} đánh giá</div>
-                    </div>
 
-                    <div class="rv-chips">
-                        <a class="chip ${empty selectedStar ? 'active' : ''}"
-                           href="${ctx}/reviews?pid=${pid}">Tất cả · ${reviewCount}</a>
-                        <c:forEach items="${reviewCounts}" var="entry">
-                            <a class="chip ${selectedStar == entry.key ? 'active' : ''}"
-                               href="${ctx}/reviews?pid=${pid}&star=${entry.key}">
-                                ${entry.key} sao · ${entry.value}
-                            </a>
-                        </c:forEach>
-                    </div>
+                            <div class="rv-chips">
+                                <a class="chip ${empty selectedStar ? 'active' : ''}"
+                                   href="${ctx}/reviews?${not empty pid ? 'pid='.concat(pid) : 'type=SERVICE'}">Tất cả · ${reviewCount}</a>
+                                <c:forEach items="${reviewCounts}" var="entry">
+                                    <a class="chip ${selectedStar == entry.key ? 'active' : ''}"
+                                       href="${ctx}/reviews?${not empty pid ? 'pid='.concat(pid) : 'type=SERVICE'}&star=${entry.key}">
+                                        ${entry.key} sao · ${entry.value}
+                                    </a>
+                                </c:forEach>
+                            </div>
 
-                    <%-- Nút viết review: luôn hiện, nếu chưa login thì mở modal --%>
+                            <c:if test="${!isServiceReview}">
+                                <div class="rv-summary__btn-container">
+                                    <c:choose>
+                                        <c:when test="${!loggedIn}">
+                                            <button class="btn-write" onclick="openLoginModal()">Đăng nhập để đánh giá</button>
+                                        </c:when>
+                                        <c:when test="${hasPurchased}">
+                                            <a class="btn-write" href="${ctx}/review/write?pid=${pid}">✦ Viết đánh giá</a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <button class="btn-write disabled" onclick="alert('Bạn cần mua và nhận sản phẩm này thành công để có thể viết đánh giá.')">✦ Viết đánh giá</button>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:if>
+                        </div>
+
+
+                    <%-- Danh sách review --%>
                     <c:choose>
-                        <c:when test="${loggedIn}">
-                            <a class="btn-write" href="${ctx}/review/write?pid=${pid}">✦ Viết đánh giá</a>
+                        <c:when test="${empty reviews}">
+                            <p style="color:var(--color-text-secondary);text-align:center;padding:40px 0">
+                                Chưa có đánh giá nào${not empty selectedStar ? ' ở mức sao này' : ''}.
+                            </p>
                         </c:when>
                         <c:otherwise>
-                            <button class="btn-write" onclick="openLoginModal()">✦ Viết đánh giá</button>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-
-                <%-- Danh sách review --%>
-                <c:choose>
-                    <c:when test="${empty reviews}">
-                        <p style="color:var(--color-text-secondary);text-align:center;padding:40px 0">
-                            Chưa có đánh giá nào${not empty selectedStar ? ' ở mức sao này' : ''}.
-                        </p>
-                    </c:when>
-                    <c:otherwise>
-                        <c:forEach items="${reviews}" var="rv">
-                            <article class="rv-card">
-                                <div class="rv-card__top">
-                                    <div class="rv-card__user">
-                                        <div class="rv-card__avatar">
-                                            ${fn:substring(rv.reviewerName, 0, 1)}
-                                        </div>
-                                        <div>
-                                            <div class="rv-card__name">${rv.reviewerName}</div>
-                                            <div class="rv-card__meta">
-                                                <span class="stars stars--sm">
-                                                    <c:forEach begin="1" end="5" var="s">
-                                                        <span class="stars__s ${s <= rv.ranking ? 'on' : ''}">★</span>
-                                                    </c:forEach>
-                                                </span>
-                                                &nbsp;·&nbsp;
-                                                <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy"/>
+                            <c:forEach items="${reviews}" var="rv">
+                                <article class="rv-card">
+                                    <div class="rv-card__top">
+                                        <div class="rv-card__user">
+                                            <div class="rv-card__avatar">
+                                                ${fn:substring(rv.reviewerName, 0, 1)}
+                                            </div>
+                                            <div>
+                                                <div class="rv-card__name">${rv.reviewerName}</div>
+                                                <div class="rv-card__meta">
+                                                    <span class="stars stars--sm">
+                                                        <c:forEach begin="1" end="5" var="s">
+                                                            <span class="stars__s ${s <= rv.ranking ? 'on' : ''}">★</span>
+                                                        </c:forEach>
+                                                    </span>
+                                                    &nbsp;·&nbsp;
+                                                    <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy"/>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <%-- Nút Sửa nếu là review của user đang đăng nhập --%>
-                                    <c:if test="${sessionScope.acc != null && rv.userId == sessionScope.acc.id}">
-                                        <a class="btn-edit" href="${ctx}/review/write?id=${rv.reviewId}">Sửa</a>
-                                    </c:if>
-                                </div>
+                                        <%-- Nút Sửa nếu là review của user đang đăng nhập --%>
+                                        <c:if test="${sessionScope.acc != null && rv.userId == sessionScope.acc.id}">
+                                            <a class="btn-edit" href="${ctx}/review/write?id=${rv.reviewId}">Sửa</a>
+                                        </c:if>
+                                    </div>
 
                                 <p class="rv-card__content">${rv.reviewContent}</p>
 
@@ -611,17 +832,113 @@
                 <c:if test="${totalPages > 1}">
                     <nav class="pagination">
                         <a class="page-btn ${currentPage == 1 ? 'disabled' : ''}"
-                           href="${ctx}/reviews?pid=${pid}&star=${selectedStar}&page=${currentPage - 1}">← Trước</a>
+                           href="${ctx}/reviews?${not empty pid ? 'pid='.concat(pid) : 'type=SERVICE'}&star=${selectedStar}&page=${currentPage - 1}">← Trước</a>
 
                         <c:forEach begin="1" end="${totalPages}" var="p">
                             <a class="page-btn ${currentPage == p ? 'active' : ''}"
-                               href="${ctx}/reviews?pid=${pid}&star=${selectedStar}&page=${p}">${p}</a>
+                               href="${ctx}/reviews?${not empty pid ? 'pid='.concat(pid) : 'type=SERVICE'}&star=${selectedStar}&page=${p}">${p}</a>
                         </c:forEach>
 
                         <a class="page-btn ${currentPage == totalPages ? 'disabled' : ''}"
-                           href="${ctx}/reviews?pid=${pid}&star=${selectedStar}&page=${currentPage + 1}">Sau →</a>
+                           href="${ctx}/reviews?${not empty pid ? 'pid='.concat(pid) : 'type=SERVICE'}&star=${selectedStar}&page=${currentPage + 1}">Sau →</a>
                     </nav>
                 </c:if>
+
+                </div> <!-- End tab-reviews -->
+
+                <div id="tab-qa" class="tab-content ${not empty param.qpage or param.success eq 'asked' ? 'active' : ''}">
+                    <%-- Q&A Form Figma Style --%>
+                    <div class="qa-box">
+                        <div class="qa-box__mascot">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </div>
+                        <div class="qa-box__main">
+                            <div class="qa-box__title">Hãy đặt câu hỏi cho chúng tôi</div>
+                            <div class="qa-box__desc">
+                                Chúng tôi sẽ phản hồi sớm nhất có thể. Thông tin có thể thay đổi theo thời gian, vui lòng đặt câu hỏi để nhận được cập nhật mới nhất!
+                            </div>
+                            <c:choose>
+                                <c:when test="${loggedIn}">
+                                    <form action="${ctx}/reviews" method="POST" class="qa-box__input-group">
+                                        <input type="hidden" name="pid" value="${pid}">
+                                        <input type="text" name="questionContent" class="qa-box__input" placeholder="Viết câu hỏi của bạn tại đây..." required maxlength="500">
+                                        <button type="submit" class="qa-box__btn">Gửi câu hỏi &rarr;</button>
+                                    </form>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="qa-box__input-group">
+                                        <input type="text" class="qa-box__input" placeholder="Đăng nhập để đặt câu hỏi..." onclick="openLoginModal()" readonly style="cursor: pointer;">
+                                        <button type="button" class="qa-box__btn" onclick="openLoginModal()">Gửi câu hỏi &rarr;</button>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+
+                    <div class="qa-header">
+                        <h2>Câu hỏi gần đây</h2>
+                        <span class="qa-count">${questionsCount} câu hỏi</span>
+                    </div>
+
+                    <%-- Danh sách Hỏi đáp --%>
+                    <c:choose>
+                        <c:when test="${empty questions}">
+                            <p style="color:var(--color-text-secondary);text-align:center;padding:40px 0">
+                                Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi!
+                            </p>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach items="${questions}" var="q">
+                                <article class="rv-card">
+                                    <span class="badge-qa">Câu hỏi</span>
+                                    <div class="rv-card__top">
+                                        <div class="rv-card__user">
+                                            <div class="rv-card__avatar" style="background: #3b82f6; color: #fff;">
+                                                ${fn:substring(q.reviewerName, 0, 1)}
+                                            </div>
+                                            <div>
+                                                <div class="rv-card__name">${q.reviewerName}</div>
+                                                <div class="rv-card__meta">
+                                                    <fmt:formatDate value="${q.reviewDate}" pattern="dd/MM/yyyy · HH:mm"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p class="rv-card__content" style="font-weight: 700; font-size: 16px; color: #1e293b;">${q.reviewContent}</p>
+
+                                    <%-- Phản hồi Admin cho câu hỏi --%>
+                                    <c:if test="${not empty q.replyContent}">
+                                        <div class="rv-reply">
+                                            <div class="rv-reply__label">
+                                                <i class="fa-solid fa-headset"></i> Phản hồi từ Admin
+                                            </div>
+                                            <div class="rv-reply__text">
+                                                ${q.replyContent}
+                                            </div>
+                                        </div>
+                                    </c:if>
+                                </article>
+                            </c:forEach>
+                            
+                            <%-- Phân trang cho câu hỏi --%>
+                            <c:if test="${totalQPages > 1}">
+                                <div class="rv-pagination pagination">
+                                    <c:forEach begin="1" end="${totalQPages}" var="p">
+                                        <c:choose>
+                                            <c:when test="${p == currentQPage}">
+                                                <span class="page-btn active">${p}</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a class="page-btn" href="?pid=${pid}&qpage=${p}#qa-tab">${p}</a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+                                </div>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
+                </div> <!-- End tab-qa -->
 
             </div>
         </main>
@@ -684,6 +1001,28 @@
             // Đóng khi bấm Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') closeLoginModal();
+            });
+
+            // ── Tabs Switcher ──
+            function switchTab(tabId) {
+                // Update tab buttons
+                document.querySelectorAll('.rv-tab').forEach(t => t.classList.remove('active'));
+                if(tabId === 'reviews') {
+                    document.querySelector('.rv-tab:nth-child(1)').classList.add('active');
+                } else if (tabId === 'qa') {
+                    document.querySelector('.rv-tab:nth-child(2)').classList.add('active');
+                }
+
+                // Update tab contents
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('tab-' + tabId).classList.add('active');
+            }
+
+            // Auto-switch based on hash URL or param success
+            window.addEventListener('DOMContentLoaded', () => {
+                if (window.location.hash === '#qa-tab') {
+                    switchTab('qa');
+                }
             });
         </script>
     </body>

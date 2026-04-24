@@ -1,4 +1,4 @@
-package controller;
+package controller.product;
 
 import dao.DAO;
 import entity.Product;
@@ -351,8 +351,10 @@ public class ProductManageController extends HttpServlet {
 
     private String resolveImagePath(HttpServletRequest request) throws IOException, ServletException {
         Part imageFile = request.getPart("imageFile");
-        if (imageFile != null && imageFile.getSize() > 0) {            String uploadedUrl = CloudinaryUtil.uploadImage(imageFile);
-            if (uploadedUrl != null && !uploadedUrl.isBlank()) {                return uploadedUrl;
+        if (imageFile != null && imageFile.getSize() > 0) {
+            String uploadedUrl = CloudinaryUtil.upload(imageFile, 800, 800, "fill");
+            if (uploadedUrl != null && !uploadedUrl.isBlank()) {
+                return uploadedUrl;
             }
 
             String localUploadPath = saveLocalProductImage(request, imageFile);

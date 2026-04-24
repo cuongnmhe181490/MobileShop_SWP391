@@ -214,122 +214,45 @@
     </style>
 </head>
 <body>
-
     <div class="dashboard-container">
-        
-        <aside class="sidebar">
-            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
-                <h2>MobileShop</h2>
-                <p>Quản trị hệ thống</p>
-            </a>
-
-            <!-- 1. TỔNG QUAN -->
-            <div class="nav-section">
-                <span class="nav-label">TỔNG QUAN</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
-                            <i class="fa-solid fa-chart-line"></i>Dashboard
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 2. QUẢN LÝ BÁN HÀNG -->
-            <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
-                            <i class="fa-solid fa-receipt"></i>Đơn hàng
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link active">
-                            <i class="fa-solid fa-user-gear"></i>Tài khoản
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
-            <div class="nav-section">
-                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
-                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
-                            <i class="fa-solid fa-star"></i>Đánh giá
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
-                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 4. CẤU HÌNH GIAO DIỆN -->
-            <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
-                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 5. HỆ THỐNG -->
-            <div style="margin-top: auto; padding-bottom: 24px;">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
-                            <i class="fa-solid fa-globe"></i>Xem Website
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
-                            <i class="fa-solid fa-power-off"></i>Đăng xuất
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </aside>
+        <c:set var="activePage" value="users" />
+        <%@ include file="/WEB-INF/jspf/admin/sidebar.jspf" %>
 
         <main class="main-content">
-            <div class="page-header">
-                <h1>Quản lý tài khoản</h1>
-                <a href="${pageContext.request.contextPath}/admin/add-user.jsp" class="btn-add"><i class="fa-solid fa-user-plus"></i> Thêm người dùng mới</a>
-            </div>
+            <header class="header">
+                <div class="welcome">
+                    <p class="admin-shell-eyebrow">Hệ thống</p>
+                    <h1>Quản lý tài khoản</h1>
+                    <p class="admin-shell-subtitle">Quản lý danh sách người dùng, phân quyền và trạng thái hoạt động.</p>
+                </div>
+                <div class="header-actions">
+                    <a href="${pageContext.request.contextPath}/admin/add-user.jsp" class="btn-primary" style="text-decoration: none;"><i class="fa-solid fa-user-plus"></i> Thêm người dùng mới</a>
+                    <div class="user-profile">
+                        <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
+                        <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>
+                    </div>
+                </div>
+            </header>
 
-            <div class="card">
-                <c:if test="${not empty sessionScope.successMsg}">
-                    <div class="alert alert-success"><i class="fa-solid fa-check-circle"></i> ${sessionScope.successMsg}</div>
-                    <c:remove var="successMsg" scope="session"/>
-                </c:if>
-                <c:if test="${not empty sessionScope.errorMsg}">
-                    <div class="alert alert-error"><i class="fa-solid fa-triangle-exclamation"></i> ${sessionScope.errorMsg}</div>
-                    <c:remove var="errorMsg" scope="session"/>
-                </c:if>
-                
-                <form action="${pageContext.request.contextPath}/admin/accounts" method="GET" class="search-bar">
-                    <input type="text" name="search" class="search-input" placeholder="Tìm theo tên, email, SĐT..." value="${searchQuery}">
-                    <button type="submit" class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+            <c:if test="${not empty sessionScope.successMsg}">
+                <div class="admin-flash admin-flash--success"><i class="fa-solid fa-check-circle"></i> ${sessionScope.successMsg}</div>
+                <c:remove var="successMsg" scope="session"/>
+            </c:if>
+            <c:if test="${not empty sessionScope.errorMsg}">
+                <div class="admin-flash admin-flash--danger"><i class="fa-solid fa-triangle-exclamation"></i> ${sessionScope.errorMsg}</div>
+                <c:remove var="errorMsg" scope="session"/>
+            </c:if>
+
+            <section class="content-card">
+                <form action="${pageContext.request.contextPath}/admin/accounts" method="GET" class="filter-bar">
+                    <div class="product-search-wrap" style="flex: 1; max-width: 400px;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" name="search" class="form-input product-search-input" placeholder="Tìm theo tên, email, SĐT..." value="${searchQuery}">
+                    </div>
+                    <button type="submit" class="btn-primary">Tìm kiếm</button>
                     
                     <c:if test="${not empty searchQuery}">
-                        <a href="${pageContext.request.contextPath}/admin/accounts" class="btn-search btn-clear"><i class="fa-solid fa-xmark"></i> Hủy lọc</a>
+                        <a href="${pageContext.request.contextPath}/admin/accounts" class="btn-outline" style="text-decoration: none;"><i class="fa-solid fa-xmark"></i> Hủy lọc</a>
                     </c:if>
                 </form>    
 
@@ -343,20 +266,21 @@
                                 <th>Vai trò</th>
                                 <th>Trạng thái</th>
                                 <th>Ngày tạo</th>
-                                <th style="text-align: center; width: 15%;">Hành động</th> </tr>
+                                <th style="text-align: center; width: 15%;">Hành động</th>
+                            </tr>
                         </thead>
                         <tbody>
                             <c:forEach items="${userList}" var="u">
                                 <tr>
-                                    <td class="font-bold">
-                                        ${u.name}
+                                    <td>
+                                        <span style="font-weight: 700; color: var(--text-main);">${u.name}</span>
                                         <c:if test="${not empty sessionScope.acc and u.id == sessionScope.acc.id}">
-                                            <span style="font-style: italic; color: var(--primary); font-size: 0.8rem;">(Bạn)</span>
+                                            <span style="font-style: italic; color: var(--primary); font-size: 0.8rem; margin-left: 4px;">(Bạn)</span>
                                         </c:if>
                                     </td>
-                                    <td class="text-muted">${u.email}</td>
+                                    <td style="color: var(--text-muted);">${u.email}</td>
                                     <td>${u.phone}</td>
-                                    <td class="font-bold">${u.role.roleName}</td>
+                                    <td><span style="font-weight: 600;">${u.role.roleName}</span></td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${u.status == 'Hoạt động'}">
@@ -367,17 +291,26 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
-                                    <td><fmt:formatDate value="${u.createdDate}" pattern="dd/MM/yyyy"/></td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${not empty u.createdDate}">
+                                                <fmt:formatDate value="${u.createdDate}" pattern="dd/MM/yyyy"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span style="color: #cbd5e1;">--/--/----</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
                                     <td>
                                         <div class="action-btns">
                                             <a href="${pageContext.request.contextPath}/admin/edit-user?id=${u.id}" class="btn-icon btn-edit" title="Sửa thông tin"><i class="fa-solid fa-pen"></i></a>
 
                                             <c:choose>
                                                 <c:when test="${not empty sessionScope.acc and u.id == sessionScope.acc.id}">
-                                                    <button type="button" class="btn-icon" style="background: #ccc; cursor: not-allowed;" disabled><i class="fa-solid fa-lock"></i></button>
+                                                    <button type="button" class="btn-icon" style="background: #e2e8f0; color: #94a3b8; cursor: not-allowed;" disabled title="Không thể tự khóa mình"><i class="fa-solid fa-lock"></i></button>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <form id="form-action-${u.id}" action="${pageContext.request.contextPath}/admin/accounts" method="POST" style="margin:0;">
+                                                    <form id="form-action-${u.id}" action="${pageContext.request.contextPath}/admin/accounts" method="POST" style="margin:0; display: none;">
                                                         <input type="hidden" name="id" value="${u.id}">
                                                         <input type="hidden" name="email" value="${u.email}">
                                                         <input type="hidden" name="name" value="${u.name}">
@@ -390,7 +323,7 @@
                                                             <button type="button" onclick="confirmLock(${u.id}, '${u.name}')" class="btn-icon btn-lock" title="Khóa tài khoản"><i class="fa-solid fa-lock"></i></button>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <button type="button" onclick="submitForm(${u.id}, 'unlock')" class="btn-icon btn-unlock" style="background: #05cd99;" title="Mở khóa"><i class="fa-solid fa-unlock"></i></button>
+                                                            <button type="button" onclick="submitForm(${u.id}, 'unlock')" class="btn-icon btn-unlock" title="Mở khóa"><i class="fa-solid fa-unlock"></i></button>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </c:otherwise>
@@ -401,9 +334,11 @@
                             </c:forEach>
                             <c:if test="${empty userList}">
                                 <tr>
-                                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                        <i class="fa-solid fa-users" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                                        Chưa có dữ liệu người dùng.
+                                    <td colspan="7" style="text-align: center; padding: 60px 0;">
+                                        <div style="color: var(--text-muted);">
+                                            <i class="fa-solid fa-users" style="font-size: 3rem; opacity: 0.2; margin-bottom: 16px; display: block;"></i>
+                                            <p style="font-size: 1.1rem; font-weight: 500;">Không tìm thấy người dùng nào.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             </c:if>
@@ -426,7 +361,7 @@
                         </div>
                     </c:if>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 

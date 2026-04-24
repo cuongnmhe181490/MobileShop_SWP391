@@ -14,6 +14,7 @@ import entity.HeroBanner;
 
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
+import java.util.Map;
 import util.CloudinaryUtil;
 
 @WebServlet(name = "HeroEditServlet", urlPatterns = {"/HeroEditServlet"})
@@ -96,28 +97,40 @@ public class HeroEditServlet extends HttpServlet {
         String description  = trim(request.getParameter("description"));
         String ctaPrimary   = trim(request.getParameter("ctaPrimary"));
         String ctaSecondary = trim(request.getParameter("ctaSecondary"));
-        String stat1        = trim(request.getParameter("stat1"));
         String stat2        = trim(request.getParameter("stat2"));
-        String stat3        = trim(request.getParameter("stat3"));
 
-        StringBuilder errors = new StringBuilder();
+        Map<String, String> errors = new java.util.HashMap<>();
         
-        if (title == null || title.isEmpty()) {
-            errors.append("Tiêu đề không được để trống. ");
+        if (eyebrow != null && eyebrow.length() > 50) {
+            errors.put("eyebrow", "Nhãn phụ tối đa 50 ký tự.");
+        }
+
+        if (title == null || title.isBlank()) {
+            errors.put("title", "Tiêu đề không được để trống.");
         } else if (title.length() < 5 || title.length() > 120) {
-            errors.append("Tiêu đề phải từ 5-120 ký tự. ");
+            errors.put("title", "Tiêu đề phải từ 5-120 ký tự.");
         }
 
-        if (ctaPrimary == null || ctaPrimary.isEmpty()) {
-            errors.append("CTA chính không được để trống. ");
+        if (ctaPrimary == null || ctaPrimary.isBlank()) {
+            errors.put("ctaPrimary", "CTA chính không được để trống.");
         } else if (ctaPrimary.length() > 30) {
-            errors.append("CTA chính tối đa 30 ký tự. ");
+            errors.put("ctaPrimary", "CTA chính tối đa 30 ký tự.");
         }
 
-        if (description == null || description.isEmpty()) {
-            errors.append("Mô tả ngắn không được để trống. ");
+        if (ctaSecondary != null && ctaSecondary.length() > 30) {
+            errors.put("ctaSecondary", "CTA phụ tối đa 30 ký tự.");
+        }
+
+        if (description == null || description.isBlank()) {
+            errors.put("description", "Mô tả ngắn không được để trống.");
         } else if (description.length() > 300) {
-            errors.append("Mô tả tối đa 300 ký tự. ");
+            errors.put("description", "Mô tả tối đa 300 ký tự.");
+        }
+
+        if (stat2 == null || stat2.isBlank()) {
+            errors.put("stat2", "Thời gian phản hồi không được để trống.");
+        } else if (stat2.length() > 20) {
+            errors.put("stat2", "Thời gian phản hồi tối đa 20 ký tự.");
         }
 
         // Xử lý File Upload (tùy chọn)
@@ -125,27 +138,50 @@ public class HeroEditServlet extends HttpServlet {
         String imageUrl = oldBanner.getImageUrl(); // Mặc định dùng cái cũ
 
         if (filePart != null && filePart.getSize() > 0) {
-            if (filePart.getSize() > 500 * 1024) {
-                errors.append("Kích thước ảnh vượt quá giới hạn 500 KB. ");
+            String contentType = filePart.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                errors.put("imageFile", "Định dạng file không hợp lệ. Vui lòng chọn ảnh.");
+            } else if (filePart.getSize() > 500 * 1024) {
+                errors.put("imageFile", "Kích thước ảnh vượt quá giới hạn 500 KB.");
             } else {
-                String uploadedUrl = CloudinaryUtil.upload(filePart);
+                String uploadedUrl = CloudinaryUtil.upload(filePart, 600, 800, "fill");
                 if (uploadedUrl != null) {
                     imageUrl = uploadedUrl;
                 } else {
-                    errors.append("Lỗi tải ảnh lên Cloudinary. ");
+                    errors.put("imageFile", "Lỗi tải ảnh lên Cloudinary.");
                 }
             }
         }
 
-        if (errors.length() > 0) {
-            request.setAttribute("error", errors.toString().trim());
+        if (!errors.isEmpty()) {
+            request.setAttribute("errors", errors);
             List<HeroBanner> banners = new ArrayList<>();
             try { banners = dao.getAll(); } catch (Exception e) { e.printStackTrace(); }
             request.setAttribute("banners", banners);
-            request.setAttribute("hero", oldBanner);
+            
+            // Reconstruct banner with current input to show in form
+            HeroBanner currentEdit = new HeroBanner();
+            currentEdit.setId(id);
+            currentEdit.setEyebrow(eyebrow);
+            currentEdit.setTitle(title);
+            currentEdit.setDescription(description);
+            currentEdit.setCtaPrimary(ctaPrimary);
+            currentEdit.setCtaSecondary(ctaSecondary);
+            currentEdit.setImageUrl(imageUrl);
+            currentEdit.setStat2Label(stat2);
+            request.setAttribute("hero", currentEdit);
+            
             request.getRequestDispatcher("hero_config/config-hero-edit.jsp").forward(request, response);
             return;
         }
+
+        // Sanitization
+        title = util.ValidationUtil.escapeHtml(title);
+        description = util.ValidationUtil.escapeHtml(description);
+        eyebrow = util.ValidationUtil.escapeHtml(eyebrow);
+        ctaPrimary = util.ValidationUtil.escapeHtml(ctaPrimary);
+        ctaSecondary = util.ValidationUtil.escapeHtml(ctaSecondary);
+        stat2 = util.ValidationUtil.escapeHtml(stat2);
 
         HeroBanner banner = new HeroBanner();
         banner.setId(id);
@@ -155,9 +191,9 @@ public class HeroEditServlet extends HttpServlet {
         banner.setCtaPrimary(ctaPrimary);
         banner.setCtaSecondary(ctaSecondary);
         banner.setImageUrl(imageUrl);
-        banner.setStat1Label(stat1);
+        banner.setStat1Label(null); // Keep as Live (Null means not manually overridden)
         banner.setStat2Label(stat2);
-        banner.setStat3Label(stat3);
+        banner.setStat3Label(null); // Keep as Live
         banner.setActive(true);
 
         boolean success = false;

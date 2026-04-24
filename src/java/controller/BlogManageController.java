@@ -13,11 +13,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.util.List;
 import util.CloudinaryUtil;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
 
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 500, // 2MB
-    maxFileSize = 1024 * 500,           // 500KB
-    maxRequestSize = 1024 * 1024 * 2    // 2MB
+        fileSizeThreshold = 1024 * 500, // 2MB
+        maxFileSize = 1024 * 500, // 500KB
+        maxRequestSize = 1024 * 1024 * 2 // 2MB
 )
 @WebServlet(name = "BlogManageController", urlPatterns = {"/admin/blog"})
 public class BlogManageController extends HttpServlet {
@@ -26,63 +29,82 @@ public class BlogManageController extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
-        
+
         String service = request.getParameter("service");
         BlogDAO dao = new BlogDAO();
-        
+
         try {
             if (service == null) {
                 service = "listAll";
             }
-            
+
             switch (service) {
                 case "listAll":
                     String filterCatId = request.getParameter("filterCat");
                     String searchTitle = request.getParameter("searchTitle");
                     String pageStr = request.getParameter("page");
-                    
+
                     int pageSizeAdmin = 7;
                     int pageIndexAdmin = 1;
                     try {
-                        if (pageStr != null) pageIndexAdmin = Integer.parseInt(pageStr);
-                    } catch (Exception e) { pageIndexAdmin = 1; }
-                    
+                        if (pageStr != null) {
+                            pageIndexAdmin = Integer.parseInt(pageStr);
+                        }
+                    } catch (Exception e) {
+                        pageIndexAdmin = 1;
+                    }
+
                     List<BlogPost> list = dao.getAllBlogs();
-                    
+
                     // Filter by Category if selected
                     if (filterCatId != null && !filterCatId.isEmpty()) {
                         int catId = Integer.parseInt(filterCatId);
                         list = list.stream()
-                                   .filter(b -> b.getIdBlogCat() == catId)
-                                   .collect(java.util.stream.Collectors.toList());
+                                .filter(b -> b.getIdBlogCat() == catId)
+                                .collect(java.util.stream.Collectors.toList());
                     }
-                    
+
                     // Search by title if searchTitle provided
                     if (searchTitle != null && !searchTitle.isEmpty()) {
                         String searchLower = searchTitle.toLowerCase();
                         list = list.stream()
-                                   .filter(b -> b.getTitle().toLowerCase().contains(searchLower))
-                                   .collect(java.util.stream.Collectors.toList());
+                                .filter(b -> b.getTitle().toLowerCase().contains(searchLower))
+                                .collect(java.util.stream.Collectors.toList());
                     }
-                    
+
                     int totalBlogsAdmin = list.size();
                     int totalPagesAdmin = (int) Math.ceil((double) totalBlogsAdmin / pageSizeAdmin);
-                    
+
                     // Slice for pagination
                     list = list.stream()
-                               .skip((long) (pageIndexAdmin - 1) * pageSizeAdmin)
-                               .limit(pageSizeAdmin)
-                               .collect(java.util.stream.Collectors.toList());
-                    
+                            .skip((long) (pageIndexAdmin - 1) * pageSizeAdmin)
+                            .limit(pageSizeAdmin)
+                            .collect(java.util.stream.Collectors.toList());
+
                     request.setAttribute("blogList", list);
                     request.setAttribute("catList", dao.getAllBlogCategories());
                     request.setAttribute("selectedCat", filterCatId);
                     request.setAttribute("searchTitle", searchTitle);
                     request.setAttribute("currentPage", pageIndexAdmin);
                     request.setAttribute("totalPages", totalPagesAdmin);
+
+                    // Phân trang nâng cao (giống Product)
+                    int pageRange = 2;
+                    int startPage = Math.max(1, pageIndexAdmin - pageRange);
+                    int endPage = Math.min(totalPagesAdmin, pageIndexAdmin + pageRange);
+
+                    request.setAttribute("prevPage", pageIndexAdmin - 1);
+                    request.setAttribute("nextPage", pageIndexAdmin + 1);
+                    request.setAttribute("startPage", startPage);
+                    request.setAttribute("endPage", endPage);
+                    request.setAttribute("showFirstPage", startPage > 1);
+                    request.setAttribute("showLastPage", endPage < totalPagesAdmin);
+                    request.setAttribute("showLeadingEllipsis", startPage > 2);
+                    request.setAttribute("showTrailingEllipsis", endPage < totalPagesAdmin - 1);
+
                     request.getRequestDispatcher("/admin/blog-manage.jsp").forward(request, response);
                     break;
-                    
+
                 case "insertBlog":
                     if ("POST".equals(request.getMethod())) {
                         try {
@@ -91,14 +113,35 @@ public class BlogManageController extends HttpServlet {
                             String description = request.getParameter("description");
                             String content = request.getParameter("content");
                             int idBlogCat = Integer.parseInt(request.getParameter("idBlogCat"));
-                            
-                            Part filePart = request.getPart("image");
-                            String imageUrl = CloudinaryUtil.upload(filePart);
-                            if (imageUrl == null) imageUrl = "";
 
-                            int userId = 1; 
+                            Part filePart = request.getPart("image");
+                            
+                            // SERVER-SIDE VALIDATION: Kích thước ảnh
+                            if (filePart != null && filePart.getSize() > 0) {
+                                try (InputStream is = filePart.getInputStream()) {
+                                    BufferedImage bi = ImageIO.read(is);
+                                    if (bi != null) {
+                                        int width = bi.getWidth();
+                                        int height = bi.getHeight();
+                                        if (width < 800 || height < 400) {
+                                            request.getSession().setAttribute("errorMessage", "Ảnh không đạt chuẩn (" + width + "x" + height + "px). Yêu cầu tối thiểu 800x400px.");
+                                            response.sendRedirect(request.getContextPath() + "/admin/blog?service=insertBlog");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+
+                            String imageUrl = CloudinaryUtil.upload(filePart);
+                            if (imageUrl == null) {
+                                imageUrl = "";
+                            }
+
+                            int userId = 1;
                             entity.User acc = (entity.User) request.getSession().getAttribute("acc");
-                            if(acc != null) userId = acc.getId();
+                            if (acc != null) {
+                                userId = acc.getId();
+                            }
 
                             BlogPost blog = new BlogPost();
                             blog.setTitle(title);
@@ -108,8 +151,8 @@ public class BlogManageController extends HttpServlet {
                             blog.setImagePath(imageUrl);
                             blog.setIdBlogCat(idBlogCat);
                             blog.setUserId(userId);
-                            
-                            if(dao.insertBlog(blog)) {
+
+                            if (dao.insertBlog(blog)) {
                                 request.getSession().setAttribute("successMessage", "Thêm bài viết mới thành công!");
                             } else {
                                 request.getSession().setAttribute("errorMessage", "Thêm bài viết thất bại!");
@@ -124,7 +167,7 @@ public class BlogManageController extends HttpServlet {
                         request.getRequestDispatcher("/admin/addBlog.jsp").forward(request, response);
                     }
                     break;
-                    
+
                 case "updateBlog":
                     if ("POST".equals(request.getMethod())) {
                         try {
@@ -134,22 +177,38 @@ public class BlogManageController extends HttpServlet {
                             String description = request.getParameter("description");
                             String content = request.getParameter("content");
                             int idBlogCat = Integer.parseInt(request.getParameter("idBlogCat"));
-                                
-                                BlogPost blog = dao.getBlogById(blogId);
-                                if (blog != null) {
-                                    Part filePart = request.getPart("image");
-                                    if (filePart != null && filePart.getSize() > 0) {
-                                        String newImageUrl = CloudinaryUtil.upload(filePart);
-                                        if (newImageUrl != null) blog.setImagePath(newImageUrl);
+
+                            BlogPost blog = dao.getBlogById(blogId);
+                            if (blog != null) {
+                                Part filePart = request.getPart("image");
+                                if (filePart != null && filePart.getSize() > 0) {
+                                    // SERVER-SIDE VALIDATION: Kích thước ảnh mới
+                                    try (InputStream is = filePart.getInputStream()) {
+                                        BufferedImage bi = ImageIO.read(is);
+                                        if (bi != null) {
+                                            int width = bi.getWidth();
+                                            int height = bi.getHeight();
+                                            if (width < 800 || height < 400) {
+                                                request.getSession().setAttribute("errorMessage", "Ảnh mới không đạt chuẩn (" + width + "x" + height + "px). Yêu cầu tối thiểu 800x400px.");
+                                                response.sendRedirect(request.getContextPath() + "/admin/blog?service=updateBlog&blogId=" + blogId);
+                                                return;
+                                            }
+                                        }
                                     }
                                     
-                                    blog.setTitle(title);
-                                    blog.setSubTitle(subTitle);
-                                    blog.setDescription(description);
-                                    blog.setContent(content);
-                                    blog.setIdBlogCat(idBlogCat);
-                                
-                                if(dao.updateBlog(blog)) {
+                                    String newImageUrl = CloudinaryUtil.upload(filePart);
+                                    if (newImageUrl != null) {
+                                        blog.setImagePath(newImageUrl);
+                                    }
+                                }
+
+                                blog.setTitle(title);
+                                blog.setSubTitle(subTitle);
+                                blog.setDescription(description);
+                                blog.setContent(content);
+                                blog.setIdBlogCat(idBlogCat);
+
+                                if (dao.updateBlog(blog)) {
                                     request.getSession().setAttribute("successMessage", "Cập nhật bài viết thành công!");
                                 } else {
                                     request.getSession().setAttribute("errorMessage", "Cập nhật thất bại!");
@@ -171,69 +230,87 @@ public class BlogManageController extends HttpServlet {
                         }
                     }
                     break;
-                    
+
                 case "deleteBlog":
                     try {
-                        int blogId = Integer.parseInt(request.getParameter("blogId"));
-                        dao.deleteBlog(blogId);
-                    } catch (Exception e) {}
-                    response.sendRedirect(request.getContextPath() + "/admin/blog");
-                    break;
-                    
+                    int blogId = Integer.parseInt(request.getParameter("blogId"));
+                    dao.deleteBlog(blogId);
+                } catch (Exception e) {
+                }
+                response.sendRedirect(request.getContextPath() + "/admin/blog");
+                break;
+
                 case "addCategory":
                     String newCatName = request.getParameter("name");
                     if (newCatName != null && !newCatName.trim().isEmpty()) {
-                        if (dao.insertBlogCategory(newCatName.trim())) {
+                        String name = newCatName.trim();
+                        if (name.length() < 2 || name.length() > 50) {
+                            response.getWriter().write("invalid_length");
+                            return;
+                        }
+                        if (dao.checkBlogCategoryExist(name)) {
+                            response.getWriter().write("duplicate");
+                        } else if (dao.insertBlogCategory(name)) {
                             response.getWriter().write("success");
                         } else {
                             response.getWriter().write("fail");
                         }
-                    }
-                    return;
-                    
-                case "deleteCategory":
-                    try {
-                        int catId = Integer.parseInt(request.getParameter("id"));
-                        if (dao.deleteBlogCategory(catId)) {
-                            response.getWriter().write("success");
-                        } else {
-                            response.getWriter().write("fail");
-                        }
-                    } catch (Exception e) {
-                        response.getWriter().write("error");
                     }
                     return;
 
+                case "deleteCategory":
+                    try {
+                    int catId = Integer.parseInt(request.getParameter("id"));
+                    if (dao.deleteBlogCategory(catId)) {
+                        response.getWriter().write("success");
+                    } else {
+                        response.getWriter().write("fail");
+                    }
+                } catch (Exception e) {
+                    response.getWriter().write("error");
+                }
+                return;
+
                 case "updateCategory":
                     try {
-                        int catId = Integer.parseInt(request.getParameter("id"));
-                        String catName = request.getParameter("name");
-                        if (catName != null && !catName.trim().isEmpty()) {
-                            if (dao.updateBlogCategory(catId, catName.trim())) {
-                                response.getWriter().write("success");
-                            } else {
-                                response.getWriter().write("fail");
-                            }
+                    int catId = Integer.parseInt(request.getParameter("id"));
+                    String catName = request.getParameter("name");
+                    if (catName != null && !catName.trim().isEmpty()) {
+                        if (dao.updateBlogCategory(catId, catName.trim())) {
+                            response.getWriter().write("success");
+                        } else {
+                            response.getWriter().write("fail");
                         }
-                    } catch (Exception e) {
-                        response.getWriter().write("error");
                     }
-                    return;
-                    
+                } catch (Exception e) {
+                    response.getWriter().write("error");
+                }
+                return;
+
                 case "listCategories":
                     List<BlogCategory> cats = dao.getAllBlogCategories();
                     StringBuilder json = new StringBuilder("[");
                     for (int i = 0; i < cats.size(); i++) {
                         BlogCategory c = cats.get(i);
                         json.append("{\"id\":").append(c.getIdBlogCat())
-                            .append(",\"name\":\"").append(c.getCategoryName().replace("\"", "\\\"")).append("\"}");
-                        if (i < cats.size() - 1) json.append(",");
+                                .append(",\"name\":\"").append(c.getCategoryName().replace("\"", "\\\"")).append("\"}");
+                        if (i < cats.size() - 1) {
+                            json.append(",");
+                        }
                     }
                     json.append("]");
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write(json.toString());
                     return;
-                    
+
+                case "toggleStatus": 
+                    try {
+                    int blogID = Integer.parseInt(request.getParameter("blogId"));
+                    String newStatus = request.getParameter("newStatus");
+                    dao.updateStatus(blogID, newStatus);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 default:
                     response.sendRedirect(request.getContextPath() + "/admin/blog");
                     break;

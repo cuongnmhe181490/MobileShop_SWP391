@@ -21,6 +21,7 @@ public class TradeInControl extends HttpServlet {
             throws ServletException, IOException {
         prepareBaseRequest(request);
         request.getRequestDispatcher("tradein.jsp").forward(request, response);
+
     }
 
     @Override
@@ -43,7 +44,9 @@ public class TradeInControl extends HttpServlet {
         // Save to session so the value "jumps" to other pages
         request.getSession().setAttribute("tradeInQuote", quote);
         
-        request.getRequestDispatcher("tradein.jsp").forward(request, response);
+
+        request.getRequestDispatcher("/tradein.jsp").forward(request, response);
+
     }
 
     private void prepareBaseRequest(HttpServletRequest request) {
@@ -51,11 +54,30 @@ public class TradeInControl extends HttpServlet {
         List<String> dynamicBrands = dao.getActiveSuppliers();
         request.setAttribute("brands", dynamicBrands);
         request.setAttribute("conditionLabels", TradeInSupport.getConditionLabels());
+
+
+        // Also fetch models for the current selected brand if any
+        String selectedBrand = (String) request.getAttribute("selectedBrand");
+        if (selectedBrand == null) {
+             selectedBrand = request.getParameter("brand");
+        }
+        if (selectedBrand == null && !dynamicBrands.isEmpty()) {
+            selectedBrand = dynamicBrands.get(0);
+        }
+        
+        if (selectedBrand != null) {
+            List<ProductModel> products = dao.getProductsByBrand(selectedBrand);
+            List<String> models = products.stream()
+                    .map(ProductModel::getProductName)
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList());
+            request.setAttribute("models", models);
+            request.setAttribute("selectedBrand", selectedBrand);
+        }
+
     }
 
     private String trim(String value) {
         return value == null ? "" : value.trim();
     }
 }
-
-
