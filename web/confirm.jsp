@@ -107,7 +107,10 @@
                     <div class="order-receipt">
                         <div class="order-receipt-row">
                             <span>Mã đơn hàng</span>
-                            <strong>#ORD-<fmt:formatNumber pattern="000" value="${param.orderId != null ? param.orderId : 0}" /></strong>
+
+                            <strong>#ORD-${sessionScope.lastOrderId}</strong>
+                            
+
                         </div>
                         <div class="order-receipt-row">
                             <span>Ngày đặt hàng</span>
@@ -117,7 +120,7 @@
                     
                     <div class="success-actions">
                         <a href="${ctx}/product" class="pill-link pill-link--primary" style="min-height: 56px; padding: 0 40px; display: flex; align-items: center;">Tiếp tục mua hàng</a>
-                        <a href="${ctx}/review/mine" class="pill-link pill-link--secondary" style="min-height: 56px; padding: 0 40px; display: flex; align-items: center;">Xem lịch sử mua</a>
+                        <a href="${ctx}/my-orders" class="pill-link pill-link--secondary" style="min-height: 56px; padding: 0 40px; display: flex; align-items: center;">Xem lịch sử mua</a>
                     </div>
                 </div>
             </div>

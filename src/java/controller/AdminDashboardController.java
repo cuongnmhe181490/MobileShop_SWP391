@@ -20,38 +20,71 @@ public class AdminDashboardController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         
         DAO dao = new DAO();
-        UserDAO userDAO = new UserDAO();
-        BlogDAO blogDAO = new BlogDAO();
         
-        int totalProducts = dao.getTotalProducts();
-        int totalUsers = userDAO.getTotalUsers();
-        int totalBlogs = blogDAO.getTotalBlogs();
-        int pendingOrders = dao.getPendingOrdersCount();
-        String monthlyRevenue = dao.getMonthlyRevenue();
+        // 1. Lấy tham số ngày từ Request
+        String startDateStr = request.getParameter("startDate");
+        String endDateStr = request.getParameter("endDate");
+        java.sql.Date sDate, eDate;
+
+        if (startDateStr == null || startDateStr.isEmpty()) {
+            sDate = new java.sql.Date(System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000));
+            eDate = new java.sql.Date(System.currentTimeMillis());
+        } else {
+            try {
+                sDate = java.sql.Date.valueOf(startDateStr);
+                eDate = java.sql.Date.valueOf(endDateStr);
+            } catch (Exception e) {
+                sDate = new java.sql.Date(System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000));
+                eDate = new java.sql.Date(System.currentTimeMillis());
+            }
+        }
+
+        long diffDays = Math.abs(eDate.getTime() - sDate.getTime()) / (1000 * 60 * 60 * 24);
+
+        dao.order.OrderDAO orderDAO = new dao.order.OrderDAO();
+        dao.product.ProductAdminDAO productDAO = new dao.product.ProductAdminDAO();
         
-        List<Map<String, String>> recentOrders = dao.getRecentOrders(5);
-        List<Map<String, String>> bestSellers = dao.getBestSellers(5);
+
+
+        try {
+            // 3. Các thống kê và chỉ số theo khoảng ngày đã chọn
+            request.setAttribute("totalProducts", dao.getNewProductsCount(sDate, eDate));
+            request.setAttribute("totalUsers", dao.getNewUsersCount(sDate, eDate));
+            request.setAttribute("soldOrders", orderDAO.getSoldOrdersCount(sDate, eDate));
+            request.setAttribute("monthlyRevenue", orderDAO.getRevenueByDate(sDate, eDate));
+            
+            // Các dữ liệu khác có thể vẫn giữ nguyên hoặc lọc thêm nếu cần
+            request.setAttribute("totalBlogs", dao.getTotalBlogs());
+            request.setAttribute("recentOrders", orderDAO.getRecentOrdersDashboard(5));
+            request.setAttribute("bestSellers", dao.getBestSellers(5, sDate, eDate));
+            request.setAttribute("monthlyRevenueData", orderDAO.getMonthlyRevenueData());
+            request.setAttribute("orderStats", orderDAO.getOrderStatusStatistics());
+            
+            // Thống kê phụ
+            request.setAttribute("newProductsMonth", dao.getNewProductsCount(sDate, eDate));
+            request.setAttribute("newUsersMonth", dao.getNewUsersCount(sDate, eDate));
+            request.setAttribute("newOrdersMonth", orderDAO.getNewOrdersCount(sDate, eDate));
+        } catch (Exception e) {
+            System.err.println("CRITICAL ERROR IN AdminDashboardController:");
+            e.printStackTrace();
+            // Cung cấp các giá trị mặc định để tránh lỗi JSP
+            request.setAttribute("errorMessage", e.getMessage());
+            request.setAttribute("totalProducts", 0);
+            request.setAttribute("totalUsers", 0);
+            request.setAttribute("totalBlogs", 0);
+            request.setAttribute("soldOrders", 0);
+            request.setAttribute("monthlyRevenue", "0");
+            request.setAttribute("revenueGrowth", 0.0);
+            request.setAttribute("recentOrders", new java.util.ArrayList<>());
+            request.setAttribute("bestSellers", new java.util.ArrayList<>());
+            request.setAttribute("monthlyRevenueData", new java.util.LinkedHashMap<>());
+            request.setAttribute("orderStats", new java.util.HashMap<>());
+        }
         
-        request.setAttribute("totalProducts", totalProducts);
-        request.setAttribute("totalUsers", totalUsers);
-        request.setAttribute("totalBlogs", totalBlogs);
-        request.setAttribute("pendingOrders", pendingOrders);
-        request.setAttribute("monthlyRevenue", monthlyRevenue);
-        request.setAttribute("recentOrders", recentOrders);
-        request.setAttribute("bestSellers", bestSellers);
-        request.setAttribute("newProductsMonth", dao.getNewProductsThisMonthCount());
-        request.setAttribute("newUsersMonth", dao.getNewUsersThisMonthCount());
-        request.setAttribute("newOrdersMonth", dao.getNewOrdersThisMonthCount());
-        request.setAttribute("revenueGrowth", dao.getRevenueGrowth());
-        
-        // Pass order status statistics as JSON-like structure for Chart.js
-        Map<String, Integer> orderStats = dao.getOrderStatusStatistics();
-        request.setAttribute("orderStats", orderStats);
-        
-        // Add current date for dashboard
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
-        request.setAttribute("currentDate", sdf.format(new java.util.Date()));
-        
+        request.setAttribute("startDate", sDate);
+        request.setAttribute("endDate", eDate);
+        request.setAttribute("diffDays", diffDays);
+
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
 

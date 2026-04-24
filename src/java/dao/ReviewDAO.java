@@ -10,6 +10,31 @@ import java.util.*;
 public class ReviewDAO {
 
     // ─────────────────────────────────────────────
+    // Helper: Map toàn bộ dữ liệu từ bảng GeneralReview
+    // ─────────────────────────────────────────────
+    private Review mapRow(ResultSet rs) throws SQLException {
+        Review r = new Review();
+        r.setReviewId(rs.getInt("ReviewId"));
+        r.setReviewType(rs.getString("ReviewType"));
+        r.setIdProduct(rs.getString("IdProduct"));
+        r.setUserId(rs.getInt("UserId"));
+        r.setReviewDate(rs.getTimestamp("ReviewDate"));
+        r.setReviewContent(rs.getString("ReviewContent"));
+        r.setReviewTopic(rs.getString("ReviewTopic"));
+        r.setRanking(rs.getInt("Ranking"));
+        r.setStatus(rs.getString("Status"));
+        r.setReplyContent(rs.getString("ReplyContent"));
+        r.setReplyDate(rs.getTimestamp("ReplyDate"));
+        
+        // Thử lấy các trường từ JOIN (nếu có trong ResultSet)
+        try { r.setReviewerName(rs.getString("FullName")); } catch (SQLException e) {}
+        try { r.setProductName(rs.getString("ProductName")); } catch (SQLException e) {}
+        try { r.setProductImage(rs.getString("ImagePath")); } catch (SQLException e) {}
+        
+        return r;
+    }
+
+    // ─────────────────────────────────────────────
     // MÀN 1: Chi tiết & Lọc sao (Product Reviews)
     // ─────────────────────────────────────────────
 
@@ -18,8 +43,7 @@ public class ReviewDAO {
                                              int page, int pageSize) throws Exception {
         List<Review> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-            "SELECT r.ReviewId, r.UserId, r.ReviewDate, r.ReviewContent, r.ReviewTopic, " +
-            "       r.Ranking, r.ReplyContent, r.ReplyDate, u.FullName " +
+            "SELECT r.*, u.FullName " +
             "FROM GeneralReview r " +
             "JOIN [User] u ON r.UserId = u.UserId " +
             "WHERE r.IdProduct = ? AND r.[Status] = 'VISIBLE' AND r.ReviewType = 'PRODUCT' AND (r.ReviewTopic IS NULL OR r.ReviewTopic != 'Q&A') "
@@ -38,10 +62,7 @@ public class ReviewDAO {
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Review r = mapRow(rs);
-                r.setIdProduct(idProduct);
-                r.setReviewType("PRODUCT");
-                list.add(r);
+                list.add(mapRow(rs));
             }
         }
         return list;
@@ -187,9 +208,7 @@ public class ReviewDAO {
     // MÀN 2: Viết review mới (Product & Service)
     // ─────────────────────────────────────────────
 
-    /** Kiểm tra user đã review sản phẩm này chưa (nếu pid != null) 
-     *  Hoặc đã review dịch vụ chưa (nếu pid == null) 
-     */
+    /** Kiểm tra user đã review sản phẩm này chưa */
     public boolean hasReviewed(int userId, String idProduct, String type) throws Exception {
         String sql;
         if ("PRODUCT".equals(type)) {
@@ -227,7 +246,7 @@ public class ReviewDAO {
         try (Connection cn = new DBContext().getConnection();
              PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, r.getReviewType());
-            ps.setString(2, r.getIdProduct()); // Might be null for service
+            ps.setString(2, r.getIdProduct());
             ps.setInt(3,    r.getUserId());
             ps.setString(4, r.getReviewContent());
             ps.setString(5, r.getReviewTopic());
@@ -267,14 +286,7 @@ public class ReviewDAO {
             ps.setInt(1, reviewId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Review r = mapRow(rs);
-                r.setIdProduct(rs.getString("IdProduct"));
-                r.setReviewType(rs.getString("ReviewType"));
-                r.setReviewTopic(rs.getString("ReviewTopic"));
-                r.setStatus(rs.getString("Status"));
-                r.setReplyContent(rs.getString("ReplyContent"));
-                r.setReplyDate(rs.getTimestamp("ReplyDate"));
-                return r;
+                return mapRow(rs);
             }
             return null;
         }
@@ -331,10 +343,7 @@ public class ReviewDAO {
     public List<Review> adminGetAll(String statusFilter, String typeFilter, Integer starFilter, int page, int pageSize) throws Exception {
         List<Review> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-            "SELECT r.ReviewId, r.ReviewType, r.IdProduct, r.UserId, r.ReviewDate, " +
-            "       r.ReviewContent, r.ReviewTopic, r.Ranking, r.[Status], " +
-            "       r.ReplyContent, r.ReplyDate, " +
-            "       u.FullName, pd.ProductName " +
+            "SELECT r.*, u.FullName, pd.ProductName " +
             "FROM GeneralReview r " +
             "JOIN [User] u ON r.UserId = u.UserId " +
             "LEFT JOIN ProductDetail pd ON r.IdProduct = pd.IdProduct " +
@@ -420,7 +429,7 @@ public class ReviewDAO {
         }
     }
 
-    /** Admin: đổi trạng thái VISIBLE ↔ HIDDEN */
+    /** Admin: đổi trạng thái VISIBLE \u2194 HIDDEN */
     public void updateStatus(int reviewId, String status) throws Exception {
         String sql = "UPDATE GeneralReview SET [Status] = ? WHERE ReviewId = ?";
         try (Connection cn = new DBContext().getConnection();
@@ -501,19 +510,5 @@ public class ReviewDAO {
             }
         }
         return map;
-    }
-
-    // ─────────────────────────────────────────────
-    // Helper
-    // ─────────────────────────────────────────────
-    private Review mapRow(ResultSet rs) throws SQLException {
-        Review r = new Review();
-        r.setReviewId(rs.getInt("ReviewId"));
-        r.setUserId(rs.getInt("UserId"));
-        r.setReviewDate(rs.getTimestamp("ReviewDate"));
-        r.setReviewContent(rs.getString("ReviewContent"));
-        r.setRanking(rs.getInt("Ranking"));
-        r.setReviewerName(rs.getString("FullName"));
-        return r;
     }
 }

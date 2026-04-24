@@ -13,11 +13,12 @@ public class BlogPost {
     private int idBlogCat;      // Mã danh mục mới (FK to BlogCategory)
     private String categoryName; // Tên danh mục (để hiển thị)
     private Date createdDate;
+    private String status;
 
     public BlogPost() {
     }
 
-    public BlogPost(int blogId, int userId, String title, String subTitle, String description, String content, String imagePath, int idBlogCat, Date createdDate) {
+    public BlogPost(int blogId, int userId, String title, String subTitle, String description, String content, String imagePath, int idBlogCat, Date createdDate,String status) {
         this.blogId = blogId;
         this.userId = userId;
         this.title = title;
@@ -27,6 +28,7 @@ public class BlogPost {
         this.imagePath = imagePath;
         this.idBlogCat = idBlogCat;
         this.createdDate = createdDate;
+        this.status = status;
     }
 
     public int getBlogId() { return blogId; }
@@ -58,4 +60,13 @@ public class BlogPost {
 
     public Date getCreatedDate() { return createdDate; }
     public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
 }

@@ -1,9 +1,11 @@
 package util;
 
 import dao.DAO;
+import dao.order.UserCartDAO;
 import entity.CartItem;
 
 import entity.ProductModel;
+import entity.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -42,7 +44,7 @@ public final class CartSupport {
         if (product == null) {
             return 0;
         }
-        return Math.max(0, product.getQuantity() - getReservedQuantity(session, product.getIdProduct()));
+        return Math.max(0, product.getQuantity());
     }
 
     public static Map<String, Integer> buildDisplayStockMap(HttpSession session, List<? extends ProductModel> products) {
@@ -59,6 +61,13 @@ public final class CartSupport {
     }
 
     public static List<CartItem> buildCartItems(HttpSession session, DAO dao) {
+        Integer userId = getLoggedInUserId(session);
+        if (userId != null) {
+            List<CartItem> dbItems = new UserCartDAO().getCartItems(userId);
+            syncCartSize(session);
+            return dbItems;
+        }
+
         Map<String, Integer> cart = getCart(session);
         List<CartItem> items = new ArrayList<>();
         List<String> invalidKeys = new ArrayList<>();
@@ -99,7 +108,11 @@ public final class CartSupport {
     }
 
     public static void syncCartSize(HttpSession session) {
-        session.setAttribute(CART_SIZE_SESSION_KEY, getTotalQuantity(getCart(session)));
+        Integer userId = getLoggedInUserId(session);
+        int total = userId == null
+                ? getTotalQuantity(getCart(session))
+                : new UserCartDAO().countCartQuantity(userId);
+        session.setAttribute(CART_SIZE_SESSION_KEY, total);
     }
 
     public static void setSuccess(HttpSession session, String message) {
@@ -110,5 +123,16 @@ public final class CartSupport {
     public static void setError(HttpSession session, String message) {
         session.setAttribute(CART_ERROR_SESSION_KEY, message);
         session.removeAttribute(CART_MESSAGE_SESSION_KEY);
+    }
+
+    public static Integer getLoggedInUserId(HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+        Object acc = session.getAttribute("acc");
+        if (acc instanceof User) {
+            return ((User) acc).getId();
+        }
+        return null;
     }
 }

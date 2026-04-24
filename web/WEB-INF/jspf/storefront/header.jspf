@@ -17,7 +17,7 @@
         <nav class="store-nav" aria-label="Điều hướng chính">
             <a class="store-nav__link ${activePage == 'home' ? 'is-active' : ''}" href="${ctx}/home">Trang chủ</a>
             <a class="store-nav__link ${activePage == 'catalog' ? 'is-active' : ''}" href="${ctx}/product">Cửa hàng</a>
-            <a class="store-nav__link ${activePage == 'tradein' ? 'is-active' : ''}" href="${ctx}/tradein">Thu cũ</a>
+            <a class="store-nav__link ${activePage == 'tradein' ? 'is-active' : ''}" href="${ctx}/tradein">Định giá</a>
             <a class="store-nav__link ${activePage == 'blog' ? 'is-active' : ''}" href="${ctx}/blog">Cẩm nang</a>
             <a class="store-nav__link ${activePage == 'contact' ? 'is-active' : ''}" href="${ctx}/contact">Liên hệ</a>
         </nav>

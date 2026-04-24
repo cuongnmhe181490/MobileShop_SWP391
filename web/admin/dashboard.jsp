@@ -1,10 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="java.util.*" %>
-<%
-    // Dữ liệu động được cung cấp bởi AdminDashboardController
-    // Bao gồm: totalProducts, totalUsers, totalBlogs, pendingOrders, monthlyRevenue, recentOrders, bestSellers
-%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -14,6 +11,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-body: #f4f7fe;
@@ -31,98 +29,117 @@
             --sidebar-active: #aff22f;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); overflow-x: hidden; }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
-
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* ===== SIDEBAR – Version Gold ===== */
-        .sidebar {
-            width: 260px;
-            background: #1e293b;
-            padding: 24px 0;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0; left: 0;
-            height: 100vh;
-            z-index: 100;
-            color: white;
-            overflow-y: auto;
-        }
-        .sidebar .brand {
-            padding: 0 24px;
-            margin-bottom: 40px;
-            text-decoration: none;
-            color: white;
-            display: block;
-        }
-        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        .dashboard-container { display: flex; min-height: 100vh; }
         
-        .nav-section { margin-bottom: 32px; }
-        .nav-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #64748b;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            display: block;
-            padding: 0 24px;
-        }
-        
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .menu-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 24px;
-            color: #94a3b8;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            border-left: 4px solid transparent;
+        /* Layout Alignment */
+        .main-content { 
+            flex: 1; 
+            margin-left: 260px; /* Chừa chỗ cho sidebar fixed */
+            padding: 40px; 
             transition: 0.3s;
         }
-        .menu-link i { width: 20px; text-align: center; }
-        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
-        .menu-link.active {
-            background: rgba(175, 242, 47, 0.1);
-            color: #aff22f;
-            border-left-color: #aff22f;
-            font-weight: 600;
-        }
-        /* ===== END SIDEBAR ===== */
 
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: 260px;
-            padding: 40px;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .welcome h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+        
+        .user-profile { display: flex; align-items: center; gap: 12px; background: white; padding: 6px 16px; border-radius: 50px; box-shadow: var(--shadow); }
+        .avatar { width: 35px; height: 35px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
 
-        .header {
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .stat-card { background: var(--bg-card); padding: 24px; border-radius: 20px; box-shadow: var(--shadow); transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text-main); }
+
+        /* Content Grid */
+        .content-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
+        .card { background: var(--bg-card); border-radius: 20px; padding: 24px; box-shadow: var(--shadow); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .card-header h3 { font-size: 1.1rem; font-weight: 700; }
+        .view-all { color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 700; }
+
+        .order-list, .product-list { display: flex; flex-direction: column; gap: 16px; }
+        .order-item, .product-item { display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; transition: 0.2s; }
+        .order-item:hover, .product-item:hover { background: #f8fafc; }
+        
+        .item-icon, .product-img { width: 48px; height: 48px; background: #f4f7fe; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--primary); }
+        .item-info { flex: 1; }
+        .item-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+        .item-meta { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .status-success { background: #e6f9f4; color: var(--success); }
+        .status-warning { background: #fff8e6; color: var(--warning); }
+        .status-danger { background: #feebeb; color: var(--danger); }
+
+        /* Table Premium Styling */
+        .dashboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            margin-top: -12px;
+        }
+        .dashboard-table th {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 10px 15px;
+            text-align: left;
+        }
+        .dashboard-table td {
+            padding: 15px;
+            background: #f8fafc;
+            vertical-align: middle;
+        }
+        .dashboard-table tr td:first-child { border-radius: 12px 0 0 12px; }
+        .dashboard-table tr td:last-child { border-radius: 0 12px 12px 0; }
+
+        /* Ranking Circles */
+        .rank-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: white;
+        }
+        .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .rank-2 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .rank-3 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .rank-default { background: #64748b; }
+
+        /* Mini Progress Bar under product name */
+        .product-progress {
+            height: 3px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin-top: 6px;
+            width: 60px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #8b5cf6);
         }
 
-        .welcome h1 { font-size: 1.5rem; color: var(--text-main); font-weight: 700; margin-bottom: 4px; }
-        .welcome p { color: var(--text-muted); font-size: 0.9rem; }
+        /* Status Badges */
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .status-success-badge { background: #dcfce7; color: #166534; }
+        .status-pending-badge { background: #fef3c7; color: #92400e; }
+        .status-canceled-badge { background: #fee2e2; color: #991b1b; }
 
         .header-actions {
             display: flex;
@@ -130,320 +147,139 @@
             gap: 20px;
         }
 
-        .notification {
-            position: relative;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-        }
-
-        .notification .n-dot {
-            position: absolute;
-            top: 10px;
-            right: 12px;
-            width: 8px;
-            height: 8px;
-            background: var(--danger);
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-
-        .user-profile {
+        /* Tùy chỉnh bộ chọn thời gian */
+        .header-filter {
             display: flex;
             align-items: center;
             gap: 12px;
             background: white;
-            padding: 4px 12px 4px 4px;
-            border-radius: 30px;
+            padding: 6px 12px;
+            border-radius: 16px;
             box-shadow: var(--shadow);
+            margin-right: 15px;
         }
 
-        .avatar {
-            width: 36px;
-            height: 36px;
-            background: var(--primary-light);
-            border-radius: 50%;
+        .date-input-group {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            padding: 24px;
-            border-radius: 20px;
-            border: 1px solid transparent;
-            box-shadow: var(--shadow);
-            transition: 0.3s;
-        }
-
-        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary-light); }
-
-        .stat-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
-        
-        .stat-trend { font-size: 0.8rem; display: flex; align-items: center; gap: 4px; font-weight: 700; }
-        .trend-up { color: var(--success); }
-        .trend-down { color: var(--danger); }
-        .trend-neutral { color: var(--warning); }
-
-        .progress-container {
-            width: 100%;
-            height: 6px;
+            gap: 8px;
             background: #f4f7fe;
+            padding: 5px 12px;
             border-radius: 10px;
-            margin-top: 16px;
-            overflow: hidden;
+            border: 1px solid var(--border);
         }
 
-        .progress-bar { height: 100%; border-radius: 10px; }
-
-        /* Tables Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1.6fr 1fr;
-            gap: 24px;
+        .date-input-group input {
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
         }
 
-        .card {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .card-header h3 { font-size: 1.1rem; color: var(--text-main); font-weight: 700; }
-        .view-all { color: var(--primary); text-decoration: none; font-size: 0.85rem; font-weight: 700; }
-
-        /* Order List */
-        .order-item {
-            display: flex;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #f4f7fe;
-        }
-
-        .order-item:last-child { border-bottom: none; }
-
-        .item-icon {
-            width: 44px;
-            height: 44px;
-            background: var(--bg-body);
+        .btn-refresh-dash {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 8px 16px;
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 16px;
-        }
-
-        .item-icon i { color: var(--primary); }
-
-        .item-info { flex: 1; }
-        .item-name { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 4px; }
-        .item-meta { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
-
-        .item-value { text-align: right; }
-        .item-price { font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
-        
-        .status-pill {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             font-weight: 700;
-        }
-
-        .status-success { background: #e6f9f4; color: var(--success); }
-        .status-warning { background: #fff8e6; color: var(--warning); }
-        .status-danger { background: #feebeb; color: var(--danger); }
-
-        /* Product List */
-        .product-item {
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 20px;
+            gap: 6px;
+            transition: 0.2s;
         }
 
-        .product-img {
-            width: 48px;
-            height: 48px;
-            background: var(--bg-body);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .btn-refresh-dash:hover { opacity: 0.9; transform: scale(1.02); }
+        
+        .time-summary {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 500;
         }
 
-        .product-img i { color: var(--primary); font-size: 1.2rem; }
+        /* White Chart Card (Reverted from dark) */
+        .card-light-chart {
+            background: white;
+            color: var(--text-main);
+        }
+        .card-light-chart h3 {
+            color: var(--text-main);
+        }
 
-        .product-info h4 { font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
-        .product-info p { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .content-grid { grid-template-columns: 1fr; }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
-
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
-                <h2>MobileShop</h2>
-                <p>Quản trị hệ thống</p>
-            </a>
-
-            <!-- 1. TỔNG QUAN -->
-            <div class="nav-section">
-                <span class="nav-label">TỔNG QUAN</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link active">
-                            <i class="fa-solid fa-chart-line"></i>Dashboard
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 2. QUẢN LÝ BÁN HÀNG -->
-            <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
-                            <i class="fa-solid fa-receipt"></i>Đơn hàng
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="fa-solid fa-user-gear"></i>Tài khoản
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
-            <div class="nav-section">
-                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
-                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
-                            <i class="fa-solid fa-star"></i>Đánh giá
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
-                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 4. CẤU HÌNH GIAO DIỆN -->
-            <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
-                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 5. HỆ THỐNG -->
-            <div style="margin-top: auto; padding-bottom: 24px;">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
-                            <i class="fa-solid fa-globe"></i>Xem Website
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
-                            <i class="fa-solid fa-power-off"></i>Đăng xuất
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
+        <%@ include file="/WEB-INF/jspf/admin/sidebar.jspf" %>
         <main class="main-content">
             <header class="header">
                 <div class="welcome">
                     <p style="text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Tổng quan hệ thống</p>
-                    <h1>Chào mừng quay trở lại, ${sessionScope.acc != null ? sessionScope.acc.name : "Thân Hải Phúc"} &bull; Hôm nay: ${currentDate}</h1>
+                    <h1>Chào mừng quay trở lại, ${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</h1>
+                    <p class="time-summary">
+                        Từ <fmt:formatDate value="${startDate}" pattern="dd/MM/yyyy"/> 
+                        → <fmt:formatDate value="${endDate}" pattern="dd/MM/yyyy"/> 
+                        (${diffDays} ngày)
+                    </p>
                 </div>
                 <div class="header-actions">
-                    <div class="notification"><i class="fa-regular fa-bell"></i></div>
+
+
+                    <!-- Form lọc thời gian mới -->
+                    <form action="${pageContext.request.contextPath}/admin/dashboard" method="GET" style="display: flex; align-items: center;">
+                        <div class="header-filter">
+                            <div class="date-input-group">
+                                <input type="date" name="startDate" value="${startDate}">
+                                <span style="color: var(--text-muted);">→</span>
+                                <input type="date" name="endDate" value="${endDate}">
+                            </div>
+                            <button type="submit" class="btn-refresh-dash">
+                                <i class="fa-solid fa-arrows-rotate"></i> Làm mới
+                            </button>
+                        </div>
+                    </form>
+
                     <div class="user-profile">
-                        <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
-                        <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>
+                        <c:set var="adminName" value="${sessionScope.acc != null ? sessionScope.acc.name : 'Admin'}" />
+                        <div class="avatar">
+                            <c:choose>
+                                <c:when test="${not empty adminName}">
+                                    ${adminName.substring(0,1).toUpperCase()}
+                                </c:when>
+                                <c:otherwise>A</c:otherwise>
+                            </c:choose>
+                        </div>
+                        <span style="font-weight: 600;">${adminName}</span>
                     </div>
                 </div>
             </header>
 
-            <div style="margin-bottom: 24px;">
-                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">THỐNG KÊ TỔNG QUAN</h3>
-            </div>
+
 
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">Tổng sản phẩm</div>
+                    <div class="stat-label">Sản phẩm ra mắt</div>
                     <div class="stat-value">${totalProducts}</div>
                 </div>
-
                 <div class="stat-card">
                     <div class="stat-label">Tổng người dùng</div>
                     <div class="stat-value">${totalUsers}</div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-label">Đơn hàng chờ</div>
-                    <div class="stat-value">${pendingOrders}</div>
+                    <div class="stat-label">Đơn hàng đã bán</div>
+                    <div class="stat-value">${soldOrders}</div>
                 </div>
-
                 <div class="stat-card">
                     <div class="stat-label">Doanh thu tháng</div>
                     <div class="stat-value">${monthlyRevenue}</div>
@@ -451,70 +287,239 @@
             </div>
 
             <div class="content-grid">
-                <!-- Recent Orders -->
+                <!-- Bảng 1: Top 5 Bán chạy -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Đơn hàng gần đây</h3>
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="view-all">Xem tất cả <i class="fa-solid fa-arrow-right"></i></a>
+                        <h3><i class="fa-solid fa-trophy" style="color: #f59e0b; margin-right: 8px;"></i> Top 5 sản phẩm bán chạy nhất</h3>
+
                     </div>
-                    <div class="order-list">
-                        <c:forEach items="${recentOrders}" var="order">
-                            <div class="order-item">
-                                <div class="item-icon">
-                                    <i class="fa-solid fa-box-open"></i>
-                                </div>
-                                <div class="item-info">
-                                    <div class="item-name">${order.name}</div>
-                                    <div class="item-meta">${order.time} &bull; ${order.id}</div>
-                                </div>
-                                <div class="item-value">
-                                    <div class="item-price">${order.price}</div>
-                                    <span class="status-pill 
-                                        ${order.status == 'Hoàn thành' ? 'status-success' : 
-                                          order.status == 'Đang giao' ? 'status-warning' : 'status-danger'}">
-                                        ${order.status}
-                                    </span>
-                                </div>
-                            </div>
-                        </c:forEach>
-                        <c:if test="${empty recentOrders}">
-                            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                <i class="fa-solid fa-receipt" style="font-size: 2rem; margin-bottom: 12px; display: block; opacity: 0.3;"></i>
-                                <p>Chưa có đơn hàng nào</p>
-                            </div>
-                        </c:if>
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Sản phẩm</th>
+                                <th>Đã bán</th>
+                                <th>Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${bestSellers}" var="p" varStatus="loop">
+                                <tr>
+                                    <td>
+                                        <div class="rank-circle rank-${loop.index < 3 ? loop.index + 1 : 'default'}">
+                                            ${loop.index + 1}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 700;">${p.name}</div>
+                                        <div class="product-progress"><div class="progress-bar-fill" style="width: ${100 - (loop.index * 15)}%;"></div></div>
+                                    </td>
+                                    <td style="font-weight: 700;">${p.sold != null ? p.sold : 0}</td>
+                                    <td style="color: var(--primary); font-weight: 700;">${p.revenue != null ? p.revenue : '₫0'}</td>
+                                </tr>
+                            </c:forEach>
+                            <c:if test="${empty bestSellers}">
+                                <tr><td colspan="4" style="text-align: center; padding: 30px; color: var(--text-muted);">Chưa có dữ liệu bán hàng</td></tr>
+                            </c:if>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bảng 2: Đơn hàng mới -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-bolt" style="color: #3b82f6; margin-right: 8px;"></i> Đơn hàng mới phát sinh</h3>
+
+                    </div>
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Mã ĐH</th>
+                                <th>Khách hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach items="${recentOrders}" var="o" end="4">
+                                <tr>
+                                    <td style="font-weight: 700; color: var(--primary);">${o.id}</td>
+                                    <td style="font-weight: 600;">${o.name}</td>
+                                    <td style="font-weight: 700;">${o.price}</td>
+                                    <td>
+                                        <span class="badge-status ${o.status == 'Đã hoàn thành' ? 'status-success-badge' : (o.status == 'Đang giao hàng' ? 'status-pending-badge' : 'status-canceled-badge')}">
+                                            ${o.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            <c:if test="${empty recentOrders}">
+                                <tr><td colspan="4" style="text-align: center; padding: 30px; color: var(--text-muted);">Chưa có đơn hàng nào</td></tr>
+                            </c:if>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hàng mới: Biểu đồ thống kê -->
+            <div class="content-grid" style="margin-top: 24px; grid-template-columns: 1.5fr 1fr;">
+                <!-- Biểu đồ Doanh thu theo tháng (Bar Chart) - WHITE THEME -->
+                <div class="card card-light-chart">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-chart-simple" style="color: var(--primary); margin-right: 8px;"></i> Doanh thu theo tháng</h3>
+                    </div>
+                    <div style="height: 300px; width: 100%;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted);">
+                        <span style="width: 12px; height: 12px; background: var(--primary); border-radius: 2px;"></span>
+                        Doanh thu (triệu đồng)
                     </div>
                 </div>
 
-                <!-- Best Sellers -->
+
+
+                <!-- Biểu đồ Trạng thái đơn hàng (Doughnut Chart) -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Sản phẩm bán chạy</h3>
-                        <i class="fa-solid fa-ellipsis-vertical" style="color: var(--text-muted); cursor: pointer;"></i>
+                        <h3><i class="fa-solid fa-chart-pie" style="color: var(--warning); margin-right: 8px;"></i> Trạng thái đơn hàng</h3>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Tổng quát</span>
                     </div>
-                    <div class="product-list">
-                        <c:forEach items="${bestSellers}" var="product">
-                            <div class="product-item">
-                                <div class="product-img">
-                                    <i class="fa-solid fa-laptop-code" style="color: var(--primary);"></i>
-                                </div>
-                                <div class="product-info">
-                                    <h4>${product.name}</h4>
-                                    <p>${product.brand} &bull; ${product.stock}</p>
-                                </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px;">
+                        <div style="width: 200px; height: 200px; margin-bottom: 20px;">
+                            <canvas id="orderStatusChart"></canvas>
+                        </div>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600;">
+                                <span style="width: 10px; height: 10px; border-radius: 2px; background: #05cd99;"></span>
+                                <span>Thành công</span>
                             </div>
-                        </c:forEach>
-                        <c:if test="${empty bestSellers}">
-                            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                <i class="fa-solid fa-box-archive" style="font-size: 2rem; margin-bottom: 12px; display: block; opacity: 0.3;"></i>
-                                <p>Chưa có dữ liệu bán hàng</p>
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600;">
+                                <span style="width: 10px; height: 10px; border-radius: 2px; background: #ee5d50;"></span>
+                                <span>Đã hủy</span>
                             </div>
-                        </c:if>
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600;">
+                                <span style="width: 10px; height: 10px; border-radius: 2px; background: #ffb81c;"></span>
+                                <span>Đang giao hàng</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <script>
+        // 1. Biểu đồ Doanh thu theo tháng (Bar Chart)
+        const revCtx = document.getElementById('revenueChart').getContext('2d');
+        
+        const revLabels = [
+            <c:forEach items="${monthlyRevenueData}" var="entry" varStatus="loop">
+                '${entry.key}'${!loop.last ? ',' : ''}
+            </c:forEach>
+        ];
+        const revData = [
+            <c:forEach items="${monthlyRevenueData}" var="entry" varStatus="loop">
+                ${(entry.value != null ? entry.value : 0) / 1000000.0}${!loop.last ? ',' : ''}
+            </c:forEach>
+        ];
+
+        new Chart(revCtx, {
+            type: 'bar',
+            data: {
+                labels: revLabels,
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: revData,
+                    backgroundColor: '#4318ff',
+                    hoverBackgroundColor: '#3311cc',
+                    borderRadius: 5,
+                    borderSkipped: false,
+                    barThickness: 25
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1b2559',
+                        titleColor: '#fff',
+                        footerColor: '#fff',
+                        bodyColor: '#fff',
+                        padding: 12,
+                        cornerRadius: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                let val = context.parsed.y * 1000000;
+                                return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+                            }
+                        }
+
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        suggestedMax: 1000,
+                        grid: { 
+                            color: '#f0f0f0',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            stepSize: 100,
+                            color: '#a3aed0',
+                            font: { size: 11, weight: '600' },
+                            callback: function(value) {
+                                if (value >= 1000) return (value / 1000).toFixed(0) + 'B';
+                                if (value === 0) return '0';
+                                return value + 'M';
+                            }
+                        }
+                    },
+
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#a3aed0',
+                            font: { size: 12, weight: '600' }
+                        }
+                    }
+                }
+            }
+        });
+
+
+
+
+
+        // 2. Biểu đồ Trạng thái đơn hàng (Doughnut Chart)
+        const orderCtx = document.getElementById('orderStatusChart').getContext('2d');
+        new Chart(orderCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Thành công', 'Đã hủy', 'Đang giao hàng'],
+                datasets: [{
+                    data: [
+                        ${(not empty orderStats and not empty orderStats['Đã hoàn thành']) ? orderStats['Đã hoàn thành'] : 0},
+                        ${(not empty orderStats and not empty orderStats['Đã hủy']) ? orderStats['Đã hủy'] : 0},
+                        ${(not empty orderStats and not empty orderStats['Đang giao hàng']) ? orderStats['Đang giao hàng'] : 0}
+                    ],
+                    backgroundColor: ['#05cd99', '#ee5d50', '#ffb81c'],
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '70%'
+            }
+        });
+    </script>
 </body>
 </html>

@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package dao;
+
 import config.DBContext;
 import entity.Product;
 import entity.ProductModel;
@@ -16,158 +17,167 @@ import entity.User;
 import java.util.*;
 import java.lang.*;
 import java.io.*;
+import java.text.NumberFormat;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.regex.Matcher;
+
 import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import entity.Supplier;
-
-
-
 
 /**
  *
  * @author ADMIN
  */
 public class DAO {
+
     private static final Pattern RELEASE_YEAR_PATTERN = Pattern.compile("(19|20)\\d{2}");
 
-    Connection conn = null; 
-    PreparedStatement ps = null; 
-    ResultSet rs = null; 
-    
-    
+    /**
+     * ÄÄƒng kÃ½ tÃ i khoáº£n ngÆ°á»i dÃ¹ng má»›i
+     */
     public void signup(String user, String gender, String pass, String address, String email, String phone, String name, String birthday) {
-    // Đã thêm danh sách cột rõ ràng để tránh lỗi IDENTITY của SQL Server
-    String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], "
-                 + "Email, PhoneNumber, FullName, Birthday, [RoleId]) \n"
-                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)"; // 0 ở cuối là Role mặc định (Khách hàng)
-    try {
-        conn = new DBContext().getConnection();
-        ps = conn.prepareStatement(query);
-        ps.setString(1, user);
-        ps.setString(2, gender);
-        ps.setString(3, pass);
-        ps.setString(4, address);
-        ps.setString(5, email);
-        ps.setString(6, phone);
-        ps.setString(7, name);
-        ps.setString(8, birthday);
-        ps.executeUpdate();
-    } catch (Exception e) {
-        e.printStackTrace(); // Rất quan trọng: In lỗi ra để biết nếu SQL bị sai
+        // ÄÃ£ thÃªm danh sÃ¡ch cá»™t rÃµ rÃ ng Ä‘á»ƒ trÃ¡nh lá»—i IDENTITY cá»§a SQL Server
+        String query = "INSERT INTO [User] (Username, Gender, [Password], [Address], Email, "
+                + "PhoneNumber, FullName, Birthday, [RoleId], [Status], [CreatedDate], [LockReason]) \n"
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, N'Hoáº¡t Ä‘á»™ng', GETDATE(), NULL)";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, user);
+            ps.setString(2, gender);
+            ps.setString(3, pass);
+            ps.setString(4, address);
+            ps.setString(5, email);
+            ps.setString(6, phone);
+            ps.setString(7, name);
+            ps.setString(8, birthday);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace(); // Ráº¥t quan trá»ng: In lá»—i ra Ä‘á»ƒ biáº¿t náº¿u SQL bá»‹ sai
+        }
     }
-}
-    
+
+    /**
+     * Kiá»ƒm tra xem Username Ä‘Ã£ tá»“n táº¡i chÆ°a, náº¿u cÃ³ thÃ¬ tráº£ vá»
+     * Ä‘á»‘i tÆ°á»£ng User Ä‘áº§y Ä‘á»§ kÃ¨m Role
+     */
     public User checkUserExist(String user) {
         String query = "SELECT u.*, r.RoleName \n"
-                 + "FROM [User] u \n"
-                 + "INNER JOIN [Role] r ON u.RoleId = r.RoleId \n"
-                 + "WHERE u.Username = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
+                + "FROM [User] u \n"
+                + "INNER JOIN [Role] r ON u.RoleId = r.RoleId \n"
+                + "WHERE u.Username = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, user);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                // 2. Khởi tạo Role
-                Role r = new Role();
-                r.setRoleId(rs.getInt("RoleId"));
-                r.setRoleName(rs.getString("RoleName"));
-                
-                User u = new User();
-                u.setId(rs.getInt("UserId"));
-                u.setUser(rs.getString("Username"));
-                u.setGender(rs.getString("Gender"));
-                u.setPass(rs.getString("Password"));
-                u.setAddress(rs.getString("Address"));
-                u.setEmail(rs.getString("Email"));
-                u.setPhone(rs.getString("PhoneNumber"));
-                u.setName(rs.getString("FullName"));
-                u.setBirthday(rs.getDate("Birthday"));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Role r = new Role();
+                    r.setRoleId(rs.getInt("RoleId"));
+                    r.setRoleName(rs.getString("RoleName"));
 
-                // 4. Gắn Role vào User
-                u.setRole(r);
+                    User u = new User();
+                    u.setId(rs.getInt("UserId"));
+                    u.setUser(rs.getString("Username"));
+                    u.setGender(rs.getString("Gender"));
+                    u.setPass(rs.getString("Password"));
+                    u.setAddress(rs.getString("Address"));
+                    u.setEmail(rs.getString("Email"));
+                    u.setPhone(rs.getString("PhoneNumber"));
+                    u.setName(rs.getString("FullName"));
+                    u.setBirthday(rs.getDate("Birthday"));
+                    u.setStatus(rs.getString("Status"));
+                    u.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    u.setLockReason(rs.getString("LockReason"));
+                    u.setRole(r);
 
-            return u;
+                    return u;
+                }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
-    
+
+    /**
+     * Láº¥y thÃ´ng tin ngÆ°á»i dÃ¹ng dá»±a trÃªn Email (dÃ¹ng cho Login/Reset
+     * Pass)
+     */
     public User getUserByEmail(String email) {
-    // Truy vấn JOIN để lấy tên Role cùng lúc
-    String sql = "SELECT u.*, r.RoleName " +
-                 "FROM [User] u " +
-                 "INNER JOIN [Role] r ON u.RoleId = r.RoleId " +
-                 "WHERE u.Email = ?";
-    try {
-        conn = new DBContext().getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, email);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            // 1. Khởi tạo đối tượng Role từ dữ liệu JOIN
-            Role role = new Role();
-            role.setRoleId(rs.getInt("RoleId"));
-            role.setRoleName(rs.getString("RoleName"));
-
-            // 2. Khởi tạo đối tượng User và gán các trường
-            User user = new User();
-            user.setId(rs.getInt("UserId"));
-            user.setEmail(rs.getString("Email"));
-            user.setPass(rs.getString("Password")); // Lấy pass đã mã hóa để check BCrypt
-            user.setName(rs.getNString("FullName"));
-            user.setPhone(rs.getString("PhoneNumber"));
-            user.setAddress(rs.getNString("Address"));
-            user.setGender(rs.getString("Gender"));
-            user.setBirthday(rs.getDate("Birthday"));
-            
-            // 3. GÁN ĐỐI TƯỢNG ROLE VÀO USER
-            user.setRole(role);
-
-            return user;
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return null;
-}
-    
-    public boolean checkEmailExist(String email) {
-        String query = "SELECT * FROM [User] WHERE Email = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
+        // Truy váº¥n JOIN Ä‘á»ƒ láº¥y tÃªn Role cÃ¹ng lÃºc
+        String sql = "SELECT u.*, r.RoleName "
+                + "FROM [User] u "
+                + "INNER JOIN [Role] r ON u.RoleId = r.RoleId "
+                + "WHERE u.Email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
-            rs = ps.executeQuery();
-            if (rs.next()) return true; // Có tồn tại
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Role role = new Role();
+                    role.setRoleId(rs.getInt("RoleId"));
+                    role.setRoleName(rs.getString("RoleName"));
+
+                    User user = new User();
+                    user.setId(rs.getInt("UserId"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPass(rs.getString("Password"));
+                    user.setName(rs.getNString("FullName"));
+                    user.setPhone(rs.getString("PhoneNumber"));
+                    user.setAddress(rs.getNString("Address"));
+                    user.setGender(rs.getString("Gender"));
+                    user.setBirthday(rs.getDate("Birthday"));
+                    user.setStatus(rs.getString("Status"));
+                    user.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    user.setLockReason(rs.getString("LockReason"));
+                    user.setRole(role);
+
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Kiá»ƒm tra xem Email Ä‘Ã£ cÃ³ ngÆ°á»i sá»­ dá»¥ng chÆ°a
+     */
+    public boolean checkEmailExist(String email) {
+        String query = "SELECT 1 FROM [User] WHERE Email = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    /**
+     * Kiá»ƒm tra xem Sá»‘ Ä‘iá»‡n thoáº¡i Ä‘Ã£ cÃ³ ngÆ°á»i sá»­ dá»¥ng chÆ°a
+     */
     public boolean checkPhoneExist(String phone) {
-        String query = "SELECT * FROM [User] WHERE Phone = ?";
-        try {
-            conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(query);
+        String query = "SELECT 1 FROM [User] WHERE PhoneNumber = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, phone);
-            rs = ps.executeQuery();
-            if (rs.next()) return true; // Có tồn tại
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    /**
+     * Chuyá»ƒn Ä‘á»•i dá»¯ liá»‡u tá»« ResultSet sang Ä‘á»‘i tÆ°á»£ng Product
+     */
     private Product mapProduct(ResultSet rs) throws SQLException {
         return new Product(
                 rs.getString("IdProduct"),
@@ -190,7 +200,11 @@ public class DAO {
                 readQuantity(rs, "IsFeatured")
         );
     }
-    
+
+    /**
+     * Chuyá»ƒn Ä‘á»•i dá»¯ liá»‡u tá»« ResultSet sang Ä‘á»‘i tÆ°á»£ng
+     * ProductReview (ÄÃ¡nh giÃ¡)
+     */
     private Review mapReview(ResultSet rs) throws SQLException {
         Review r = new Review();
         r.setIdProduct(rs.getString("IdProduct"));
@@ -202,11 +216,13 @@ public class DAO {
         return r;
     }
 
-
+    /**
+     * HÃ m chung Ä‘á»ƒ thá»±c thi cÃ¡c cÃ¢u lá»‡nh SELECT vÃ  tráº£ vá» danh
+     * sÃ¡ch sáº£n pháº©m
+     */
     private List<Product> queryProducts(String sql, SqlConsumer<PreparedStatement> binder) {
         List<Product> list = new ArrayList<>();
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             binder.accept(ps);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -219,6 +235,10 @@ public class DAO {
         return list;
     }
 
+    /**
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m ná»•i báº­t (theo ngÃ y phÃ¡t hÃ nh vÃ 
+     * giÃ¡)
+     */
     public List<ProductModel> getFeaturedProducts(int limit) {
         return new ArrayList<>(queryProducts(
                 "SELECT * FROM ProductDetail ORDER BY ReleaseDate DESC, Price DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY",
@@ -226,14 +246,19 @@ public class DAO {
         ));
     }
 
+    /**
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m má»›i nháº¥t
+     */
     public List<ProductModel> getLatestProducts(int limit) {
         return getFeaturedProducts(limit);
     }
 
+    /**
+     * TÃ¬m sáº£n pháº©m theo ID
+     */
     public Product getProductByID(String id) {
         String query = "SELECT * FROM ProductDetail WHERE IdProduct = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -246,10 +271,13 @@ public class DAO {
         return null;
     }
 
+    /**
+     * TÃ¬m sáº£n pháº©m theo hÃ£ng vÃ  tÃªn (DÃ¹ng cho Trade-in hoáº·c gá»£i
+     * Ã½)
+     */
     public Product getProductByBrandAndName(String brand, String modelName) {
         String query = "SELECT TOP 1 * FROM ProductDetail WHERE IdSupplier = ? AND ProductName LIKE ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, brand);
             ps.setString(2, "%" + modelName + "%");
             try (ResultSet rs = ps.executeQuery()) {
@@ -263,13 +291,14 @@ public class DAO {
         return null;
     }
 
+    /**
+     * Láº¥y danh sÃ¡ch táº¥t cáº£ cÃ¡c hÃ£ng hiá»‡n cÃ³ trong há»‡ thá»‘ng
+     */
     public List<String> getAvailableBrands() {
         List<String> brands = new ArrayList<>();
         String query = "SELECT DISTINCT IdSupplier FROM ProductDetail "
                 + "WHERE IdSupplier IS NOT NULL AND LTRIM(RTRIM(IdSupplier)) <> '' ORDER BY IdSupplier";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 brands.add(rs.getString("IdSupplier"));
             }
@@ -279,12 +308,13 @@ public class DAO {
         return brands;
     }
 
+    /**
+     * Láº¥y cÃ¡c tÃ¹y chá»n RAM hiá»‡n cÃ³ (Ä‘á»ƒ lÃ m bá»™ lá»c)
+     */
     public List<Integer> getAvailableRamOptions() {
         List<Integer> ramOptions = new ArrayList<>();
         String query = "SELECT DISTINCT RAM FROM ProductDetail WHERE RAM IS NOT NULL";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 int ramValue = parseMemoryValue(rs.getString("RAM"));
                 if (ramValue > 0 && !ramOptions.contains(ramValue)) {
@@ -298,12 +328,13 @@ public class DAO {
         return ramOptions;
     }
 
+    /**
+     * Láº¥y cÃ¡c nÄƒm phÃ¡t hÃ nh hiá»‡n cÃ³ (Ä‘á»ƒ lÃ m bá»™ lá»c)
+     */
     public List<Integer> getAvailableReleaseYears(int limit) {
         Set<Integer> yearSet = new TreeSet<>(Comparator.reverseOrder());
         String query = "SELECT ReleaseDate FROM ProductDetail WHERE ReleaseDate IS NOT NULL";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 int releaseYear = parseReleaseYear(rs.getString("ReleaseDate"));
                 if (releaseYear > 0) {
@@ -320,7 +351,11 @@ public class DAO {
         return years;
     }
 
-    public List<Product> getCatalogProducts(String keyword, String brand, String storage, String year, String minPrice, String maxPrice, String sort) {
+    /**
+     * HÃ m tÃ¬m kiáº¿m vÃ  lá»c sáº£n pháº©m tá»•ng há»£p (keyword, brand,
+     * ram, year, price, sort)
+     */
+    public List<Product> getCatalogProducts(String keyword, String brand, String storage, String year, String minPrice, String maxPrice, String sort, String startDate, String endDate) {
         List<Product> products = new ArrayList<>();
         String normalizedKeyword = normalizeKeyword(keyword);
         String normalizedBrand = normalizeIdentifier(brand);
@@ -366,6 +401,16 @@ public class DAO {
             parameters.add("%" + releaseYear + "%");
         }
 
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate >= ?");
+            parameters.add(startDate);
+        }
+
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate <= ?");
+            parameters.add(endDate);
+        }
+
         if (minPriceValue != null) {
             sql.append(" AND Price >= ?");
             parameters.add(minPriceValue);
@@ -395,8 +440,7 @@ public class DAO {
                 break;
         }
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             bindParams(ps, parameters);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -409,6 +453,9 @@ public class DAO {
         return products;
     }
 
+    /**
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m liÃªn quan (cÃ¹ng hÃ£ng)
+     */
     public List<Product> getRelatedProducts(String supplier, String excludeId, int limit) {
         return queryProducts(
                 "SELECT * FROM ProductDetail WHERE IdSupplier = ? AND IdProduct <> ? "
@@ -421,28 +468,32 @@ public class DAO {
         );
     }
 
+    /**
+     * Kiá»ƒm tra xem database cÃ³ dá»¯ liá»‡u sáº£n pháº©m khÃ´ng
+     */
     public boolean canAccessProductData() {
         String query = "SELECT TOP 1 1 FROM ProductDetail";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    public List<Product> getProducts(String keyword, String supplierId, String sortBy, int offset, int pageSize) {
+    /**
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m cÃ³ phÃ¢n trang (dÃ¹ng cho trang quáº£n
+     * lÃ½)
+     */
+    public List<Product> getProducts(String keyword, String supplierId, String sortBy, int offset, int pageSize, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT * FROM ProductDetail WHERE 1 = 1");
         List<Object> params = new ArrayList<>();
-        appendProductFilters(sql, params, keyword, supplierId);
+        appendProductFilters(sql, params, keyword, supplierId, startDate, endDate);
         sql.append(" ORDER BY ").append(resolveSortClause(sortBy)).append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
         params.add(offset);
         params.add(pageSize);
 
         List<Product> list = new ArrayList<>();
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             bindParams(ps, params);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -455,13 +506,16 @@ public class DAO {
         return list;
     }
 
-    public int countProducts(String keyword, String supplierId) {
+    /**
+     * Äáº¿m tá»•ng sá»‘ sáº£n pháº©m dá»±a trÃªn bá»™ lá»c (dÃ¹ng Ä‘á»ƒ tÃ­nh
+     * sá»‘ trang)
+     */
+    public int countProducts(String keyword, String supplierId, String startDate, String endDate) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ProductDetail WHERE 1 = 1");
         List<Object> params = new ArrayList<>();
-        appendProductFilters(sql, params, keyword, supplierId);
+        appendProductFilters(sql, params, keyword, supplierId, startDate, endDate);
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             bindParams(ps, params);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -474,6 +528,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * ThÃªm sáº£n pháº©m má»›i vÃ o database
+     */
     public boolean addProduct(Product product) {
         boolean splitQuantitySchema = hasProductDetailColumn("OriginalQuantity") && hasProductDetailColumn("CurrentQuantity");
         boolean hasFeaturedColumn = hasProductDetailColumn("IsFeatured");
@@ -488,8 +545,7 @@ public class DAO {
             query = "INSERT INTO ProductDetail (IdProduct, ProductName, Price, Quantity, ReleaseDate, Screen, OperatingSystem, CPU, RAM, Camera, Battery, Description, Discount, ImagePath, IdSupplier, idCat) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         }
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             bindProduct(ps, product, false, splitQuantitySchema, hasFeaturedColumn);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -498,6 +554,9 @@ public class DAO {
         return false;
     }
 
+    /**
+     * Cáº­p nháº­t thÃ´ng tin sáº£n pháº©m hiá»‡n cÃ³
+     */
     public boolean updateProduct(Product product) {
         Product existing = getProductByID(product.getIdProduct());
         if (existing != null) {
@@ -521,8 +580,7 @@ public class DAO {
         } else {
             query = "UPDATE ProductDetail SET ProductName = ?, Price = ?, Quantity = ?, ReleaseDate = ?, Screen = ?, OperatingSystem = ?, CPU = ?, RAM = ?, Camera = ?, Battery = ?, Description = ?, Discount = ?, ImagePath = ?, IdSupplier = ?, idCat = ? WHERE IdProduct = ?";
         }
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             bindProduct(ps, product, true, splitQuantitySchema, hasFeaturedColumn);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -531,10 +589,12 @@ public class DAO {
         return false;
     }
 
+    /**
+     * XÃ³a sáº£n pháº©m khá»i database
+     */
     public boolean deleteProduct(String idProduct) {
         String query = "DELETE FROM ProductDetail WHERE IdProduct = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, idProduct);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -543,10 +603,12 @@ public class DAO {
         return false;
     }
 
+    /**
+     * Kiá»ƒm tra xem sáº£n pháº©m Ä‘Ã£ tá»“n táº¡i theo tÃªn vÃ  hÃ£ng chÆ°a
+     */
     public boolean productExistsByNameAndSupplier(String productName, String supplierId) {
         String query = "SELECT 1 FROM ProductDetail WHERE ProductName = ? AND IdSupplier = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, productName);
             ps.setString(2, supplierId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -558,13 +620,15 @@ public class DAO {
         return false;
     }
 
+    /**
+     * Cáº­p nháº­t sá»‘ lÆ°á»£ng tá»“n kho (Restock) cho sáº£n pháº©m Ä‘Ã£ cÃ³
+     */
     public boolean restockExistingProduct(String productName, String supplierId, int delta) {
         boolean splitQuantitySchema = hasProductDetailColumn("OriginalQuantity") && hasProductDetailColumn("CurrentQuantity");
         String query = splitQuantitySchema
                 ? "UPDATE ProductDetail SET OriginalQuantity = OriginalQuantity + ?, CurrentQuantity = CurrentQuantity + ? WHERE ProductName = ? AND IdSupplier = ?"
                 : "UPDATE ProductDetail SET Quantity = Quantity + ? WHERE ProductName = ? AND IdSupplier = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, delta);
             if (splitQuantitySchema) {
                 ps.setInt(2, delta);
@@ -581,6 +645,9 @@ public class DAO {
         return false;
     }
 
+    /**
+     * Ãnh xáº¡ tÃªn hÃ£ng sang ID danh má»¥c (Hardcoded)
+     */
     public Integer getCategoryIdBySupplier(String supplierId) {
         if (supplierId == null) {
             return null;
@@ -605,12 +672,13 @@ public class DAO {
         }
     }
 
+    /**
+     * Láº¥y danh sÃ¡ch ID cÃ¡c nhÃ  cung cáº¥p
+     */
     public List<String> getSupplierIds() {
         List<String> suppliers = new ArrayList<>();
         String query = "SELECT IdSupplier FROM Supplier ORDER BY IdSupplier";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 suppliers.add(rs.getString("IdSupplier"));
             }
@@ -620,10 +688,12 @@ public class DAO {
         return suppliers;
     }
 
+    /**
+     * Sinh ID tiáº¿p theo cho sáº£n pháº©m má»›i (vÃ­ dá»¥: 0005)
+     */
     public String getNextProductId() {
         String query = "SELECT RIGHT('0000' + CAST(ISNULL(MAX(TRY_CAST(IdProduct AS INT)), 0) + 1 AS VARCHAR), 4) AS NextId FROM ProductDetail";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString("NextId");
@@ -635,15 +705,17 @@ public class DAO {
         return "0001";
     }
 
-    
+    /**
+     * Äáº¿m sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ cá»§a má»™t sáº£n pháº©m (cÃ³ thá»ƒ
+     * lá»c theo sá»‘ sao)
+     */
     public int countProductReviews(String productId, Integer ranking) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS Total FROM ProductReview WHERE IdProduct = ? ");
         if (ranking != null) {
             sql.append("AND Ranking = ?");
         }
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             ps.setString(1, productId);
             if (ranking != null) {
                 ps.setInt(2, ranking);
@@ -658,7 +730,10 @@ public class DAO {
         }
         return 0;
     }
-    
+
+    /**
+     * Láº¥y danh sÃ¡ch Ä‘Ã¡nh giÃ¡ cá»§a sáº£n pháº©m cÃ³ phÃ¢n trang
+     */
     public List<Review> getProductReviews(String productId, Integer ranking, int offset, int pageSize) {
         List<Review> reviews = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
@@ -671,8 +746,7 @@ public class DAO {
         }
         sql.append("ORDER BY pr.ReviewDate DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int index = 1;
             ps.setString(index++, productId);
             if (ranking != null) {
@@ -692,6 +766,9 @@ public class DAO {
         return reviews;
     }
 
+    /**
+     * Thá»‘ng kÃª sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ theo tá»«ng má»©c sao (1-5 sao)
+     */
     public Map<Integer, Integer> getReviewCountsByRating(String productId) {
         Map<Integer, Integer> counts = new LinkedHashMap<>();
         for (int star = 5; star >= 1; star--) {
@@ -699,8 +776,7 @@ public class DAO {
         }
 
         String query = "SELECT Ranking, COUNT(*) AS Total FROM ProductReview WHERE IdProduct = ? GROUP BY Ranking";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, productId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -712,11 +788,13 @@ public class DAO {
         }
         return counts;
     }
-    
+
+    /**
+     * TÃ­nh Ä‘iá»ƒm Ä‘Ã¡nh giÃ¡ trung bÃ¬nh cá»§a sáº£n pháº©m
+     */
     public double getAverageRating(String productId) {
         String query = "SELECT COALESCE(AVG(CAST(Ranking AS FLOAT)), 0) AS AverageRating FROM ProductReview WHERE IdProduct = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, productId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -728,11 +806,13 @@ public class DAO {
         }
         return 0d;
     }
-    
+
+    /**
+     * Tá»•ng sá»‘ lÆ°á»£ng Ä‘Ã¡nh giÃ¡ cá»§a má»™t sáº£n pháº©m
+     */
     public int getReviewCount(String productId) {
         String query = "SELECT COUNT(*) AS TotalReview FROM ProductReview WHERE IdProduct = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setString(1, productId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -745,6 +825,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * GÃ¡n dá»¯ liá»‡u sáº£n pháº©m vÃ o PreparedStatement Ä‘á»ƒ thá»±c thi SQL
+     */
     private void bindProduct(PreparedStatement ps, Product product, boolean updateMode, boolean splitQuantitySchema, boolean hasFeaturedColumn) throws Exception {
         int index = 1;
         int originalQuantity = product.getOriginalQuantity() >= 0 ? product.getOriginalQuantity() : Math.max(0, product.getCurrentQuantity());
@@ -789,7 +872,10 @@ public class DAO {
         }
     }
 
-    private void appendProductFilters(StringBuilder sql, List<Object> params, String keyword, String supplierId) {
+    /**
+     * ThÃªm cÃ¡c Ä‘iá»u kiá»‡n lá»c SQL cho sáº£n pháº©m
+     */
+    private void appendProductFilters(StringBuilder sql, List<Object> params, String keyword, String supplierId, String startDate, String endDate) {
         String safeKeyword = normalizeKeyword(keyword);
         String safeSupplier = normalizeIdentifier(supplierId);
 
@@ -801,8 +887,20 @@ public class DAO {
             sql.append(" AND IdSupplier = ?");
             params.add(safeSupplier);
         }
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate >= ?");
+            params.add(startDate);
+        }
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            sql.append(" AND ReleaseDate <= ?");
+            params.add(endDate);
+        }
     }
 
+    /**
+     * GÃ¡n cÃ¡c tham sá»‘ vÃ o PreparedStatement theo kiá»ƒu dá»¯ liá»‡u
+     * tÆ°Æ¡ng á»©ng
+     */
     private void bindParams(PreparedStatement ps, List<Object> params) throws SQLException {
         for (int i = 0; i < params.size(); i++) {
             Object value = params.get(i);
@@ -817,6 +915,9 @@ public class DAO {
         }
     }
 
+    /**
+     * Xá»­ lÃ½ chuá»—i ORDER BY cho SQL dá»±a trÃªn lá»±a chá»n sáº¯p xáº¿p
+     */
     private String resolveSortClause(String sortBy) {
         String quantityColumn = hasProductDetailColumn("CurrentQuantity") ? "CurrentQuantity" : "Quantity";
         if (sortBy == null) {
@@ -836,19 +937,29 @@ public class DAO {
         }
     }
 
+    /**
+     * Kiá»ƒm tra xem báº£ng ProductDetail cÃ³ cá»™t cá»¥ thá»ƒ nÃ o khÃ´ng
+     * (Ä‘á»ƒ xá»­ lÃ½ linh hoáº¡t cÃ¡c version DB)
+     */
     private boolean hasProductDetailColumn(String columnName) {
-        try (Connection conn = new DBContext().getConnection();
-             ResultSet rs = conn.getMetaData().getColumns(null, null, "ProductDetail", columnName)) {
+        try (Connection conn = new DBContext().getConnection(); ResultSet rs = conn.getMetaData().getColumns(null, null, "ProductDetail", columnName)) {
             return rs.next();
         } catch (Exception e) {
             return false;
         }
     }
 
+    /**
+     * Chuáº©n hÃ³a chuá»—i (xÃ³a khoáº£ng tráº¯ng thá»«a)
+     */
     private String normalizeIdentifier(String value) {
         return value == null ? "" : value.trim();
     }
 
+    /**
+     * Chuáº©n hÃ³a tá»« khÃ³a tÃ¬m kiáº¿m (lowercase, xÃ³a dáº¥u cÃ¡ch thá»«a,
+     * xá»­ lÃ½ tá»« viáº¿t liá»n)
+     */
     private String normalizeKeyword(String value) {
         if (value == null) {
             return "";
@@ -865,10 +976,18 @@ public class DAO {
         return normalized.replaceAll("\\s+", " ").trim();
     }
 
+    /**
+     * Chuyá»ƒn Ä‘á»•i tá»« khÃ³a sang Ä‘á»‹nh dáº¡ng phÃ¹ há»£p vá»›i cÃ¢u
+     * lá»‡nh LIKE trong SQL
+     */
     private String toSqlLikeKeyword(String value) {
         return normalizeKeyword(value).replace(" ", "").replace("-", "");
     }
 
+    /**
+     * Chuyá»ƒn Ä‘á»•i chuá»—i dung lÆ°á»£ng (vÃ­ dá»¥ "128GB") sang sá»‘
+     * nguyÃªn (128)
+     */
     private int parseMemoryValue(String value) {
         String normalized = normalizeIdentifier(value);
         if (normalized.isEmpty()) {
@@ -885,6 +1004,9 @@ public class DAO {
         }
     }
 
+    /**
+     * TrÃ­ch xuáº¥t nÄƒm phÃ¡t hÃ nh tá»« chuá»—i vÄƒn báº£n báº±ng Regex
+     */
     private int parseReleaseYear(String value) {
         String normalized = normalizeIdentifier(value);
         if (normalized.isEmpty()) {
@@ -901,6 +1023,9 @@ public class DAO {
         }
     }
 
+    /**
+     * Chuyá»ƒn Ä‘á»•i chuá»—i giÃ¡ tiá»n sang kiá»ƒu Double
+     */
     private Double parsePriceValue(String value) {
         String normalized = normalizeIdentifier(value);
         if (normalized.isEmpty()) {
@@ -918,6 +1043,10 @@ public class DAO {
         }
     }
 
+    /**
+     * Äá»c giÃ¡ trá»‹ sá»‘ lÆ°á»£ng tá»« ResultSet (há»— trá»£ nhiá»u tÃªn
+     * cá»™t khÃ¡c nhau)
+     */
     private int readQuantity(ResultSet rs, String... columnNames) throws SQLException {
         for (String columnName : columnNames) {
             try {
@@ -929,6 +1058,9 @@ public class DAO {
         return 0;
     }
 
+    /**
+     * Äá»c giÃ¡ trá»‹ kiá»ƒu Double tá»« ResultSet an toÃ n
+     */
     private double readDouble(ResultSet rs, String columnName) throws SQLException {
         try {
             return rs.getDouble(columnName);
@@ -939,16 +1071,19 @@ public class DAO {
 
     @FunctionalInterface
     private interface SqlConsumer<T> {
+
         void accept(T value) throws Exception;
     }
-    
-    // 1. Hàm tạo và lưu Token mới (Có hiệu lực 10 phút)
+
+    // 1. HÃ m táº¡o vÃ  lÆ°u Token má»›i (CÃ³ hiá»‡u lá»±c 10 phÃºt)
+    /**
+     * LÆ°u mÃ£ Token khÃ´i phá»¥c máº­t kháº©u vÃ  thá»i gian háº¿t háº¡n (10
+     * phÃºt)
+     */
     public void saveResetToken(String email, String token) {
-        // DATEADD(minute, 10, GETDATE()) là lệnh của SQL Server để cộng thêm 15 phút từ giờ hiện tại
+        // DATEADD(minute, 10, GETDATE()) lÃ  lá»‡nh cá»§a SQL Server Ä‘á»ƒ cá»™ng thÃªm 15 phÃºt tá»« giá» hiá»‡n táº¡i
         String sql = "UPDATE [User] SET ResetToken = ?, ResetTokenExpiry = DATEADD(minute, 10, GETDATE()) WHERE Email = ?";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, token);
             ps.setString(2, email);
             ps.executeUpdate();
@@ -957,23 +1092,27 @@ public class DAO {
         }
     }
 
-    // 2. Hàm kiểm tra Token khi khách hàng click vào link
+    // 2. HÃ m kiá»ƒm tra Token khi khÃ¡ch hÃ ng click vÃ o link
+    /**
+     * TÃ¬m ngÆ°á»i dÃ¹ng dá»±a trÃªn Reset Token (Ä‘á»ƒ xÃ¡c thá»±c link
+     * Ä‘á»•i pass)
+     */
     public User getUserByResetToken(String token) {
-        // Chỉ lấy User nếu Token khớp VÀ thời gian hiện tại vẫn nhỏ hơn thời gian hết hạn
-        // Sửa tạm để test
-        String sql = "SELECT * FROM [User] WHERE ResetToken = ?";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+
+        String sql = "SELECT * FROM [User] WHERE ResetToken = ? AND ResetTokenExpiry > GETDATE()";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, token);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                User u = new User();
-                u.setId(rs.getInt("UserId"));
-                u.setEmail(rs.getString("Email"));
-                u.setName(rs.getNString("FullName"));
-                // ... (bạn có thể set thêm các trường khác nếu cần)
-                return u;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User u = new User();
+                    u.setId(rs.getInt("UserId"));
+                    u.setEmail(rs.getString("Email"));
+                    u.setName(rs.getNString("FullName"));
+                    u.setStatus(rs.getString("Status"));
+                    u.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    u.setLockReason(rs.getString("LockReason"));
+                    return u;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -981,13 +1120,14 @@ public class DAO {
         return null;
     }
 
-    // 3. Hàm lưu mật khẩu mới và Xóa Token (Chỉ dùng 1 lần)
+    // 3. HÃ m lÆ°u máº­t kháº©u má»›i vÃ  XÃ³a Token (Chá»‰ dÃ¹ng 1 láº§n)
+    /**
+     * Cáº­p nháº­t máº­t kháº©u má»›i vÃ  xÃ³a Token khÃ´i phá»¥c
+     */
     public void updatePasswordAndClearToken(String email, String newHashedPassword) {
-        // Đổi pass xong thì đưa Token về NULL để vô hiệu hóa link cũ
+        // Äá»•i pass xong thÃ¬ Ä‘Æ°a Token vá» NULL Ä‘á»ƒ vÃ´ hiá»‡u hÃ³a link cÅ©
         String sql = "UPDATE [User] SET [Password] = ?, ResetToken = NULL, ResetTokenExpiry = NULL WHERE Email = ?";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newHashedPassword);
             ps.setString(2, email);
             ps.executeUpdate();
@@ -995,11 +1135,13 @@ public class DAO {
             e.printStackTrace();
         }
     }
-    public int getTotalProducts() {
-        String query = "SELECT COUNT(*) FROM ProductDetail";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+
+    /**
+     * Äáº¿m tá»•ng sá»‘ lÆ°á»£ng blog (bÃ i viáº¿t) Ä‘ang hiá»ƒn thá»‹
+     */
+    public int getTotalBlogs() {
+        String query = "SELECT COUNT(*) FROM Blog WHERE (Status = 'VISIBLE' OR Status IS NULL)";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -1009,37 +1151,75 @@ public class DAO {
         return 0;
     }
 
-    public int getPendingOrdersCount() {
-        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Chờ xử lý'";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
-        } catch (Exception e) { e.printStackTrace(); }
+    /**
+     * Äáº¿m tá»•ng sá»‘ lÆ°á»£ng sáº£n pháº©m trong kho
+     */
+    public int getTotalProducts() {
+        String query = "SELECT COUNT(*) FROM ProductDetail";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
-    public String getMonthlyRevenue() {
-        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+    /**
+     * Äáº¿m sá»‘ lÆ°á»£ng Ä‘Æ¡n hÃ ng Ä‘ang chá» xá»­ lÃ½
+     */
+    public int getPendingOrdersCount() {
+        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = N'Äang giao hÃ ng' OR OrderStatus = 'Pending'";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                double total = rs.getDouble(1);
-                if (total >= 1000000) return String.format("%.1fM", total / 1000000.0);
-                return String.format("%.0f", total);
+                return rs.getInt(1);
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * TÃ­nh tá»•ng doanh thu trong khoáº£ng thá»i gian xÃ¡c Ä‘á»‹nh (chá»‰
+     * tÃ­nh Ä‘Æ¡n HoÃ n thÃ nh)
+     */
+    public String getRevenueByDate(Date startDate, Date endDate) {
+        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE OrderDate >= ? AND OrderDate <= ? AND OrderStatus = N'ÄÃ£ hoÃ n thÃ nh'";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double total = rs.getDouble(1);
+                    if (total >= 1000000) {
+                        return String.format("%.1fM", total / 1000000.0);
+                    }
+                    if (total >= 1000) {
+                        return String.format("%.0fK", total / 1000.0);
+                    }
+                    return String.format("%.0f", total);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "0";
     }
 
+    /**
+     * Láº¥y danh sÃ¡ch cÃ¡c Ä‘Æ¡n hÃ ng gáº§n Ä‘Ã¢y Ä‘á»ƒ hiá»ƒn thá»‹
+     * Dashboard
+     */
     public List<Map<String, String>> getRecentOrders(int limit) {
         List<Map<String, String>> list = new ArrayList<>();
-        String query = "SELECT TOP (?) o.IdOrder, u.FullName, o.OrderDate, o.TotalPrice, o.OrderStatus " +
-                      "FROM [Order] o JOIN [User] u ON o.UserId = u.UserId " +
-                      "ORDER BY o.IdOrder DESC";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        String query = "SELECT TOP (?) o.IdOrder, u.FullName, o.OrderDate, o.TotalPrice, o.OrderStatus "
+                + "FROM [Order] o JOIN [User] u ON o.UserId = u.UserId "
+                + "ORDER BY o.IdOrder DESC";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm dd/MM");
@@ -1053,130 +1233,279 @@ public class DAO {
                     list.add(map);
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
-    public List<Map<String, String>> getBestSellers(int limit) {
+    /**
+     * Láº¥y danh sÃ¡ch sáº£n pháº©m bÃ¡n cháº¡y nháº¥t
+     */
+    public List<Map<String, String>> getBestSellers(int limit, java.sql.Date startDate, java.sql.Date endDate) {
         List<Map<String, String>> list = new ArrayList<>();
-        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, p.Quantity, SUM(od.Quantity) as Sold " +
-                      "FROM ProductDetail p JOIN OrderDetail od ON p.IdProduct = od.IdProduct " +
-                      "GROUP BY p.ProductName, p.IdSupplier, p.Quantity " +
-                      "ORDER BY Sold DESC";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+        // Truy vấn dựa trên thực tế bán hàng từ OrderDetail và Order
+        // Sử dụng TRY_CAST để khớp ID sản phẩm dù có hay không có số 0 ở đầu (0001 vs 1)
+        // Bao gồm cả đơn đã hoàn thành và đang giao hàng để dữ liệu đầy đủ hơn
+        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, "
+                + "SUM(od.Quantity) as Sold, "
+                + "SUM(od.Quantity * od.UnitPrice) as Revenue "
+                + "FROM OrderDetail od "
+                + "JOIN [Order] o ON od.IdOrder = o.IdOrder "
+                + "JOIN ProductDetail p ON TRY_CAST(od.IdProduct AS INT) = TRY_CAST(p.IdProduct AS INT) "
+                + "WHERE o.OrderStatus IN (?, ?) "
+                + "AND o.OrderDate >= ? AND o.OrderDate <= ? "
+                + "GROUP BY p.ProductName, p.IdSupplier "
+                + "ORDER BY Sold DESC, p.ProductName ASC";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, limit);
+            ps.setString(2, dao.order.OrderDAO.STATUS_COMPLETED);
+            ps.setString(3, dao.order.OrderDAO.STATUS_DELIVERING);
+            ps.setDate(4, startDate);
+            ps.setDate(5, endDate);
             try (ResultSet rs = ps.executeQuery()) {
+                java.text.NumberFormat nf = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
                 while (rs.next()) {
                     Map<String, String> map = new HashMap<>();
                     map.put("name", rs.getString("ProductName"));
                     map.put("brand", rs.getString("IdSupplier"));
-                    map.put("stock", "Còn " + rs.getInt("Quantity") + " máy");
+                    map.put("sold", String.valueOf(rs.getInt("Sold")));
+
+                    double rev = rs.getDouble("Revenue");
+                    if (rev >= 1000000) {
+                        map.put("revenue", String.format("%.1fM", rev / 1000000.0));
+                    } else {
+                        map.put("revenue", nf.format(rev));
+                    }
                     list.add(map);
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
-        return list;
-    }
-
-    public List<Supplier> getAllSuppliers() throws SQLException, Exception{
-        List<Supplier> list = new ArrayList<>();
-        String query = "SELECT* FROM SUPPLIER";
-        try {
-            conn = new DBContext().getConnection();
-            PreparedStatement ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()){
-                Supplier s = new Supplier(
-                rs.getString("IdSupplier"),
-                rs.getString("Name"),
-                rs.getString("Address"),
-                rs.getString("Email"),
-                rs.getString("PhoneNumber"),
-                rs.getString("LogoPath")
-                );
-                list.add(s);
-            }
-        }catch (Exception e){
-           e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return list;
     }
-    
-    public int getNewProductsThisMonthCount() {
-        // Đếm sản phẩm trong 30 ngày gần nhất để con số "nhảy" linh hoạt hơn
-        String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= DATEADD(day, -30, GETDATE())";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
-        } catch (Exception e) { e.printStackTrace(); }
+
+    /**
+     * Overload cũ để tương thích nếu cần
+     */
+    public List<Map<String, String>> getBestSellers(int limit) {
+        // Mặc định lấy 30 ngày gần nhất nếu không có ngày
+        java.sql.Date endDate = new java.sql.Date(System.currentTimeMillis());
+        java.sql.Date startDate = new java.sql.Date(System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000));
+        return getBestSellers(limit, startDate, endDate);
+    }
+
+    /**
+     * Láº¥y toÃ n bá»™ danh sÃ¡ch nhÃ  cung cáº¥p (Supplier)
+     */
+    public List<Supplier> getAllSuppliers() throws SQLException, Exception {
+        List<Supplier> list = new ArrayList<>();
+        String query = "SELECT* FROM SUPPLIER";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Supplier s = new Supplier(
+                        rs.getString("IdSupplier"),
+                        rs.getString("Name"),
+                        rs.getString("Address"),
+                        rs.getString("Email"),
+                        rs.getString("PhoneNumber"),
+                        rs.getString("LogoPath")
+                );
+                list.add(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * Äáº¿m sá»‘ sáº£n pháº©m má»›i Ä‘Æ°á»£c ra máº¯t trong khoáº£ng thá»i
+     * gian xÃ¡c Ä‘á»‹nh
+     */
+    public int getNewProductsCount(Date startDate, Date endDate) {
+        String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= ? AND ReleaseDate <= ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
+    /**
+     * Láº¥y thá»‘ng kÃª sá»‘ lÆ°á»£ng Ä‘Æ¡n hÃ ng theo tá»«ng tráº¡ng thÃ¡i
+     */
     public Map<String, Integer> getOrderStatusStatistics() {
         Map<String, Integer> stats = new HashMap<>();
-        // Khởi tạo các trạng thái mặc định
-        stats.put("Hoàn thành", 0);
-        stats.put("Chờ xử lý", 0);
-        stats.put("Đã hủy", 0);
-        
+        // Khá»Ÿi táº¡o cÃ¡c tráº¡ng thÃ¡i máº·c Ä‘á»‹nh
+        stats.put("ÄÃ£ hoÃ n thÃ nh", 0);
+        stats.put("Äang giao hÃ ng", 0);
+        stats.put("Pending", 0);
+        stats.put("ÄÃ£ há»§y", 0);
+
         String query = "SELECT OrderStatus, COUNT(*) as Total FROM [Order] GROUP BY OrderStatus";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 stats.put(rs.getString("OrderStatus"), rs.getInt("Total"));
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return stats;
     }
 
-    public int getNewUsersThisMonthCount() {
-        String query = "SELECT COUNT(*) FROM [User] WHERE MONTH(Birthday) = MONTH(GETDATE())"; 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
-        } catch (Exception e) { e.printStackTrace(); }
+    /**
+     * Äáº¿m sá»‘ ngÆ°á»i dÃ¹ng má»›i Ä‘Äƒng kÃ½ trong khoáº£ng thá»i gian
+     * xÃ¡c Ä‘á»‹nh
+     */
+    public int getNewUsersCount(Date startDate, Date endDate) {
+        String query = "SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
-    public int getNewOrdersThisMonthCount() {
-        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= DATEADD(day, -30, GETDATE())";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
-        } catch (Exception e) { e.printStackTrace(); }
+    /**
+     * Äáº¿m sá»‘ Ä‘Æ¡n hÃ ng má»›i trong khoáº£ng thá»i gian xÃ¡c Ä‘á»‹nh
+     */
+    public int getNewOrdersCount(Date startDate, Date endDate) {
+        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= ? AND OrderDate <= ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
+    /**
+     * TÃ­nh toÃ¡n tá»· lá»‡ tÄƒng trÆ°á»Ÿng doanh thu so vá»›i thÃ¡ng trÆ°á»›c
+     */
     public double getRevenueGrowth() {
-        String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'Hoàn thành'";
-        String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+        String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'ÄÃ£ hoÃ n thÃ nh'";
+
+        String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'ÄÃ£ hoÃ n thÃ nh'";
+
         try (Connection conn = new DBContext().getConnection()) {
             double prev = 0, curr = 0;
             try (PreparedStatement ps = conn.prepareStatement(sqlPrev); ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) prev = rs.getDouble(1);
+                if (rs.next()) {
+                    prev = rs.getDouble(1);
+                }
             }
             try (PreparedStatement ps = conn.prepareStatement(sqlCurr); ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) curr = rs.getDouble(1);
+                if (rs.next()) {
+                    curr = rs.getDouble(1);
+                }
             }
-            if (prev == 0) return curr > 0 ? 100.0 : 0.0;
+            if (prev == 0) {
+                return curr > 0 ? 100.0 : 0.0;
+            }
             return ((curr - prev) / prev) * 100.0;
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0.0;
     }
 
-    // ─── Order & OrderDetail Management ───
+    /**
+     * Láº¥y danh sÃ¡ch tÃªn cÃ¡c thÆ°Æ¡ng hiá»‡u (Supplier) Ä‘ang cÃ³ sáº£n
+     * pháº©m
+     */
+    public List<String> getActiveSuppliers() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT DISTINCT IdSupplier FROM ProductDetail WHERE IdSupplier IS NOT NULL ORDER BY IdSupplier";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString("IdSupplier"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public Map<String, Integer> getDashboardSummary(java.sql.Date start, java.sql.Date end) {
+        Map<String, Integer> summary = new HashMap<>();
+        // Táº¡m thá»i bá» qua báº£ng [Order] náº¿u nÃ³ gÃ¢y lá»—i tráº¯ng trang do thiáº¿u table trong DB
+        String sql = "SELECT "
+                + "(SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= ? AND ReleaseDate <= ?) as products, "
+                + "(SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?) as users, "
+                + "(SELECT COUNT(*) FROM Blog WHERE (Status = 'VISIBLE' OR Status IS NULL)) as blogs";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, start);
+            ps.setDate(2, end);
+            ps.setDate(3, start);
+            ps.setDate(4, end);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    summary.put("products", rs.getInt("products"));
+                    summary.put("users", rs.getInt("users"));
+                    summary.put("blogs", rs.getInt("blogs"));
+                    summary.put("pending", 0); // Táº¡m thá»i
+                    summary.put("newProducts", 0);
+                    summary.put("newUsers", 0);
+                    summary.put("newOrders", 0);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Lá»—i táº¡i getDashboardSummary: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return summary;
+    }
+
+    public List<ProductModel> getProductsByBrand(String brandId) {
+        List<ProductModel> list = new ArrayList<>();
+        String sql = "SELECT * FROM ProductDetail WHERE IdSupplier = ? ORDER BY ProductName";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, brandId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductModel pm = new ProductModel();
+                    pm.setIdProduct(rs.getString("IdProduct"));
+                    pm.setProductName(rs.getString("ProductName"));
+                    pm.setPrice(rs.getDouble("Price"));
+                    pm.setImagePath(rs.getString("ImagePath"));
+                    pm.setIdSupplier(rs.getString("IdSupplier"));
+                    list.add(pm);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
     public int addOrder(Order order) {
-        String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, CustomerNote, OrderStatus, PaymentMethod) "
-                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            if (order.getUserId() != null) {
+        String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, OrderStatus) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            if (order.getUserId() != null && order.getUserId() > 0) {
                 ps.setInt(1, order.getUserId());
             } else {
                 ps.setNull(1, java.sql.Types.INTEGER);
@@ -1186,12 +1515,8 @@ public class DAO {
             ps.setString(4, order.getReceiverName());
             ps.setString(5, order.getReceiverPhone());
             ps.setString(6, order.getReceiverAddress());
-            ps.setString(7, order.getCustomerNote());
-            ps.setString(8, order.getOrderStatus());
-            ps.setString(9, order.getPaymentMethod());
-            
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
+            ps.setString(7, order.getOrderStatus());
+            if (ps.executeUpdate() > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
                         return rs.getInt(1);
@@ -1204,18 +1529,149 @@ public class DAO {
         return -1;
     }
 
-    public boolean addOrderDetail(OrderDetail detail) {
-        String query = "INSERT INTO OrderDetail (IdOrder, IdProduct, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setInt(1, detail.getIdOrder());
-            ps.setString(2, detail.getIdProduct());
-            ps.setInt(3, detail.getQuantity());
-            ps.setDouble(4, detail.getUnitPrice());
+    public List<Map<String, Object>> getAdminOrders(String keyword, String status) {
+        List<Map<String, Object>> orders = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, ")
+                .append("o.ReceiverAddress, o.OrderStatus, COUNT(od.IdProduct) AS ItemCount ")
+                .append("FROM [Order] o LEFT JOIN OrderDetail od ON o.IdOrder = od.IdOrder WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append("AND (CAST(o.IdOrder AS varchar(20)) LIKE ? OR o.ReceiverName LIKE ? OR o.ReceiverPhone LIKE ?) ");
+            String like = "%" + keyword.trim() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+        if (isAllowedOrderStatus(status)) {
+            sql.append("AND o.OrderStatus = ? ");
+            params.add(status);
+        }
+        sql.append("GROUP BY o.IdOrder, o.OrderDate, o.TotalPrice, o.ReceiverName, o.ReceiverPhone, o.ReceiverAddress, o.OrderStatus ")
+                .append("ORDER BY o.OrderDate DESC, o.IdOrder DESC");
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapOrderRow(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public List<Map<String, Object>> getOrderDetails(int orderId) {
+        List<Map<String, Object>> details = new ArrayList<>();
+        String sql = "SELECT od.IdOrder, od.IdProduct, p.ProductName, p.ImagePath, od.Quantity, od.UnitPrice, (od.Quantity * od.UnitPrice) AS Subtotal FROM OrderDetail od LEFT JOIN ProductDetail p ON od.IdProduct = p.IdProduct WHERE od.IdOrder = ? ORDER BY od.IdProduct";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("idOrder", rs.getInt("IdOrder"));
+                    row.put("idProduct", rs.getString("IdProduct"));
+                    row.put("productName", rs.getString("ProductName"));
+                    row.put("imagePath", rs.getString("ImagePath"));
+                    row.put("quantity", rs.getInt("Quantity"));
+                    row.put("unitPrice", rs.getDouble("UnitPrice"));
+                    row.put("subtotal", rs.getDouble("Subtotal"));
+                    details.add(row);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return details;
+    }
+
+    public boolean updateOrderStatus(int orderId, String status) {
+        if (!isAllowedOrderStatus(status)) {
+            return false;
+        }
+        String sql = "UPDATE [Order] SET OrderStatus = ? WHERE IdOrder = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, orderId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean isAllowedOrderStatus(String status) {
+        return "Đang giao hàng".equals(status) || "Đã hoàn thành".equals(status) || "Đã hủy".equals(status);
+    }
+
+    public int countProducts(String keyword, String supplierId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ProductDetail WHERE 1 = 1");
+        List<Object> params = new ArrayList<>();
+        appendProductFilters(sql, params, keyword, supplierId);
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            bindParams(ps, params);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Product> getProducts(String keyword, String supplierId, String sortBy, int offset, int pageSize) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM ProductDetail WHERE 1 = 1");
+        List<Object> params = new ArrayList<>();
+        appendProductFilters(sql, params, keyword, supplierId);
+        sql.append(" ORDER BY ").append(resolveSortClause(sortBy)).append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add(offset);
+        params.add(pageSize);
+
+        List<Product> list = new ArrayList<>();
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            bindParams(ps, params);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapProduct(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
+    private void appendProductFilters(StringBuilder sql, List<Object> params, String keyword, String supplierId) {
+        String safeKeyword = normalizeKeyword(keyword);
+        String safeSupplier = normalizeIdentifier(supplierId);
+
+        if (!safeKeyword.isEmpty()) {
+            sql.append(" AND REPLACE(REPLACE(LOWER(ProductName), ' ', ''), '-', '') LIKE ?");
+            params.add("%" + toSqlLikeKeyword(safeKeyword) + "%");
+        }
+        if (!safeSupplier.isEmpty()) {
+            sql.append(" AND IdSupplier = ?");
+            params.add(safeSupplier);
+        }
+    }
+
+    private Map<String, Object> mapOrderRow(ResultSet rs) throws java.sql.SQLException {
+        Map<String, Object> row = new HashMap<>();
+        row.put("idOrder", rs.getInt("IdOrder"));
+        row.put("customerName", rs.getString("ReceiverName"));
+        row.put("receiverName", rs.getString("ReceiverName"));
+        row.put("receiverPhone", rs.getString("ReceiverPhone"));
+        row.put("receiverAddress", rs.getString("ReceiverAddress"));
+        row.put("orderDate", rs.getDate("OrderDate"));
+        row.put("totalPrice", rs.getDouble("TotalPrice"));
+        row.put("status", rs.getString("OrderStatus"));
+        row.put("itemCount", rs.getInt("ItemCount"));
+        return row;
     }
 }

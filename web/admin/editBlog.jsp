@@ -1,181 +1,37 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chỉnh sửa bài viết - MobileShop Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-custom.css">
-    <style>
-        /* ===== SIDEBAR – Version Gold ===== */
-        .sidebar {
-            width: 260px;
-            background: #1e293b;
-            padding: 24px 0;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0; left: 0;
-            height: 100vh;
-            z-index: 100;
-            color: white;
-            overflow-y: auto;
-        }
-        .sidebar .brand {
-            padding: 0 24px;
-            margin-bottom: 40px;
-            text-decoration: none;
-            color: white;
-            display: block;
-        }
-        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
-        
-        .nav-section { margin-bottom: 32px; }
-        .nav-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #64748b;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            display: block;
-            padding: 0 24px;
-        }
-        
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .menu-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 24px;
-            color: #94a3b8;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            border-left: 4px solid transparent;
-            transition: 0.3s;
-        }
-        .menu-link i { width: 20px; text-align: center; }
-        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
-        .menu-link.active {
-            background: rgba(175, 242, 47, 0.1);
-            color: #aff22f;
-            border-left-color: #aff22f;
-            font-weight: 600;
-        }
-        /* ===== END SIDEBAR ===== */
-    </style>
+    <link rel="stylesheet" href="${ctx}/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${ctx}/css/admin-custom.css">
 </head>
 <body>
     <div class="admin-layout">
-        <aside class="sidebar">
-            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
-                <h2>MobileShop</h2>
-                <p>Quản trị hệ thống</p>
-            </a>
-
-            <!-- 1. TỔNG QUAN -->
-            <div class="nav-section">
-                <span class="nav-label">TỔNG QUAN</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
-                            <i class="fa-solid fa-chart-line"></i>Dashboard
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 2. QUẢN LÝ BÁN HÀNG -->
-            <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
-                            <i class="fa-solid fa-receipt"></i>Đơn hàng
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="fa-solid fa-user-gear"></i>Tài khoản
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
-            <div class="nav-section">
-                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
-                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
-                            <i class="fa-solid fa-star"></i>Đánh giá
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active">
-                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 4. CẤU HÌNH GIAO DIỆN -->
-            <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
-                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 5. HỆ THỐNG -->
-            <div style="margin-top: auto; padding-bottom: 24px;">
-                <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
-                            <i class="fa-solid fa-globe"></i>Xem Website
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
-                            <i class="fa-solid fa-power-off"></i>Đăng xuất
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </aside>
+        <c:set var="activePage" value="blog" />
+        <%@ include file="/WEB-INF/jspf/admin/sidebar.jspf" %>
 
         <main class="main-content">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="fw-bold mb-1">Chỉnh sửa bài viết</h2>
-                    <p class="text-secondary small">Cập nhật thông tin chi tiết bài viết ID: #${blog.blogId}</p>
+            <header class="page-header">
+                <div class="page-title">
+                    <p class="admin-shell-eyebrow">Quản lý nội dung</p>
+                    <h1>Chỉnh sửa bài viết</h1>
+                    <p class="admin-shell-subtitle">Cập nhật nội dung chi tiết bài viết ID: #${blog.blogId}</p>
                 </div>
-                <a href="${pageContext.request.contextPath}/admin/blog" class="btn btn-sm btn-light border">
+                <a href="${ctx}/admin/blog" class="btn-cancel" style="padding: 10px 24px; font-size: 0.9rem; text-decoration: none;">
                     <i class="fas fa-arrow-left me-2"></i> Quay lại
                 </a>
-            </div>
+            </header>
 
             <div class="form-container">
-                <form action="${pageContext.request.contextPath}/admin/blog" method="POST" enctype="multipart/form-data">
+                <form action="${ctx}/admin/blog" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="service" value="updateBlog">
                     <input type="hidden" name="blogId" value="${blog.blogId}">
                     
@@ -208,42 +64,66 @@
 
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label class="label-custom">Hãng / Category <span class="text-danger">*</span></label>
-                                <select name="idSupplier" class="form-select form-input-custom" required>
-                                    <c:forEach items="${supList}" var="sup">
-                                        <option value="${sup}" ${sup == blog.idSupplier ? 'selected' : ''}>${sup}</option>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="label-custom mb-0">Danh mục bài viết <span class="text-danger">*</span></label>
+                                    <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#manageCatModal" style="font-size: 0.75rem; color: var(--primary);">+ Quản lý</button>
+                                </div>
+                                <select name="idBlogCat" id="categorySelect" class="form-input-custom" required>
+                                    <c:forEach items="${catList}" var="cat">
+                                        <option value="${cat.idBlogCat}" ${blog.idBlogCat == cat.idBlogCat ? 'selected' : ''}>${cat.categoryName}</option>
                                     </c:forEach>
                                 </select>
                             </div>
 
                             <div class="form-group">
-                                <label class="label-custom">Ảnh đại diện bài viết</label>
-                                <div class="mb-2">
-                                    <p class="small text-secondary mb-1">Ảnh hiện tại:</p>
-                                    <img src="${not empty blog.imagePath ? blog.imagePath : 'img/no-image.png'}" class="rounded shadow-sm" style="width: 100%; height: 120px; object-fit: cover; border: 1px solid #e5e7eb;">
-                                </div>
+                                <label class="label-custom">Ảnh bìa bài viết</label>
                                 <div class="upload-zone" id="uploadZone">
-                                    <i class="fas fa-folder-open upload-icon"></i>
-                                    <div class="upload-text">Chọn ảnh mới hoặc <span>kéo thả</span></div>
-                                    <div class="text-muted small mt-1">PNG, JPG, GIF tối đa 500KB</div>
+                                    <i class="fas fa-cloud-arrow-up upload-icon"></i>
+                                    <div class="upload-text">Kéo thả hoặc <span>thay đổi ảnh</span></div>
+                                    <div class="text-muted small mt-2">Để trống nếu không muốn đổi ảnh cũ</div>
                                     <input type="file" name="image" id="thumbInput" accept="image/*">
                                 </div>
-                                <div id="thumbPreview" class="mt-3 d-none">
-                                    <img src="" id="imgShow" class="rounded shadow-sm" style="width: 100% !important; aspect-ratio: 16/9; object-fit: cover; border: 1px solid #e5e7eb; display: block;">
-                                    <p class="text-center small text-muted mt-2">Xem trước ảnh bìa mới</p>
+                                <div id="thumbPreview" class="mt-3">
+                                    <img src="${blog.imagePath}" id="imgShow" class="rounded-4 shadow-sm" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 1px solid var(--border);">
+                                    <p class="text-center small text-muted mt-2 fw-bold">Ảnh bìa hiện tại</p>
                                 </div>
-                                <p class="small text-muted mt-2">Để trống nếu không muốn thay đổi ảnh bìa.</p>
+                            </div>
+
+                            <div class="alert alert-warning border-0 rounded-4 p-3 mt-4" style="background: #fffbeb;">
+                                <h6 class="fw-bold mb-2" style="color: #92400e;"><i class="fas fa-history me-2"></i>Lưu ý</h6>
+                                <p class="small mb-0 text-secondary">Mọi thay đổi sẽ được áp dụng ngay lập tức trên Website sau khi bạn nhấn Lưu.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="action-footer">
-                        <a href="${pageContext.request.contextPath}/admin/blog" class="btn-cancel">Hủy</a>
-                        <button type="submit" class="btn-submit">Cập nhật bài viết <i class="fas fa-check-circle ms-1"></i></button>
+                        <a href="${ctx}/admin/blog" class="btn-cancel">Hủy bỏ</a>
+                        <button type="submit" class="btn-submit">Lưu thay đổi <i class="fas fa-save ms-2"></i></button>
                     </div>
                 </form>
             </div>
         </main>
+    </div>
+
+    <!-- Modal Quản lý danh mục -->
+    <div class="modal fade" id="manageCatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header-custom">
+                    <h5 class="modal-title-custom">Quản lý danh mục</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body-custom">
+                    <div class="cat-input-group">
+                        <input type="text" id="newCatName" class="form-input-custom" placeholder="Tên danh mục mới..." maxlength="50">
+                        <button type="button" id="btnAddCat" class="btn-add-cat">Thêm</button>
+                    </div>
+                    <div class="cat-list" id="catListContainer">
+                        <div class="empty-cats text-center p-4 text-muted">Đang tải danh mục...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -253,12 +133,9 @@
             var counter = document.getElementById(counterId);
             if (!input || !counter) return;
             
-            // Khởi tạo giá trị ban đầu
             counter.textContent = input.value.length + " / " + maxLength;
-            
             input.addEventListener('input', function() {
-                var len = input.value.length;
-                counter.textContent = len + " / " + maxLength;
+                counter.textContent = input.value.length + " / " + maxLength;
             });
         }
         updateCounter('titleInput', 'titleCounter', 255);
@@ -266,25 +143,123 @@
         updateCounter('descInput', 'descCounter', 255);
         updateCounter('blogContent', 'contentCounter', 4000);
 
+        // Preview Image & Dimension Validation
         document.getElementById('thumbInput').addEventListener('change', function() {
             var file = this.files[0];
             if (file) {
-                // Kiểm tra dung lượng ngay tại Client (500KB)
+                // 1. Kiểm tra dung lượng (500KB)
                 if (file.size > 500 * 1024) {
-                    alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB (Ảnh bạn chọn: " + (file.size/1024).toFixed(2) + "KB)");
-                    this.value = ""; // Xóa file
-                    document.getElementById('thumbPreview').classList.add('d-none');
+                    alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB.");
+                    this.value = "";
                     return;
                 }
+                
+                // 2. Kiểm tra kích thước
+                var _URL = window.URL || window.webkitURL;
+                var img = new Image();
+                img.onload = function() {
+                    var width = this.width;
+                    var height = this.height;
+                    var minWidth = 800;
+                    var minHeight = 400;
 
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('imgShow').src = e.target.result;
-                    document.getElementById('thumbPreview').classList.remove('d-none');
+                    if (width < minWidth || height < minHeight) {
+                        alert("CẢNH BÁO: Ảnh quá nhỏ (" + width + "x" + height + "px).\n\n" +
+                              "Để blog hiển thị sắc nét, vui lòng chọn ảnh có kích thước tối thiểu " + minWidth + "x" + minHeight + "px.");
+                        document.getElementById('thumbInput').value = "";
+                    } else {
+                        document.getElementById('imgShow').src = this.src;
+                    }
                 };
-                reader.readAsDataURL(file);
+                img.src = _URL.createObjectURL(file);
             }
         });
+
+        // AJAX Category Management
+        const categoryModal = document.getElementById('manageCatModal');
+        const catListContainer = document.getElementById('catListContainer');
+        const btnAddCat = document.getElementById('btnAddCat');
+        const newCatNameInput = document.getElementById('newCatName');
+        const categorySelect = document.getElementById('categorySelect');
+
+        function loadCategories() {
+            fetch('${ctx}/admin/blog?service=listCategories')
+                .then(response => response.json())
+                .then(data => {
+                    renderCatList(data);
+                    updateSelectOptions(data);
+                });
+        }
+
+        function renderCatList(cats) {
+            let html = '';
+            cats.forEach(cat => {
+                html += `
+                    <div class="cat-item">
+                        <div class="cat-name-wrapper" id="cat-display-\${cat.id}">
+                            <span class="cat-name fw-bold">\${cat.name}</span>
+                            <button type="button" class="btn btn-sm text-primary ms-2" onclick="showEditInput(\${cat.id}, '\${cat.name.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        </div>
+                        <div class="cat-edit-wrapper d-none" id="cat-edit-\${cat.id}" style="flex: 1; display: flex; gap: 5px;">
+                            <input type="text" class="form-input-custom" value="\${cat.name}" id="input-edit-\${cat.id}" style="padding: 4px 10px; height: 36px; font-size: 0.85rem;">
+                            <button type="button" class="btn-add-cat" style="padding: 0 12px; height: 36px; font-size: 0.75rem;" onclick="saveCategory(\${cat.id})">Lưu</button>
+                            <button type="button" class="btn-cancel" style="padding: 0 12px; height: 36px; font-size: 0.75rem;" onclick="cancelEdit(\${cat.id})">Hủy</button>
+                        </div>
+                        <button type="button" class="btn-delete-cat" onclick="deleteCategory(\${cat.id})">
+                            <i class="fas fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            catListContainer.innerHTML = html || '<div class="empty-cats text-center p-4">Chưa có danh mục nào</div>';
+        }
+
+        window.showEditInput = function(id, currentName) {
+            document.getElementById('cat-display-' + id).classList.add('d-none');
+            document.getElementById('cat-edit-' + id).classList.remove('d-none');
+        };
+
+        window.cancelEdit = function(id) {
+            document.getElementById('cat-display-' + id).classList.remove('d-none');
+            document.getElementById('cat-edit-' + id).classList.add('d-none');
+        };
+
+        window.saveCategory = function(id) {
+            const newName = document.getElementById('input-edit-' + id).value.trim();
+            if (!newName) return;
+            fetch(`${ctx}/admin/blog?service=updateCategory&id=\${id}&name=` + encodeURIComponent(newName))
+                .then(r => r.text()).then(res => {
+                    if (res === 'success') loadCategories();
+                });
+        };
+
+        function updateSelectOptions(cats) {
+            const currentValue = categorySelect.value;
+            let html = '<option value="">-- Chọn danh mục --</option>';
+            cats.forEach(cat => {
+                html += `<option value="\${cat.id}" \${currentValue == cat.id ? 'selected' : ''}>\${cat.name}</option>`;
+            });
+            categorySelect.innerHTML = html;
+        }
+
+        btnAddCat.addEventListener('click', function() {
+            const name = newCatNameInput.value.trim();
+            if (!name) return;
+            fetch(`${ctx}/admin/blog?service=addCategory&name=` + encodeURIComponent(name))
+                .then(r => r.text()).then(res => { 
+                    if (res === 'success') { newCatNameInput.value = ''; loadCategories(); }
+                });
+        });
+
+        window.deleteCategory = function(id) {
+            if (!confirm('Xóa danh mục này?')) return;
+            fetch(`${ctx}/admin/blog?service=deleteCategory&id=` + id)
+                .then(r => r.text()).then(res => { if (res === 'success') loadCategories(); });
+        };
+
+        categoryModal.addEventListener('show.bs.modal', loadCategories);
     </script>
 </body>
 </html>
