@@ -66,9 +66,7 @@ public class ContactDAO {
         return getFiltered(null, null, page, pageSize);
     }
 
-    public int countAll() throws Exception {
-        return countFiltered(null, null);
-    }
+
 
     public boolean updateStatus(int contactId, String status, String adminNotes) throws Exception {
         String sql = "UPDATE ContactMessages SET [Status] = ?, AdminNotes = ? WHERE ContactId = ?";

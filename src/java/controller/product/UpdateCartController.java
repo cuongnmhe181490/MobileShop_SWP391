@@ -1,6 +1,7 @@
 package controller.storefront;
 
 import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import dao.order.UserCartDAO;
 import entity.ProductModel;
 import entity.User;
@@ -40,7 +41,7 @@ public class UpdateCartController extends HttpServlet {
             return;
         }
 
-        ProductModel product = new DAO().getProductByID(productId);
+        ProductModel product = new ProductStorefrontDAO().getProductByID(productId);
         if (product == null) {
             cartDao.removeItem(user.getId(), productId);
             CartSupport.syncCartSize(session);

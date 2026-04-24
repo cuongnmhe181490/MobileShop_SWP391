@@ -1,6 +1,7 @@
 package controller.storefront;
 
 import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.ProductModel;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -24,7 +25,7 @@ public class GetModelsByBrandControl extends HttpServlet {
             String brandId = request.getParameter("brand");
             if (brandId != null) brandId = brandId.trim();
             
-            DAO dao = new DAO();
+            ProductStorefrontDAO dao = new ProductStorefrontDAO();
             List<ProductModel> products = dao.getProductsByBrand(brandId);
 
             List<String> modelNames = products.stream()

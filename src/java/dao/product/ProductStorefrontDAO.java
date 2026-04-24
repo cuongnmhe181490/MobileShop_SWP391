@@ -78,6 +78,17 @@ public class ProductStorefrontDAO extends ProductBaseDAO {
         return brands;
     }
 
+    public List<String> getActiveSuppliers() {
+        return getAvailableBrands();
+    }
+
+    public List<ProductModel> getProductsByBrand(String brandId) {
+        return new ArrayList<>(queryProducts(
+                "SELECT * FROM ProductDetail WHERE IdSupplier = ?",
+                ps -> ps.setString(1, brandId)
+        ));
+    }
+
     public List<Integer> getAvailableRamOptions() {
         List<Integer> ramOptions = new ArrayList<>();
         String query = "SELECT DISTINCT RAM FROM ProductDetail WHERE RAM IS NOT NULL";
@@ -262,6 +273,28 @@ public class ProductStorefrontDAO extends ProductBaseDAO {
             System.out.println(e);
         }
         return reviews;
+    }
+
+    public int countProductReviews(String productId, Integer ranking) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ProductReview WHERE IdProduct = ?");
+        if (ranking != null) {
+            sql.append(" AND Ranking = ?");
+        }
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setString(1, productId);
+            if (ranking != null) {
+                ps.setInt(2, ranking);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return 0;
     }
 
     public Map<Integer, Integer> getReviewCountsByRating(String productId) {

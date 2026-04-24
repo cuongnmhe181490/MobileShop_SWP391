@@ -30,7 +30,7 @@ public class PlaceOrderController extends HttpServlet {
 
         DAO productDao = new DAO();
         UserCartDAO cartDao = new UserCartDAO();
-        List<CartItem> cartItems = CartSupport.buildCartItems(session, productDao);
+        List<CartItem> cartItems = CartSupport.buildCartItems(session);
         if (cartItems.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/product");
             return;
@@ -84,7 +84,11 @@ public class PlaceOrderController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/confirm.jsp");
         } catch (Exception ex) {
             ex.printStackTrace();
-            request.setAttribute("formError", "Kh\u00f4ng th\u1ec3 l\u01b0u \u0111\u01a1n h\u00e0ng. Vui l\u00f2ng th\u1eed l\u1ea1i.");
+            String msg = ex.getMessage();
+            if (msg == null || msg.isEmpty()) {
+                msg = "Không thể lưu đơn hàng. Vui lòng thử lại.";
+            }
+            request.setAttribute("formError", msg);
             forwardCheckout(request, response, cartItems, cartTotal, fullName, email, phone, address, note);
         }
     }

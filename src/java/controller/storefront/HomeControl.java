@@ -6,6 +6,7 @@ package controller.storefront;
 
 import dao.BlogDAO;
 import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.BlogPost;
 import entity.ProductModel;
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class HomeControl extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
 
         BlogDAO bdao = new BlogDAO();
         List<ProductModel> featuredProducts = dao.getFeaturedProducts(6);

@@ -1,6 +1,7 @@
 package controller.storefront;
 
 import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.ProductModel;
 import entity.Review;
 import jakarta.servlet.ServletException;
@@ -23,7 +24,7 @@ public class ReviewDetailControl extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
         String productId = request.getParameter("pid");
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         ProductModel product = dao.getProductByID(productId);
         if (product == null) {
             response.sendRedirect(request.getContextPath() + "/product");

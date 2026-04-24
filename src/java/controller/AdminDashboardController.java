@@ -19,8 +19,6 @@ public class AdminDashboardController extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
-        DAO dao = new DAO();
-        
         // 1. Lấy tham số ngày từ Request
         String startDateStr = request.getParameter("startDate");
         String endDateStr = request.getParameter("endDate");
@@ -41,28 +39,28 @@ public class AdminDashboardController extends HttpServlet {
 
         long diffDays = Math.abs(eDate.getTime() - sDate.getTime()) / (1000 * 60 * 60 * 24);
 
+        BlogDAO blogDAO = new BlogDAO();
+        UserDAO userDAO = new UserDAO();
         dao.order.OrderDAO orderDAO = new dao.order.OrderDAO();
         dao.product.ProductAdminDAO productDAO = new dao.product.ProductAdminDAO();
-        
-
 
         try {
             // 3. Các thống kê và chỉ số theo khoảng ngày đã chọn
-            request.setAttribute("totalProducts", dao.getNewProductsCount(sDate, eDate));
-            request.setAttribute("totalUsers", dao.getNewUsersCount(sDate, eDate));
+            request.setAttribute("totalProducts", productDAO.getNewProductsCount(sDate, eDate));
+            request.setAttribute("totalUsers", userDAO.getNewUsersCount(sDate, eDate));
             request.setAttribute("soldOrders", orderDAO.getSoldOrdersCount(sDate, eDate));
             request.setAttribute("monthlyRevenue", orderDAO.getRevenueByDate(sDate, eDate));
             
             // Các dữ liệu khác có thể vẫn giữ nguyên hoặc lọc thêm nếu cần
-            request.setAttribute("totalBlogs", dao.getTotalBlogs());
+            request.setAttribute("totalBlogs", blogDAO.getTotalBlogs());
             request.setAttribute("recentOrders", orderDAO.getRecentOrdersDashboard(5));
-            request.setAttribute("bestSellers", dao.getBestSellers(5, sDate, eDate));
+            request.setAttribute("bestSellers", orderDAO.getBestSellers(5, sDate, eDate));
             request.setAttribute("monthlyRevenueData", orderDAO.getMonthlyRevenueData());
             request.setAttribute("orderStats", orderDAO.getOrderStatusStatistics());
             
             // Thống kê phụ
-            request.setAttribute("newProductsMonth", dao.getNewProductsCount(sDate, eDate));
-            request.setAttribute("newUsersMonth", dao.getNewUsersCount(sDate, eDate));
+            request.setAttribute("newProductsMonth", productDAO.getNewProductsCount(sDate, eDate));
+            request.setAttribute("newUsersMonth", userDAO.getNewUsersCount(sDate, eDate));
             request.setAttribute("newOrdersMonth", orderDAO.getNewOrdersCount(sDate, eDate));
         } catch (Exception e) {
             System.err.println("CRITICAL ERROR IN AdminDashboardController:");

@@ -30,7 +30,7 @@ public class CheckoutController extends HttpServlet {
 
         UserCartDAO cartDao = new UserCartDAO();
         String reserveError = cartDao.reserveLowStockItems(user.getId());
-        List<CartItem> cartItems = CartSupport.buildCartItems(session, new DAO());
+        List<CartItem> cartItems = CartSupport.buildCartItems(session);
         if (cartItems.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/product");
             return;
@@ -70,7 +70,7 @@ public class CheckoutController extends HttpServlet {
         String address = request.getParameter("address");
         String note = request.getParameter("note");
         
-        List<CartItem> cartItems = CartSupport.buildCartItems(session, dao);
+        List<CartItem> cartItems = CartSupport.buildCartItems(session);
         double cartTotal = calculateTotal(cartItems);
         
         boolean hasError = false;

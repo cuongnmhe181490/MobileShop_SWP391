@@ -59,9 +59,9 @@ public class OrderDAO {
                     
                     String updateStockSql;
                     if (hasQuantity) {
-                        updateStockSql = "UPDATE ProductDetail SET CurrentQuantity = CurrentQuantity - ?, Quantity = Quantity - ? WHERE TRY_CAST(IdProduct AS INT) = TRY_CAST(? AS INT) AND CurrentQuantity >= ?";
+                        updateStockSql = "UPDATE ProductDetail SET CurrentQuantity = CurrentQuantity - ?, Quantity = Quantity - ? WHERE IdProduct = ? AND CurrentQuantity >= ?";
                     } else {
-                        updateStockSql = "UPDATE ProductDetail SET CurrentQuantity = CurrentQuantity - ? WHERE TRY_CAST(IdProduct AS INT) = TRY_CAST(? AS INT) AND CurrentQuantity >= ?";
+                        updateStockSql = "UPDATE ProductDetail SET CurrentQuantity = CurrentQuantity - ? WHERE IdProduct = ? AND CurrentQuantity >= ?";
                     }
                     
                     try (PreparedStatement stockPs = conn.prepareStatement(updateStockSql)) {
@@ -312,7 +312,7 @@ public class OrderDAO {
                 + "SELECT SUM(uc.Quantity) FROM UserCart uc "
                 + "WHERE uc.IdProduct = p.IdProduct AND uc.UserId <> ? "
                 + "AND uc.IsReserved = 1 AND uc.ExpiresAt > GETDATE()), 0) AS AvailableQuantity "
-                + "FROM ProductDetail p WITH (UPDLOCK, HOLDLOCK) WHERE TRY_CAST(p.IdProduct AS INT) = TRY_CAST(? AS INT)";
+                + "FROM ProductDetail p WITH (UPDLOCK, HOLDLOCK) WHERE p.IdProduct = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setString(2, productId);
@@ -326,18 +326,7 @@ public class OrderDAO {
         return status != null && !status.trim().isEmpty();
     }
 
-    public int getPendingOrdersCount() {
-        String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus = ? OR OrderStatus = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setString(1, STATUS_DELIVERING);
-            ps.setString(2, STATUS_PENDING);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return 0;
-    }
+
 
     public int getSoldOrdersCount(java.sql.Date startDate, java.sql.Date endDate) {
         String query = "SELECT COUNT(*) FROM [Order] WHERE OrderStatus IN (?, ?) AND OrderDate >= ? AND OrderDate <= ?";
@@ -451,6 +440,52 @@ public class OrderDAO {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
+    }
+
+    public List<Map<String, String>> getBestSellers(int limit, java.sql.Date startDate, java.sql.Date endDate) {
+        List<Map<String, String>> list = new ArrayList<>();
+        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, " +
+                      "SUM(od.Quantity) as Sold, " +
+                      "SUM(od.Quantity * od.UnitPrice) as Revenue " +
+                      "FROM OrderDetail od " +
+                      "JOIN [Order] o ON od.IdOrder = o.IdOrder " +
+                      "JOIN ProductDetail p ON TRY_CAST(od.IdProduct AS INT) = TRY_CAST(p.IdProduct AS INT) " +
+                      "WHERE o.OrderStatus IN (?, ?) " +
+                      "AND o.OrderDate >= ? AND o.OrderDate <= ? " +
+                      "GROUP BY p.ProductName, p.IdSupplier " +
+                      "ORDER BY Sold DESC, p.ProductName ASC";
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setInt(1, limit);
+            ps.setString(2, STATUS_COMPLETED);
+            ps.setString(3, STATUS_DELIVERING);
+            ps.setDate(4, startDate);
+            ps.setDate(5, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                java.text.NumberFormat nf = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
+                while (rs.next()) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("name", rs.getString("ProductName"));
+                    map.put("brand", rs.getString("IdSupplier"));
+                    map.put("sold", String.valueOf(rs.getInt("Sold")));
+                    double rev = rs.getDouble("Revenue");
+                    if (rev >= 1000000) {
+                        map.put("revenue", String.format("%.1fM", rev / 1000000.0));
+                    } else {
+                        map.put("revenue", nf.format(rev));
+                    }
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Map<String, String>> getBestSellers(int limit) {
+        java.sql.Date endDate = new java.sql.Date(System.currentTimeMillis());
+        java.sql.Date startDate = new java.sql.Date(System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000));
+        return getBestSellers(limit, startDate, endDate);
     }
 
     private Map<String, Object> mapOrder(ResultSet rs) throws SQLException {

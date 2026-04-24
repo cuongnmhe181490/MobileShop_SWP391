@@ -199,14 +199,14 @@ public class BlogDAO extends DBContext {
         return false;
     }
 
+
+
     public int getTotalBlogs() {
-        String query = "SELECT COUNT(*) FROM Blog  WHERE (Status = 'VISIBLE' OR Status IS NULL)";
+        String query = "SELECT COUNT(*) FROM Blog WHERE (Status = 'VISIBLE' OR Status IS NULL)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
+            if (rs.next()) return rs.getInt(1);
         } catch (Exception e) {
             e.printStackTrace();
         }

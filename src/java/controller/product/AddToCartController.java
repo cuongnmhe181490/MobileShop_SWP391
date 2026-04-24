@@ -1,6 +1,7 @@
 package controller.storefront;
 
 import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import dao.order.UserCartDAO;
 import entity.Product;
 import entity.User;
@@ -42,7 +43,7 @@ public class AddToCartController extends HttpServlet {
             return;
         }
 
-        Product product = new DAO().getProductByID(productId);
+        Product product = new ProductStorefrontDAO().getProductByID(productId);
         if (product == null) {
             CartSupport.setError(session, "Sản phẩm không tồn tại hoặc đã bị gỡ khỏi hệ thống.");
             redirectBack(request, response, request.getContextPath() + "/product");

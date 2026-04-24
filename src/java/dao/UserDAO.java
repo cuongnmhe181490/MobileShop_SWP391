@@ -104,7 +104,12 @@ public class UserDAO extends DBContext{
     /**
      * Đếm số lượng người dùng đăng ký mới trong khoảng thời gian xác định
      */
-    public int getTotalUsersByDate(java.sql.Date startDate, java.sql.Date endDate) {
+
+    
+    /**
+     * Ä áº¿m sá»‘ ngÆ°á» i dÃ¹ng má»›i Ä‘Äƒng kÃ½ trong khoáº£ng thá» i gian xÃ¡c Ä‘á»‹nh
+     */
+    public int getNewUsersCount(java.sql.Date startDate, java.sql.Date endDate) {
         String query = "SELECT COUNT(*) FROM [User] WHERE CreatedDate >= ? AND CreatedDate <= ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -116,7 +121,7 @@ public class UserDAO extends DBContext{
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
-    
+
     public List<User> getAllUsers() {
         List<User> list = new ArrayList<>();
         String sql = "SELECT u.*, r.RoleName FROM [User] u INNER JOIN [Role] r ON u.RoleId = r.RoleId ORDER BY u.RoleId ASC, u.UserId DESC";
@@ -271,8 +276,8 @@ public class UserDAO extends DBContext{
     public boolean addUserByAdmin(String username, String password, String email, String fullName, String phone, String address, String gender, String birthday, int roleId) {
         
         // Đã xóa Status và CreatedDate, để DB tự động lấy giá trị mặc định (Default)
-        String sql = "INSERT INTO [User] (Username, [Password], Email, FullName, PhoneNumber, Address, Gender, Birthday, RoleId) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO [User] (Username, [Password], Email, FullName, PhoneNumber, Address, Gender, Birthday, RoleId, Status, CreatedDate) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, N'Hoạt động', GETDATE())";
                      
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

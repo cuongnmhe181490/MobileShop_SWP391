@@ -2,6 +2,7 @@ package controller.storefront;
 
 import dao.BlogDAO;
 import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.ProductModel;
 import entity.TradeInQuote;
 import jakarta.servlet.ServletException;
@@ -32,7 +33,7 @@ public class TradeInControl extends HttpServlet {
         String brand = trim(request.getParameter("brand"));
         String modelName = trim(request.getParameter("modelName"));
         String condition = trim(request.getParameter("condition"));
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         ProductModel matchedProduct = dao.getProductByBrandAndName(brand, modelName);
         TradeInQuote quote = TradeInSupport.buildQuote(brand, modelName, condition, matchedProduct);
 
@@ -50,7 +51,7 @@ public class TradeInControl extends HttpServlet {
     }
 
     private void prepareBaseRequest(HttpServletRequest request) {
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         List<String> dynamicBrands = dao.getActiveSuppliers();
         request.setAttribute("brands", dynamicBrands);
         request.setAttribute("conditionLabels", TradeInSupport.getConditionLabels());

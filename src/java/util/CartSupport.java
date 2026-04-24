@@ -2,8 +2,8 @@ package util;
 
 import dao.DAO;
 import dao.order.UserCartDAO;
+import dao.product.ProductStorefrontDAO;
 import entity.CartItem;
-
 import entity.ProductModel;
 import entity.User;
 import jakarta.servlet.http.HttpSession;
@@ -60,7 +60,7 @@ public final class CartSupport {
         return stockMap;
     }
 
-    public static List<CartItem> buildCartItems(HttpSession session, DAO dao) {
+    public static List<CartItem> buildCartItems(HttpSession session) {
         Integer userId = getLoggedInUserId(session);
         if (userId != null) {
             List<CartItem> dbItems = new UserCartDAO().getCartItems(userId);
@@ -71,6 +71,7 @@ public final class CartSupport {
         Map<String, Integer> cart = getCart(session);
         List<CartItem> items = new ArrayList<>();
         List<String> invalidKeys = new ArrayList<>();
+        ProductStorefrontDAO psDAO = new ProductStorefrontDAO();
 
         for (Map.Entry<String, Integer> entry : cart.entrySet()) {
             Integer quantity = entry.getValue();
@@ -79,7 +80,7 @@ public final class CartSupport {
                 continue;
             }
 
-            ProductModel product = dao.getProductByID(entry.getKey());
+            ProductModel product = psDAO.getProductByID(entry.getKey());
             if (product == null) {
                 invalidKeys.add(entry.getKey());
                 continue;

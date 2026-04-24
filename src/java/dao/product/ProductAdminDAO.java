@@ -248,4 +248,26 @@ public class ProductAdminDAO extends ProductStorefrontDAO {
             e.printStackTrace();
         }
     }
+    public int getTotalProducts() {
+        String query = "SELECT COUNT(*) FROM ProductDetail";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public int getNewProductsCount(java.sql.Date startDate, java.sql.Date endDate) {
+        String query = "SELECT COUNT(*) FROM ProductDetail WHERE ReleaseDate >= ? AND ReleaseDate <= ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
 }

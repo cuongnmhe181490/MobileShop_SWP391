@@ -28,7 +28,7 @@ public class CartController extends HttpServlet {
             request.getRequestDispatcher("/cart.jsp").forward(request, response);
             return;
         }
-        List<CartItem> cartItems = CartSupport.buildCartItems(request.getSession(), dao);
+        List<CartItem> cartItems = CartSupport.buildCartItems(request.getSession());
         double cartTotal = 0;
 
         for (CartItem item : cartItems) {

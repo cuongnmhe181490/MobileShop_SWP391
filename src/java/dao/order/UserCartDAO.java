@@ -239,7 +239,7 @@ public class UserCartDAO {
         releaseExpiredReservations();
         String sql = "SELECT TOP 1 1 "
                 + "FROM UserCart uc JOIN ProductDetail p ON uc.IdProduct = p.IdProduct "
-                + "WHERE uc.UserId = ? AND COALESCE(p.CurrentQuantity, 0) <= 5 "
+                + "WHERE uc.UserId = ? AND COALESCE(p.CurrentQuantity, 0) <= 100 "
                 + "AND (uc.IsReserved = 0 OR uc.ExpiresAt IS NULL OR uc.ExpiresAt <= GETDATE())";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
