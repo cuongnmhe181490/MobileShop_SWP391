@@ -204,6 +204,13 @@
         .btn-search:hover { background: #0f172a; color: white; }
         .btn-clear { background: #f4f7fe; color: var(--text-main); border: 1px solid var(--border); }
         .btn-clear:hover { background: #e9edf7; color: var(--text-main); }
+        
+        /* CSS Phân trang */
+        .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 24px; padding-bottom: 20px; }
+        .page-link { width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; border-radius: 10px; background: #f4f7fe; color: #2B3674; font-weight: 600; text-decoration: none; transition: 0.3s; border: 1px solid transparent; }
+        .page-link:hover { background: #e9edf7; transform: translateY(-2px); }
+        .page-link.active { background: #4318ff; color: white; border-color: #4318ff; }
+        .page-link.disabled { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -402,6 +409,22 @@
                             </c:if>
                         </tbody>
                     </table>
+                    <c:if test="${totalPages > 1}">
+                        <div class="pagination">
+                            <a href="?page=${currentPage - 1}${not empty searchQuery ? '&search='.concat(searchQuery) : ''}" 
+                               class="page-link ${currentPage == 1 ? 'disabled' : ''}">
+                               <i class="fa-solid fa-chevron-left"></i> </a>
+
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <a href="?page=${i}${not empty searchQuery ? '&search='.concat(searchQuery) : ''}" 
+                                   class="page-link ${currentPage == i ? 'active' : ''}">${i}</a>
+                            </c:forEach>
+
+                            <a href="?page=${currentPage + 1}${not empty searchQuery ? '&search='.concat(searchQuery) : ''}" 
+                               class="page-link ${currentPage == totalPages ? 'disabled' : ''}">
+                               <i class="fa-solid fa-chevron-right"></i> </a>
+                        </div>
+                    </c:if>
                 </div>
             </div>
         </main>
