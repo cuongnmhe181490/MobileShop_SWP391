@@ -73,36 +73,13 @@ public class AdminHomeConfigServlet extends HttpServlet {
      * Công thức: AVG(Ranking) làm tròn 1 chữ số thập phân, ví dụ "4.8/5"
      */
     private String getLiveSatisfactionRate() {
-        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) AS Average FROM ProductReview";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                double avg = rs.getDouble("Average");
-                if (avg > 0) {
-                    return String.format("%.1f/5", avg);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "0.0/5";
+        return heroDAO.getLiveSatisfactionRate();
     }
 
     /**
      * Lấy tổng số sản phẩm trong kho từ bảng ProductDetail.
      */
     private int getLiveProductCount() {
-        String sql = "SELECT COUNT(*) FROM ProductDetail";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return heroDAO.getLiveProductCount();
     }
 }

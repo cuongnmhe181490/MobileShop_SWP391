@@ -13,7 +13,7 @@
             }
 
             .review-shell {
-                max-width: 850px;
+                max-width: 760px;
                 margin: 40px auto;
                 padding: 40px;
                 background: #ffffff;
@@ -768,7 +768,7 @@
                                 </div>
                             </c:if>
                         </div>
-                    </div>
+
 
                     <%-- Danh sách review --%>
                     <c:choose>
