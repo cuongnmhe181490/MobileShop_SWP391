@@ -42,9 +42,9 @@
             /* Floating Compare Bar */
             .compare-bar {
                 position: fixed;
-                bottom: -150px;
+                bottom: 0;
                 left: 50%;
-                transform: translateX(-50%);
+                transform: translateX(-50%) translateY(110%);
                 width: 95%;
                 max-width: 1000px;
                 background: #FFF;
@@ -55,9 +55,13 @@
                 display: flex;
                 align-items: center;
                 gap: 24px;
-                transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                visibility: hidden;
             }
-            .compare-bar.show { bottom: 0; }
+            .compare-bar.show { 
+                transform: translateX(-50%) translateY(0); 
+                visibility: visible;
+            }
             .compare-slots {
                 display: flex;
                 gap: 16px;
@@ -198,6 +202,8 @@
                     <section class="detail-summary">
                         <span class="section-eyebrow">${detail.idSupplier}</span>
                         <h1>${detail.productName}</h1>
+                        <input type="hidden" id="currentProductName" value="<c:out value='${detail.productName}' />">
+                        <input type="hidden" id="currentProductImage" value="${detail.imagePath}">
                         <div class="detail-toolbar">
                             <a class="tool-item" href="${ctx}/reviews?pid=${detail.idProduct}"><i class="fa-regular fa-comment-dots"></i> Hỏi đáp</a>
                             <a class="tool-item" onclick="initCompare()"><i class="fa-solid fa-circle-plus"></i> So sánh</a>
@@ -269,7 +275,6 @@
                                     </div>
                                     <span>${reviewCount} đánh giá</span>
                                 </div>
-                                <a class="review-summary-card__link" href="${ctx}/reviews?pid=${detail.idProduct}">Xem chi tiết</a>
                             </div>
                             <p>Người mua có thể xem chi tiết theo từng mức sao và toàn bộ nhận xét ở màn đánh giá riêng.</p>
                         </section>
@@ -424,14 +429,19 @@
             const currentPid = '${detail.idProduct}';
 
             function initCompare() {
-                // Add current product if not in list
-                if (!currentCompare.find(p => p.id === currentPid)) {
-                    currentCompare.push({
-                        id: currentPid,
-                        name: `${detail.productName.replace('"', '\\"')}`,
-                        image: '${detail.imagePath}'
-                    });
-                }
+                // Start fresh for this product session
+                currentCompare = [];
+                
+                const pName = document.getElementById('currentProductName').value;
+                const pImage = document.getElementById('currentProductImage').value;
+
+                // Add current product
+                currentCompare.push({
+                    id: currentPid,
+                    name: pName,
+                    image: pImage
+                });
+                
                 saveCompare();
                 renderCompareBar();
                 toggleCompareBar(true);
@@ -471,8 +481,10 @@
             }
 
             function removeFromCompare(id, e) {
-                e.stopPropagation();
-                currentCompare = currentCompare.filter(p => p.id !== id);
+                if (e) e.stopPropagation();
+                // Sync first
+                currentCompare = JSON.parse(localStorage.getItem('mobileShopCompare') || '[]');
+                currentCompare = currentCompare.filter(p => p.id != id);
                 saveCompare();
                 renderCompareBar();
                 if (currentCompare.length === 0) toggleCompareBar(false);
@@ -519,6 +531,9 @@
             }
 
             function selectForCompare(p) {
+                // Sync first
+                currentCompare = JSON.parse(localStorage.getItem('mobileShopCompare') || '[]');
+                
                 if (currentCompare.length >= 3) {
                     alert('Chỉ có thể so sánh tối đa 3 sản phẩm.');
                     return;
@@ -527,6 +542,7 @@
                 saveCompare();
                 renderCompareBar();
                 closeModal();
+                toggleCompareBar(true);
             }
 
             function goCompare() {
@@ -537,12 +553,13 @@
                 window.location.href = url;
             }
 
-            // Sync bar on load if items exist
+            // Reset comparison list on load for a fresh start on each product
             window.addEventListener('load', () => {
-                if (currentCompare.length > 0) {
-                    renderCompareBar();
-                    toggleCompareBar(true);
-                }
+                localStorage.removeItem('mobileShopCompare');
+                currentCompare = [];
+                renderCompareBar();
+                // Ensure hidden by default on load
+                toggleCompareBar(false);
             });
         </script>
     </body>

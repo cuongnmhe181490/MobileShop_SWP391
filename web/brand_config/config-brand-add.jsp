@@ -432,8 +432,8 @@
             const validationRules = {
                 idSupplier: { required: true, max: 100, label: 'Mã thương hiệu' },
                 name: { required: true, max: 100, label: 'Tên thương hiệu' },
-                email: { required: true, max: 100, format: 'email', label: 'Email liên hệ' },
-                phoneNumber: { max: 15, label: 'Số điện thoại' },
+                 email: { required: true, max: 100, format: 'email', label: 'Email liên hệ' },
+                phoneNumber: { max: 15, format: 'phone', label: 'Số điện thoại' },
                 address: { max: 255, label: 'Địa chỉ' },
                 logoFile: { required: true, label: 'Logo thương hiệu' }
             };
@@ -454,6 +454,11 @@
                     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!re.test(value)) {
                         errorMsg = 'Định dạng email không hợp lệ.';
+                    }
+                } else if (value && rules.format === 'phone') {
+                    const re = /^[\d +()]{7,20}$/;
+                    if (!re.test(value)) {
+                        errorMsg = 'Định dạng số điện thoại không hợp lệ.';
                     }
                 }
 
@@ -530,11 +535,18 @@
                 const file = e.target.files[0];
                 const container = document.getElementById('previewContainer');
                 const preview = document.getElementById('logoPreview');
+                const fieldId = 'logoFile';
+                const field = document.getElementById(fieldId);
+                const fieldContainer = field.closest('.field');
+                const errorDiv = fieldContainer.querySelector('.error-feedback');
+
                 if (file) {
                     if (file.size > 500 * 1024) {
                         showToast('Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB.', 'error');
                         e.target.value = '';
                         container.style.display = 'none';
+                        fieldContainer.classList.add('has-error');
+                        errorDiv.textContent = 'Dung lượng logo tối đa 500KB.';
                     } else {
                         const reader = new FileReader();
                         reader.onload = function(event) {
@@ -545,8 +557,23 @@
 
                         const img = new Image();
                         img.onload = function() {
-                            if (this.width > 1200 || this.height > 1200) {
-                                showToast('Kích thước logo quá lớn! Cảnh báo: nên dùng 400x400px để tối ưu.', 'warning');
+                            const ratio = this.width / this.height;
+                            let errorMsg = '';
+                            if (this.width > 1000 || this.height > 1000) {
+                                errorMsg = 'Độ phân giải logo quá lớn! Tối đa 1000x1000px.';
+                            } else if (ratio < 0.8 || ratio > 1.2) {
+                                errorMsg = 'Vui lòng chọn ảnh vuông! Tỷ lệ chuẩn 1:1 (400x400px).';
+                            }
+
+                            if (errorMsg) {
+                                showToast(errorMsg, 'error');
+                                e.target.value = '';
+                                container.style.display = 'none';
+                                fieldContainer.classList.add('has-error');
+                                errorDiv.textContent = errorMsg;
+                            } else {
+                                fieldContainer.classList.remove('has-error');
+                                errorDiv.textContent = '';
                             }
                         };
                         img.src = URL.createObjectURL(file);

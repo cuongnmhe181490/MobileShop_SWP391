@@ -392,6 +392,7 @@
             imageFileInput.addEventListener('change', () => {
                 setError('imageFile', '');
                 const file = imageFileInput.files[0];
+                const container = imageFileInput.closest('.field-block');
                 if (!file) {
                     return;
                 }
@@ -400,14 +401,36 @@
                 if (!validTypes.includes(file.type)) {
                     setError('imageFile', 'Chỉ chấp nhận file ảnh hợp lệ: png, jpg, jpeg, gif, webp.');
                     imageFileInput.value = '';
+                    container.classList.add('field-block--error');
                     return;
                 }
                 if (file.size > 500 * 1024) {
                     setError('imageFile', 'Kích thước ảnh tối đa là 500kb.');
                     imageFileInput.value = '';
+                    container.classList.add('field-block--error');
                     return;
                 }
-                preview.src = URL.createObjectURL(file);
+
+                const img = new Image();
+                img.onload = function() {
+                    const ratio = this.width / this.height;
+                    let errorMsg = '';
+                    if (this.width > 1500 || this.height > 1500) {
+                        errorMsg = 'Độ phân giải ảnh quá lớn! Tối đa 1500x1500px.';
+                    } else if (ratio < 0.8 || ratio > 1.2) {
+                        errorMsg = 'Vui lòng chọn ảnh vuông! Tỷ lệ chuẩn 1:1 (khuyên dùng 800x800px).';
+                    }
+
+                    if (errorMsg) {
+                        setError('imageFile', errorMsg);
+                        imageFileInput.value = '';
+                        container.classList.add('field-block--error');
+                    } else {
+                        container.classList.remove('field-block--error');
+                        preview.src = URL.createObjectURL(file);
+                    }
+                };
+                img.src = URL.createObjectURL(file);
             });
 
             form.addEventListener('submit', async (event) => {
