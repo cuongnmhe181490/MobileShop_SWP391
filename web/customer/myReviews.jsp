@@ -119,6 +119,24 @@
                 color: #991b1b;
             }
 
+            /* Tag badge */
+            .tag-badge {
+                display: inline-block;
+                padding: 1px 10px;
+                background: #EEF3FD; 
+                color: #3B6FE8;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+                margin-right: 8px;
+            }
+            .tag-badge--qa {
+                background: #FFF7ED;
+                color: #EA580C;
+            }
+
             /* Admin reply */
             .rv-reply {
                 margin-top: 10px;
@@ -196,13 +214,53 @@
                 text-decoration: none;
             }
 
+            /* Tabs */
+            .my-tabs {
+                display: flex;
+                gap: 32px;
+                margin-bottom: 24px;
+                border-bottom: 1px solid var(--line);
+                padding-bottom: 1px;
+            }
+            .tab-btn {
+                background: none;
+                border: none;
+                padding: 12px 0;
+                font-size: 14px;
+                font-weight: 700;
+                color: var(--muted);
+                cursor: pointer;
+                position: relative;
+                transition: 0.3s;
+            }
+            .tab-btn:hover { color: var(--text); }
+            .tab-btn.active { color: var(--accent); }
+            .tab-btn.active::after {
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: var(--accent);
+            }
+            .tab-pane {
+                display: none;
+            }
+            .tab-pane.active {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
             /* Confirm modal */
             .modal-overlay {
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0,0,0,.45);
-                z-index: 999;
+                background: rgba(15, 23, 42, 0.4);
+                backdrop-filter: blur(4px);
+                z-index: 1000;
                 align-items: center;
                 justify-content: center;
             }
@@ -210,46 +268,51 @@
                 display: flex;
             }
             .modal-box {
-                background: var(--color-background-primary);
-                border-radius: 16px;
-                padding: 28px;
-                max-width: 360px;
+                background: #ffffff;
+                border-radius: 20px;
+                padding: 32px;
+                max-width: 380px;
                 width: 90%;
                 text-align: center;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.1);
             }
             .modal-box h2 {
-                font-size: 16px;
-                font-weight: 700;
-                margin-bottom: 8px;
-                color: var(--color-text-primary);
+                font-size: 18px;
+                font-weight: 800;
+                margin-bottom: 10px;
+                color: #0f172a;
             }
             .modal-box p  {
-                font-size: 13px;
-                color: var(--color-text-secondary);
-                margin-bottom: 20px;
+                font-size: 14px;
+                color: #64748b;
+                margin-bottom: 24px;
+                line-height: 1.6;
             }
             .modal-actions {
                 display: flex;
-                gap: 10px;
+                gap: 12px;
                 justify-content: center;
             }
             .btn-confirm-del {
-                padding: 8px 20px;
+                padding: 10px 24px;
                 border-radius: 999px;
-                background: #dc2626;
+                background: #ef4444;
                 color: #fff;
-                font-size: 13px;
-                font-weight: 600;
+                font-size: 14px;
+                font-weight: 700;
                 border: none;
                 cursor: pointer;
+                transition: 0.2s;
             }
+            .btn-confirm-del:hover { background: #dc2626; }
             .btn-confirm-cancel {
-                padding: 8px 20px;
+                padding: 10px 24px;
                 border-radius: 999px;
-                font-size: 13px;
-                border: 1px solid var(--color-border-secondary);
-                color: var(--color-text-secondary);
-                background: none;
+                font-size: 14px;
+                font-weight: 600;
+                border: 1px solid #e2e8f0;
+                color: #64748b;
+                background: #f8fafc;
                 cursor: pointer;
             }
         </style>
@@ -269,26 +332,41 @@
                 <c:choose>
                     <c:when test="${empty reviews}">
                         <div class="empty-state">
-                            <p>Bạn chưa đánh giá sản phẩm nào.</p>
-                            <a class="btn-browse" href="${ctx}/catalog">Khám phá sản phẩm</a>
+                            <p>Bạn chưa có đánh giá nào.</p>
+                            <a class="btn-browse" href="${ctx}/product">Khám phá sản phẩm</a>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <c:forEach items="${reviews}" var="rv">
-                            <div class="rv-card">
-                                <%-- Ảnh sản phẩm --%>
-                                <c:choose>
-                                    <c:when test="${not empty rv.productImage}">
-                                        <img class="rv-card__thumb" src="${rv.productImage}" alt="${rv.productName}"/>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="rv-card__thumb-placeholder"></div>
-                                    </c:otherwise>
-                                </c:choose>
+                        <div class="my-tabs">
+                            <button class="tab-btn active" onclick="switchTab('product', this)">Đánh giá Sản phẩm</button>
+                            <button class="tab-btn" onclick="switchTab('service', this)">Đánh giá Dịch vụ</button>
+                        </div>
 
-                                <%-- Nội dung --%>
-                                <div class="rv-card__body">
-                                    <div class="rv-card__product">${rv.productName}</div>
+                        <!-- TAB: Sản phẩm -->
+                        <div id="tab-product" class="tab-pane active">
+                            <c:set var="hasProduct" value="false" />
+                            <c:forEach items="${reviews}" var="rv">
+                                <c:if test="${rv.reviewType eq 'PRODUCT'}">
+                                    <c:set var="hasProduct" value="true" />
+                                    <div class="rv-card">
+                                        <%-- Ảnh sản phẩm --%>
+                                        <c:choose>
+                                            <c:when test="${not empty rv.productImage}">
+                                                <img class="rv-card__thumb" src="${rv.productImage}" alt="${rv.productName}"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <div class="rv-card__thumb-placeholder"></div>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                        <%-- Nội dung --%>
+                                        <div class="rv-card__body">
+                                            <div style="display: flex; align-items: center; margin-bottom: 2px;">
+                                                <span class="tag-badge ${rv.reviewContent.contains('?') ? 'tag-badge--qa' : ''}">
+                                                    ${rv.reviewContent.contains('?') ? 'Hỏi đáp' : 'Sản phẩm'}
+                                                </span>
+                                                <div class="rv-card__product" style="margin: 0;">${rv.productName}</div>
+                                            </div>
                                     <div class="rv-card__meta">
                                         <span class="stars">
                                             <c:forEach begin="1" end="5" var="s">
@@ -326,13 +404,81 @@
 
                                 <%-- Nút Sửa / Xóa --%>
                                 <div class="rv-card__actions">
-                                    <a class="btn-edit"
-                                       href="${ctx}/review/write?id=${rv.reviewId}">Sửa</a>
-                                    <button class="btn-delete"
-                                            onclick="confirmDelete(${rv.reviewId}, '${rv.productName}')">Xóa</button>
+                                    <a class="btn-edit" href="${ctx}/review/write?id=${rv.reviewId}">Sửa</a>
+                                    <button class="btn-delete" onclick="confirmDelete(${rv.reviewId}, '${rv.productName}')">Xóa</button>
                                 </div>
                             </div>
-                        </c:forEach>
+                                </c:if>
+                            </c:forEach>
+                            <c:if test="${!hasProduct}">
+                                <div class="empty-state">
+                                    <p>Bạn chưa có đánh giá nào cho riêng thẻ Sản phẩm.</p>
+                                </div>
+                            </c:if>
+                        </div>
+
+                        <!-- TAB: Dịch vụ -->
+                        <div id="tab-service" class="tab-pane">
+                            <c:set var="hasService" value="false" />
+                            <c:forEach items="${reviews}" var="rv">
+                                <c:if test="${rv.reviewType eq 'SERVICE'}">
+                                    <c:set var="hasService" value="true" />
+                                    <div class="rv-card">
+                                        <div class="rv-card__thumb-placeholder" style="display:flex; align-items:center; justify-content:center; font-size:24px; color:#d1d5db; background:#f8fafc; border:1px solid #e2e8f0;">⭐</div>
+                                        <div class="rv-card__body">
+                                            <div style="display: flex; align-items: center; margin-bottom: 2px;">
+                                                <span class="tag-badge">Dịch vụ</span>
+                                                <div class="rv-card__product" style="margin: 0;">Chất lượng dịch vụ</div>
+                                            </div>
+                                            <div class="rv-card__meta">
+                                                <span class="stars">
+                                                    <c:forEach begin="1" end="5" var="s">
+                                                        <span class="${s <= rv.ranking ? 'on' : ''}">★</span>
+                                                    </c:forEach>
+                                                </span>
+                                                <span>·</span>
+                                                <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy"/>
+                                                <span>·</span>
+                                                <span class="badge badge--${rv.status eq 'VISIBLE' ? 'visible' : 'hidden'}">
+                                                    ${rv.status eq 'VISIBLE' ? 'Đang hiển thị' : 'Đang ẩn'}
+                                                </span>
+                                            </div>
+                                            <p class="rv-card__content" style="font-weight:600; color:#334155; margin-bottom:4px;">${rv.reviewTopic}</p>
+                                            <p class="rv-card__content" style="margin-top:0;">${rv.reviewContent}</p>
+
+                                            <%-- Ảnh review --%>
+                                            <c:if test="${not empty rv.images}">
+                                                <div class="rv-card__images" style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                                                    <c:forEach items="${rv.images}" var="img">
+                                                        <img src="${img.imageUrl}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-border-primary);" alt="Review image">
+                                                    </c:forEach>
+                                                </div>
+                                            </c:if>
+
+                                            <%-- Phản hồi Admin --%>
+                                            <c:if test="${not empty rv.replyContent}">
+                                                <div class="rv-reply">
+                                                    <div class="rv-reply__label">Phản hồi từ cửa hàng</div>
+                                                    <div class="rv-reply__text">${rv.replyContent}</div>
+                                                </div>
+                                            </c:if>
+                                        </div>
+
+                                        <%-- Nút Sửa / Xóa --%>
+                                        <div class="rv-card__actions">
+                                            <a class="btn-edit" href="${ctx}/review/write?id=${rv.reviewId}">Sửa</a>
+                                            <button class="btn-delete" onclick="confirmDelete(${rv.reviewId}, 'Đánh giá dịch vụ')">Xóa</button>
+                                        </div>
+                                    </div>
+                                </c:if>
+                            </c:forEach>
+                            <c:if test="${!hasService}">
+                                <div class="empty-state">
+                                    <p>Bạn chưa có đánh giá dịch vụ nào.</p>
+                                    <a class="btn-browse" href="${ctx}/contact">Đánh giá dịch vụ ngay</a>
+                                </div>
+                            </c:if>
+                        </div>
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -360,10 +506,19 @@
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
 
         <script>
+            function switchTab(tabId, btnElement) {
+                // Remove active classes
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+                // Add active to current
+                btnElement.classList.add('active');
+                document.getElementById('tab-' + tabId).classList.add('active');
+            }
+
             function confirmDelete(reviewId, productName) {
                 document.getElementById('deleteReviewId').value = reviewId;
                 document.getElementById('modalDesc').textContent =
-                        'Bạn có chắc muốn xóa đánh giá sản phẩm "' + productName + '"?';
+                        'Bạn có chắc muốn xóa "' + productName + '"?';
                 document.getElementById('deleteModal').classList.add('open');
             }
             function closeModal() {
@@ -372,6 +527,18 @@
             document.getElementById('deleteModal').addEventListener('click', function (e) {
                 if (e.target === this)
                     closeModal();
+            });
+
+            // Auto-hide success alert
+            window.addEventListener('DOMContentLoaded', () => {
+                const alert = document.querySelector('.rv-alert--success');
+                if (alert) {
+                    setTimeout(() => {
+                        alert.style.transition = '0.5s opacity';
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.style.display = 'none', 500);
+                    }, 3000);
+                }
             });
         </script>
     </body>

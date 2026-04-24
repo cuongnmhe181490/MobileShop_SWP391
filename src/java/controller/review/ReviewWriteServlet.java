@@ -91,6 +91,7 @@ public class ReviewWriteServlet extends HttpServlet {
                 if (product != null) {
                     req.setAttribute("productName",  product.get("ProductName"));
                     req.setAttribute("productImage", product.get("ImagePath"));
+                    req.setAttribute("productPrice", product.get("Price"));
                 }
             }
 
