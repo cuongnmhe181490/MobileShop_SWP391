@@ -13,6 +13,20 @@ public class CloudinaryUtil {
     private CloudinaryUtil() {
     }
 
+
+    private static final Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
+            "cloud_name", "dovcx8lxl",
+            "api_key", "686417178596178",
+            "api_secret", "wgqV0cS4ia7kjW8fNJ-n21216hc",
+            "secure", true
+    ));
+
+    /**
+     * Hàm xử lý upload file từ Servlet Part lên Cloudinary
+     * @param filePart Đối tượng Part nhận từ request.getPart()
+     * @return String URL của ảnh sau khi upload thành công, hoặc null nếu lỗi
+     */
+
     public static String upload(Part filePart) {
         return uploadImage(filePart, 0, 0, null);
     }

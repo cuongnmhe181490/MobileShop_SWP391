@@ -86,7 +86,8 @@ public class requestPassword extends HttpServlet {
             daoUser.saveResetToken(email, token);
             
             // 3. Tạo link kèm Token
-            String resetLink = "http://localhost:9999/MobileShop/resetPassword?token=" + token;
+            String contextPath = request.getContextPath(); // Tự lấy "/MobileShop_SWP391"
+            String resetLink = "http://localhost:9999" + contextPath + "/resetPassword?token=" + token;
             
             // 4. Gửi Mail bằng SendGrid
             SendGridEmailService emailService = new SendGridEmailService();
