@@ -17,11 +17,6 @@
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
-        <!-- Css Styles -->
-        <link rel="stylesheet" href="${ctx}/css/bootstrap.min.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/owl.carousel.min.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/style.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/custom.css" type="text/css">
     </head>
     <body>
         <%@ include file="/WEB-INF/jspf/storefront/header.jspf" %>
@@ -40,7 +35,6 @@
                                 <div class="filter-group">
                                     <h3>Tìm kiếm</h3>
                                     <input id="catalogSearchInput" class="catalog-search" type="text" name="txt" value="${fn:escapeXml(searchQuery)}" placeholder="Tìm sản phẩm như iPhone 17 Pro Max">
-                                    <p class="catalog-filter-note">Hệ thống tự bỏ khác biệt hoa/thường và khoảng trắng khi tìm kiếm.</p>
                                 </div>
 
                                 <div class="filter-group">
@@ -159,16 +153,19 @@
                         <div class="catalog-grid">
                             <c:forEach items="${catalogProducts}" var="item">
                                 <c:set var="displayStock" value="${catalogDisplayStockMap[item.idProduct]}" />
+                                <c:url var="detailUrl" value="/detail">
+                                    <c:param name="pid" value="${item.idProduct}" />
+                                </c:url>
                                 <c:url var="fallbackImageUrl" value="/product-image">
                                     <c:param name="brand" value="${item.idSupplier}" />
                                     <c:param name="name" value="${item.productName}" />
                                 </c:url>
                                 <article class="product-card">
-                                    <a class="product-card__media" href="${ctx}/detail?pid=${item.idProduct}">
+                                    <a class="product-card__media" href="${detailUrl}">
                                         <img src="${item.imagePath}" alt="${item.productName}" onerror="this.onerror=null;this.src='${fallbackImageUrl}';">
                                     </a>
                                     <div class="product-card__body">
-                                        <h3><a href="${ctx}/detail?pid=${item.idProduct}">${item.productName}</a></h3>
+                                        <h3><a href="${detailUrl}">${item.productName}</a></h3>
                                         <div class="product-card__row">
                                             <div class="product-price">${catalogPriceLabels[item.idProduct]}</div>
                                         </div>
@@ -198,7 +195,7 @@
                                                     </form>
                                                 </c:otherwise>
                                             </c:choose>
-                                            <a class="pill-link pill-link--dark" href="${ctx}/detail?pid=${item.idProduct}">Xem chi tiết</a>
+                                            <a class="pill-link pill-link--dark" href="${detailUrl}">Xem chi tiết</a>
                                         </div>
                                     </div>
                                 </article>

@@ -1,6 +1,6 @@
-package controller.storefront;
+package controller.product;
 
-import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.CartItem;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,7 +17,7 @@ public class CartController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         List<CartItem> cartItems = CartSupport.buildCartItems(request.getSession(), dao);
         double cartTotal = 0;
 

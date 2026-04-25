@@ -1,213 +1,233 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý đơn hàng - MobileShop Admin</title>
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${ctx}/css/admin-custom.css">
     <style>
-        :root {
-            --bg-body: #f4f7fe;
-            --bg-sidebar: #1e293b;
-            --bg-card: #ffffff;
-            --primary: #4318ff;
-            --text-main: #1b2559;
-            --text-muted: #a3aed0;
-            --border: #e9edf7;
-            --sidebar-active: #aff22f;
-            --shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+        .order-filter-bar {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) minmax(160px, 190px) 76px 96px;
+            gap: 14px;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 24px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); }
+        .order-search-wrap,
+        .order-filter-select {
+            min-width: 0;
+            width: 100%;
+        }
 
-        .admin-layout { display: flex; min-height: 100vh; }
+        .order-search-wrap i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #cbd5e1;
+            font-size: 16px;
+            pointer-events: none;
+        }
 
-        /* Sidebar Styling */
-        /* ===== SIDEBAR – Version Gold ===== */
-        .sidebar {
-            width: 260px;
-            background: #1e293b;
-            padding: 24px 0;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0; left: 0;
-            height: 100vh;
-            z-index: 100;
-            color: white;
-            overflow-y: auto;
+        .order-search-input,
+        .order-filter-select select {
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
-        .sidebar .brand {
-            padding: 0 24px;
-            margin-bottom: 40px;
-            text-decoration: none;
-            color: white;
-            display: block;
+
+        .order-search-input {
+            padding-left: 40px;
         }
-        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
-        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
-        
-        .nav-section { margin-bottom: 32px; }
-        .nav-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #64748b;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            display: block;
-            padding: 0 24px;
+
+        .order-status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
         }
-        
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .menu-link {
+
+        .order-status-badge--delivering {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .order-status-badge--completed {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .order-status-badge--cancelled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .order-action-group {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 24px;
-            color: #94a3b8;
+            gap: 6px;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            min-width: 0;
+        }
+
+        .order-action-group form {
+            margin: 0;
+            display: inline-flex;
+            min-width: 0;
+        }
+
+        .order-action-btn {
+            height: 34px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            box-sizing: border-box;
             text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            border-left: 4px solid transparent;
-            transition: 0.3s;
+            transition: background 0.15s, border-color 0.15s;
         }
-        .menu-link i { width: 20px; text-align: center; }
-        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
-        .menu-link.active {
-            background: rgba(175, 242, 47, 0.1);
-            color: #aff22f;
-            border-left-color: #aff22f;
-            font-weight: 600;
-        }
-        /* ===== END SIDEBAR ===== */
 
-        .main-content { flex: 1; margin-left: 260px; padding: 40px; }
-        
-        /* Table and Cards */
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .page-title h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
-        .page-title p { color: var(--text-muted); font-size: 0.9rem; }
-        
-        .content-card {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: var(--shadow);
+        .order-action-btn--view {
+            min-width: 82px;
         }
-        
-        .filter-bar { display: flex; gap: 16px; margin-bottom: 24px; }
-        .form-input, .form-select {
-            padding: 10px 16px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-        
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); padding: 10px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
-        .admin-table { width: 100%; border-collapse: collapse; }
-        .admin-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-        .admin-table td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-        .status--pending { background: #fff8e6; color: var(--warning); }
+        .order-action-btn--complete {
+            min-width: 112px;
+        }
+
+        .order-action-btn--cancel {
+            min-width: 68px;
+        }
+
+        .product-action-btn--danger {
+            color: #ef4444;
+            border-color: #fecdd3;
+        }
+
+        .product-action-btn--danger:hover {
+            background: #fff1f2;
+        }
+
+        .order-empty-state {
+            text-align: center;
+            padding: 56px 24px;
+            color: var(--text-muted);
+        }
+
+        .order-empty-state i {
+            font-size: 3rem;
+            opacity: 0.18;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .admin-table td {
+            white-space: nowrap;
+        }
+        .admin-table td.wrap-ok {
+            white-space: normal;
+        }
     </style>
+</head>
 <body>
-
-        <!-- Sidebar -->
+    <div class="dashboard-container">
+        <!-- ===== SIDEBAR (đồng bộ từ dashboard.jsp) ===== -->
         <aside class="sidebar">
-            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
+            <a href="${ctx}/admin/dashboard" class="brand">
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
 
-            <!-- 1. TỔNG QUAN -->
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                        <a href="${ctx}/admin/dashboard" class="menu-link">
                             <i class="fa-solid fa-chart-line"></i>Dashboard
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <!-- 2. QUẢN LÝ BÁN HÀNG -->
             <div class="nav-section">
                 <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link active">
+                        <a href="${ctx}/admin/orders" class="menu-link active">
                             <i class="fa-solid fa-receipt"></i>Đơn hàng
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="${ctx}/admin/products" class="menu-link">
                             <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link">
+                        <a href="${ctx}/admin/accounts" class="menu-link">
                             <i class="fa-solid fa-user-gear"></i>Tài khoản
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
             <div class="nav-section">
                 <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                        <a href="${ctx}/admin/contacts" class="menu-link">
                             <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                        <a href="${ctx}/admin/reviews" class="menu-link">
                             <i class="fa-solid fa-star"></i>Đánh giá
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
+                        <a href="${ctx}/admin/blog" class="menu-link">
                             <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <!-- 4. CẤU HÌNH GIAO DIỆN -->
             <div class="nav-section">
                 <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
+                        <a href="${ctx}/admin-home-config.jsp" class="menu-link">
                             <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
                         </a>
                     </li>
                 </ul>
             </div>
 
-            <!-- 5. HỆ THỐNG -->
             <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                        <a href="${ctx}/home" class="menu-link">
                             <i class="fa-solid fa-globe"></i>Xem Website
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                        <a href="${ctx}/logout" class="menu-link">
                             <i class="fa-solid fa-power-off"></i>Đăng xuất
                         </a>
                     </li>
@@ -215,76 +235,120 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <header class="page-header">
-                <div class="page-title">
+            <header class="header">
+                <div class="welcome">
+                    <p class="admin-shell-eyebrow">QUẢN LÝ ĐƠN HÀNG</p>
                     <h1>Quản lý đơn hàng</h1>
-                    <p>Theo dõi trạng thái đơn hàng và xử lý nhanh từ dashboard.</p>
+                    <p class="admin-shell-subtitle">Theo dõi đơn mới nhất, lọc theo khách hàng hoặc trạng thái và cập nhật xử lý ngay tại đây.</p>
                 </div>
-                <button class="btn-primary">Xuất danh sách</button>
             </header>
 
             <section class="content-card">
-                <!-- Filters -->
-                <div class="filter-bar">
-                    <div style="position: relative; flex: 1; max-width: 400px;">
-                        <i class="fa-solid fa-circle-user" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #cbd5e1;"></i>
-                        <input type="text" class="form-input" placeholder="Tìm theo tên khách hàng" style="padding-left: 36px;">
+                <form class="order-filter-bar" action="${ctx}/admin/orders" method="get">
+                    <div class="order-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" class="form-input order-search-input" name="keyword" value="${keyword}" placeholder="Tìm theo mã đơn, tên khách hoặc SĐT">
                     </div>
-                    
-                    <select class="form-select">
-                        <option>Tất cả trạng thái</option>
-                        <option>Chờ xử lý</option>
-                        <option>Đang giao</option>
-                        <option>Đã hoàn thành</option>
-                        <option>Đã hủy</option>
-                    </select>
-                    
-                    <button class="btn-primary" style="background: #4e6af2;">Lọc</button>
-                    <button class="btn-outline">Đặt lại</button>
-                </div>
 
-                <!-- Table -->
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Khách hàng</th>
-                            <th>Tổng tiền</th>
-                            <th>Ngày đặt</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${not empty orderList}">
+                    <select class="form-select order-filter-select" name="status">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Đang giao hàng" ${statusFilter == 'Đang giao hàng' ? 'selected' : ''}>Đang giao hàng</option>
+                        <option value="Đã hoàn thành" ${statusFilter == 'Đã hoàn thành' ? 'selected' : ''}>Đã hoàn thành</option>
+                        <option value="Đã hủy" ${statusFilter == 'Đã hủy' ? 'selected' : ''}>Đã hủy</option>
+                    </select>
+
+                    <button type="submit" class="btn-primary">Lọc</button>
+                    <a href="${ctx}/admin/orders" class="btn-outline" style="text-decoration:none;">Đặt lại</a>
+                </form>
+
+                <c:choose>
+                    <c:when test="${not empty orderList}">
+                        <div class="table-wrap" style="width: 100%; overflow-x: auto;">
+                        <table class="admin-table order-admin-table" style="table-layout: fixed; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">Mã đơn</th>
+                                    <th style="width: 150px;">Khách hàng</th>
+                                    <th style="width: 60px;">SL</th>
+                                    <th style="width: 120px;">Tổng tiền</th>
+                                    <th style="width: 100px;">Ngày đặt</th>
+                                    <th style="width: 130px;">Trạng thái</th>
+                                    <th style="width: 280px;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 <c:forEach items="${orderList}" var="order">
+                                    <c:url var="detailUrl" value="/admin/orders/detail">
+                                        <c:param name="id" value="${order.idOrder}" />
+                                    </c:url>
                                     <tr>
-                                        <td style="font-weight: 500;">${order.customerName}</td>
-                                        <td><fmt:formatNumber value="${order.totalPrice}" type="number"/>đ</td>
-                                        <td><fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy"/></td>
-                                        <td><span class="status-badge status--pending">${order.status}</span></td>
+                                        <td>#ORD-${order.idOrder}</td>
+                                        <td class="wrap-ok">
+                                            <div style="font-weight:600">${order.customerName}</div>
+                                            <div style="color:var(--text-muted);font-size:0.82rem">${order.receiverPhone}</div>
+                                        </td>
+                                        <td>${order.itemCount}</td>
+                                        <td><fmt:formatNumber value="${order.totalPrice}" type="number" maxFractionDigits="0" /> đ</td>
+                                        <td><fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy" /></td>
                                         <td>
-                                            <button class="btn-outline" style="padding: 4px 12px; font-size: 0.8rem;">Chi tiết</button>
+                                            <span class="order-status-badge ${order.status == 'Đang giao hàng' ? 'order-status-badge--delivering' : (order.status == 'Đã hoàn thành' ? 'order-status-badge--completed' : 'order-status-badge--cancelled')}">
+                                                ${order.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="order-action-group">
+                                                <a class="btn-outline order-action-btn order-action-btn--view" href="${detailUrl}" title="Xem chi tiết">Xem</a>
+                                                <c:if test="${order.status == 'Đang giao hàng'}">
+                                                    <form action="${ctx}/admin/orders" method="post">
+                                                        <input type="hidden" name="id" value="${order.idOrder}">
+                                                        <input type="hidden" name="action" value="complete">
+                                                        <button type="submit" class="btn-outline order-action-btn order-action-btn--complete" title="Xác nhận hoàn thành">Hoàn thành</button>
+                                                    </form>
+                                                    <form action="${ctx}/admin/orders" method="post">
+                                                        <input type="hidden" name="id" value="${order.idOrder}">
+                                                        <input type="hidden" name="action" value="cancel">
+                                                        <button type="submit" class="btn-outline order-action-btn product-action-btn--danger order-action-btn--cancel" onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">Hủy đơn</button>
+                                                    </form>
+                                                </c:if>
+                                            </div>
                                         </td>
                                     </tr>
                                 </c:forEach>
-                            </c:when>
-                            <c:otherwise>
-                                <tr>
-                                    <td colspan="5" style="text-align: center; padding: 4rem; color: var(--text-muted);">
-                                        <i class="fa-solid fa-cart-shopping" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.2;"></i>
-                                        Chưa có dữ liệu đơn hàng.
-                                    </td>
-                                </tr>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
+                            </tbody>
+                        </table>
+                        </div>
+
+                        <c:if test="${totalPages > 1}">
+                            <div class="product-pagination">
+                                <c:url var="basePageUrl" value="/admin/orders">
+                                    <c:param name="keyword" value="${keyword}" />
+                                    <c:param name="status" value="${statusFilter}" />
+                                </c:url>
+                                <c:if test="${currentPage > 1}">
+                                    <a href="${basePageUrl}&page=1" class="product-page-link">Đầu</a>
+                                    <a href="${basePageUrl}&page=${currentPage - 1}" class="product-page-link">Trước</a>
+                                </c:if>
+                                <c:forEach begin="1" end="${totalPages}" var="pageIndex">
+                                    <a href="${basePageUrl}&page=${pageIndex}" class="product-page-link ${pageIndex == currentPage ? 'is-active' : ''}">${pageIndex}</a>
+                                </c:forEach>
+                                <c:if test="${currentPage < totalPages}">
+                                    <a href="${basePageUrl}&page=${currentPage + 1}" class="product-page-link">Sau</a>
+                                    <a href="${basePageUrl}&page=${totalPages}" class="product-page-link">Cuối</a>
+                                </c:if>
+                            </div>
+                        </c:if>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="order-empty-state">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <h3>Chưa có dữ liệu đơn hàng</h3>
+                            <p>Không có đơn hàng nào khớp với bộ lọc hiện tại.</p>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
             </section>
         </main>
     </div>
-
 </body>
 </html>

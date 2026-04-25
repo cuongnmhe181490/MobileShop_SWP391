@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.mindrot.jbcrypt.BCrypt;
+import util.CartSupport;
 
 /**
  *
@@ -90,6 +91,7 @@ public class LoginControl extends HttpServlet {
 
                 HttpSession session = request.getSession();
                 session.setAttribute("acc", loginUser);
+                CartSupport.syncCartSize(session);
                 response.sendRedirect("home"); 
             } else {
                 request.setAttribute("mess", "Email hoặc mật khẩu không chính xác!");

@@ -279,6 +279,10 @@ public class DAO {
         return brands;
     }
 
+    public List<String> getActiveSuppliers() {
+        return getAvailableBrands();
+    }
+
     public List<Integer> getAvailableRamOptions() {
         List<Integer> ramOptions = new ArrayList<>();
         String query = "SELECT DISTINCT RAM FROM ProductDetail WHERE RAM IS NOT NULL";

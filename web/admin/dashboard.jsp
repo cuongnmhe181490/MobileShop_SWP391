@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="java.util.*" %>
 <%
@@ -49,7 +49,7 @@
             min-height: 100vh;
         }
 
-        /* ===== SIDEBAR – Version Gold ===== */
+        /* ===== SIDEBAR ===== */
         .sidebar {
             width: 260px;
             background: #1e293b;
@@ -339,12 +339,12 @@
                 <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                        <a href="${pageContext.request.contextPath}/admin/orders" class="menu-link">
                             <i class="fa-solid fa-receipt"></i>Đơn hàng
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="${pageContext.request.contextPath}/admin/products" class="menu-link">
                             <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
                         </a>
                     </li>
@@ -412,7 +412,7 @@
             <header class="header">
                 <div class="welcome">
                     <p style="text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Tổng quan hệ thống</p>
-                    <h1>Chào mừng quay trở lại, ${sessionScope.acc != null ? sessionScope.acc.name : "Thân Hải Phúc"} &bull; Hôm nay: ${currentDate}</h1>
+                    <h1>Chào mừng quay trở lại, ${sessionScope.acc != null ? sessionScope.acc.name : "Admin"} &bull; Hôm nay: ${currentDate}</h1>
                 </div>
                 <div class="header-actions">
                     <div class="notification"><i class="fa-regular fa-bell"></i></div>
@@ -455,7 +455,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3>Đơn hàng gần đây</h3>
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="view-all">Xem tất cả <i class="fa-solid fa-arrow-right"></i></a>
+                        <a href="${pageContext.request.contextPath}/admin/orders" class="view-all">Xem tất cả <i class="fa-solid fa-arrow-right"></i></a>
                     </div>
                     <div class="order-list">
                         <c:forEach items="${recentOrders}" var="order">

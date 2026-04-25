@@ -7,12 +7,10 @@
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
-        <!-- Css Styles -->
         <link rel="stylesheet" href="${ctx}/css/bootstrap.min.css" type="text/css">
         <link rel="stylesheet" href="${ctx}/css/style.css" type="text/css">
         <link rel="stylesheet" href="${ctx}/css/mobileshop.css" type="text/css">
         <link rel="stylesheet" href="${ctx}/css/custom.css" type="text/css">
-    </head>
         <style>
             .success-container {
                 max-width: 720px;
@@ -97,27 +95,27 @@
             <div class="mobile-shell">
                 <div class="success-container">
                     <img src="${ctx}/img/order_success_illustration.png" alt="Đặt hàng thành công" class="success-image">
-                    
+
                     <span class="status-chip status-chip--green" style="margin-bottom: 20px; padding: 10px 24px;">Đặt hàng thành công</span>
                     <h1>Cảm ơn bạn đã tin tưởng!</h1>
                     <p>
                         Đơn hàng của bạn đã được ghi nhận. Chúng tôi sẽ xử lý và liên hệ với bạn trong thời gian sớm nhất để xác nhận giao hàng.
                     </p>
-                    
+
                     <div class="order-receipt">
                         <div class="order-receipt-row">
                             <span>Mã đơn hàng</span>
-                            <strong>#ORD-<fmt:formatNumber pattern="000" value="${param.orderId != null ? param.orderId : 0}" /></strong>
+                            <strong>#ORD-<fmt:formatNumber pattern="000" value="${sessionScope.lastOrderId != null ? sessionScope.lastOrderId : (param.orderId != null ? param.orderId : 0)}" /></strong>
                         </div>
                         <div class="order-receipt-row">
                             <span>Ngày đặt hàng</span>
                             <strong><%= new java.text.SimpleDateFormat("dd/MM/yyyy · HH:mm").format(new java.util.Date()) %></strong>
                         </div>
                     </div>
-                    
+
                     <div class="success-actions">
                         <a href="${ctx}/product" class="pill-link pill-link--primary" style="min-height: 56px; padding: 0 40px; display: flex; align-items: center;">Tiếp tục mua hàng</a>
-                        <a href="${ctx}/review/mine" class="pill-link pill-link--secondary" style="min-height: 56px; padding: 0 40px; display: flex; align-items: center;">Xem lịch sử mua</a>
+                        <a href="${ctx}/my-orders" class="pill-link pill-link--secondary" style="min-height: 56px; padding: 0 40px; display: flex; align-items: center;">Xem lịch sử mua</a>
                     </div>
                 </div>
             </div>

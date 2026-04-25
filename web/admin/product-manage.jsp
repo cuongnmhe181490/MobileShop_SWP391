@@ -1,7 +1,8 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -10,12 +11,13 @@
     <title>Quản lý sản phẩm - MobileShop</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-custom.css">
+    <link rel="stylesheet" href="${ctx}/css/admin-custom.css">
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- ===== SIDEBAR (đồng bộ từ dashboard.jsp) ===== -->
         <aside class="sidebar">
-            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
+            <a href="${ctx}/admin/dashboard" class="brand">
                 <h2>MobileShop</h2>
                 <p>Quản trị hệ thống</p>
             </a>
@@ -23,42 +25,79 @@
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ</span>
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="javascript:void(0)" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/products" class="menu-link active"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin/orders" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin/products" class="menu-link active">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin/accounts" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin/blog" class="menu-link">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">HỆ THỐNG</span>
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${ctx}/admin-home-config.jsp" class="menu-link">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
                 </ul>
             </div>
 
-            <div style="margin-top: auto;">
+            <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
-                    <li class="menu-item"><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${ctx}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${ctx}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>
@@ -66,13 +105,12 @@
         <main class="main-content">
             <header class="header">
                 <div class="welcome">
-                    <p class="admin-shell-eyebrow">Quản lý sản phẩm</p>
+                    <p class="admin-shell-eyebrow">QUẢN LÝ SẢN PHẨM</p>
                     <h1>Quản lý sản phẩm</h1>
                     <p class="admin-shell-subtitle">Quản trị danh sách sản phẩm và thao tác nhanh trong đúng shell dashboard hiện tại.</p>
                 </div>
                 <div class="header-actions">
-                    <a href="${pageContext.request.contextPath}/admin/products?service=addProduct" class="btn-primary" style="text-decoration: none;">Thêm sản phẩm</a>
-                    <div class="notification"><i class="fa-regular fa-bell"></i></div>
+                    <a href="${ctx}/admin/products?service=addProduct" class="btn-primary" style="text-decoration: none;">Thêm sản phẩm</a>
                     <div class="user-profile">
                         <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
                         <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>
@@ -104,7 +142,7 @@
             </c:if>
 
             <section class="content-card product-content-card">
-                <form class="filter-bar product-filter-bar" action="${pageContext.request.contextPath}/admin/products" method="GET">
+                <form class="filter-bar product-filter-bar" action="${ctx}/admin/products" method="GET">
                     <input type="hidden" name="service" value="listAll">
                     <div class="product-search-wrap">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -127,57 +165,59 @@
                     </select>
 
                     <button type="submit" class="btn-primary">Lọc</button>
-                    <a href="${pageContext.request.contextPath}/admin/products" class="btn-outline" style="text-decoration: none;">Đặt lại</a>
+                    <a href="${ctx}/admin/products" class="btn-outline" style="text-decoration: none;">Đặt lại</a>
                 </form>
 
                 <c:choose>
                     <c:when test="${not empty productList}">
-                        <table class="admin-table product-admin-table">
+                        <div class="table-wrap" style="width: 100%; overflow-x: auto;">
+                        <table class="admin-table product-admin-table" style="table-layout: fixed; width: 100%;">
                             <thead>
                                 <tr>
-                                    <th style="width: 140px;">Ảnh sản phẩm</th>
-                                    <th>Tên sản phẩm</th>
-                                    <th style="width: 160px;">Giá</th>
-                                    <th style="width: 120px;">Số lượng</th>
-                                    <th style="width: 150px;">Ngày ra mắt</th>
-                                    <th style="width: 150px;">Nhà cung cấp</th>
-                                    <th style="width: 190px;">Hành động</th>
+                                    <th style="width: 68px;">Ảnh</th>
+                                    <th style="width: 210px;">Tên sản phẩm</th>
+                                    <th style="width: 110px;">Giá</th>
+                                    <th style="width: 58px;">SL</th>
+                                    <th style="width: 108px;">Ngày ra mắt</th>
+                                    <th style="width: 115px;">NCC</th>
+                                    <th style="width: 220px;">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <c:forEach items="${productList}" var="product">
                                     <c:set var="resolvedImage" value="${product.imagePath}" />
                                     <c:if test="${not empty resolvedImage and fn:startsWith(resolvedImage, '/uploads/')}">
-                                        <c:set var="resolvedImage" value="${pageContext.request.contextPath}${resolvedImage}" />
+                                        <c:set var="resolvedImage" value="${ctx}${resolvedImage}" />
                                     </c:if>
                                     <tr>
                                         <td>
-                                            <div class="product-thumb-wrap">
+                                            <div class="product-thumb-wrap" style="width:56px;height:56px;border-radius:12px;">
                                                 <img
-                                                    src="${not empty resolvedImage ? resolvedImage : pageContext.request.contextPath.concat('/img/categories/cat-1.jpg')}"
+                                                    src="${not empty resolvedImage ? resolvedImage : ctx.concat('/img/categories/cat-1.jpg')}"
                                                     class="product-thumb"
                                                     alt="${product.productName}"
-                                                    onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/categories/cat-1.jpg';">
+                                                    onerror="this.onerror=null;this.src='${ctx}/img/categories/cat-1.jpg';">
                                             </div>
                                         </td>
-                                        <td>
+                                        <td style="white-space:normal;">
                                             <div class="product-name-text">${product.productName}</div>
                                         </td>
-                                        <td><fmt:formatNumber value="${product.price}" type="number" groupingUsed="true" maxFractionDigits="0"/> đ</td>
+                                        <td style="white-space:nowrap;"><fmt:formatNumber value="${product.price}" type="number" groupingUsed="true" maxFractionDigits="0"/> đ</td>
                                         <td>${product.quantity}</td>
-                                        <td>${product.releaseDate}</td>
+                                        <td style="white-space:nowrap;">${product.releaseDate}</td>
                                         <td>${product.idSupplier}</td>
                                         <td>
                                             <div class="product-action-group">
-                                                <a href="${pageContext.request.contextPath}/admin/products?service=viewProduct&id=${product.idProduct}" class="btn-outline product-action-btn">Xem</a>
-                                                <a href="${pageContext.request.contextPath}/admin/products?service=editProduct&id=${product.idProduct}" class="btn-outline product-action-btn">Sửa</a>
-                                                <a href="${pageContext.request.contextPath}/admin/products?service=deleteProduct&id=${product.idProduct}" class="btn-outline product-action-btn product-action-btn--danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">Xóa</a>
+                                                <a href="${ctx}/admin/products?service=viewProduct&id=${product.idProduct}" class="btn-outline product-action-btn">Xem</a>
+                                                <a href="${ctx}/admin/products?service=editProduct&id=${product.idProduct}" class="btn-outline product-action-btn">Sửa</a>
+                                                <a href="${ctx}/admin/products?service=deleteProduct&id=${product.idProduct}" class="btn-outline product-action-btn product-action-btn--danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">Xóa</a>
                                             </div>
                                         </td>
                                     </tr>
                                 </c:forEach>
                             </tbody>
                         </table>
+                        </div>
 
                         <c:if test="${totalPages > 1}">
                             <div class="product-pagination">
@@ -222,7 +262,7 @@
                             <i class="fa-solid fa-box-open"></i>
                             <h3>Không có sản phẩm phù hợp</h3>
                             <p>Danh sách hiện đang trống hoặc chưa có kết quả khớp với bộ lọc hiện tại.</p>
-                            <a href="${pageContext.request.contextPath}/admin/products?service=addProduct" class="btn-primary" style="text-decoration: none;">Thêm sản phẩm</a>
+                            <a href="${ctx}/admin/products?service=addProduct" class="btn-primary" style="text-decoration: none;">Thêm sản phẩm</a>
                         </div>
                     </c:otherwise>
                 </c:choose>

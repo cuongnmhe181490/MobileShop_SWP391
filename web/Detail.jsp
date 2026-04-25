@@ -299,93 +299,7 @@
                     </article>
                 </section>
 
-                <section class="review-preview">
-                    <div class="section-heading">
-                        <div>
-                            <span class="section-eyebrow">Đánh giá gần đây</span>
-                            <h2>Người mua nói gì về mẫu máy này.</h2>
-                        </div>
-                        <a class="pill-link" href="${ctx}/reviews?pid=${detail.idProduct}">Xem tất cả đánh giá</a>
-                    </div>
 
-                    <div class="review-list">
-                        <c:forEach items="${reviewPreview}" var="review">
-                            <article class="review-card">
-                                <div class="review-card__head">
-                                    <div>
-                                        <h3>${review.reviewerName}</h3>
-                                        <div class="review-stars review-stars--small">
-                                            <c:forEach begin="1" end="5" var="star">
-                                                <span class="review-stars__star ${star <= review.ranking ? 'is-filled' : ''}">★</span>
-                                            </c:forEach>
-                                        </div>
-                                    </div>
-                                    <span>${review.reviewDate}</span>
-                                </div>
-                                <p>${review.review}</p>
-                            </article>
-                        </c:forEach>
-                    </div>
-                </section>
-
-                <section>
-                    <div class="section-heading">
-                        <div>
-                            <span class="section-eyebrow">Gợi ý thêm</span>
-                            <h2>Cùng thương hiệu, cùng nhóm trải nghiệm.</h2>
-                        </div>
-                    </div>
-
-                    <div class="catalog-grid">
-                        <c:forEach items="${relatedProducts}" var="item">
-                            <c:set var="relatedDisplayStock" value="${relatedDisplayStockMap[item.idProduct]}" />
-                            <c:url var="relatedFallbackImageUrl" value="/product-image">
-                                <c:param name="brand" value="${item.idSupplier}" />
-                                <c:param name="name" value="${item.productName}" />
-                            </c:url>
-                            <article class="product-card">
-                                <a class="product-card__media" href="${ctx}/detail?pid=${item.idProduct}">
-                                    <img src="${item.imagePath}" alt="${item.productName}" onerror="this.onerror=null;this.src='${relatedFallbackImageUrl}';">
-                                </a>
-                                <div class="product-card__body">
-                                    <h3><a href="${ctx}/detail?pid=${item.idProduct}">${item.productName}</a></h3>
-                                    <div class="product-card__row">
-                                        <div class="product-price">${relatedPriceLabels[item.idProduct]}</div>
-                                        <span class="status-chip ${relatedDisplayStock > 0 ? 'status-chip--green' : 'status-chip--pink'}">${item.quantity == 0 ? 'Hết hàng' : relatedDisplayStock > 0 ? 'Còn hàng' : 'Tạm hết hàng'}</span>
-                                    </div>
-                                    <div class="product-card__stock">
-                                        <c:choose>
-                                            <c:when test="${item.quantity == 0}">
-                                                Sản phẩm hiện đã hết hàng
-                                            </c:when>
-                                            <c:otherwise>
-                                                Còn ${relatedDisplayStock} sản phẩm khả dụng
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                    <div class="product-card__actions">
-                                        <c:choose>
-                                            <c:when test="${relatedDisplayStock <= 0}">
-                                                <button class="pill-button pill-button--primary" type="button" disabled>Hết hàng</button>
-                                            </c:when>
-                                            <c:when test="${sessionScope.acc == null}">
-                                                <a class="pill-link pill-link--primary" href="${loginNoticeUrl}">Thêm giỏ hàng</a>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <form action="${ctx}/cart/add" method="post">
-                                                    <input type="hidden" name="idProduct" value="${item.idProduct}">
-                                                    <input type="hidden" name="quantity" value="1">
-                                                    <button class="pill-button pill-button--primary" type="submit">Thêm giỏ hàng</button>
-                                                </form>
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <a class="pill-link pill-link--dark" href="${ctx}/detail?pid=${item.idProduct}">Xem chi tiết</a>
-                                    </div>
-                                </div>
-                            </article>
-                        </c:forEach>
-                    </div>
-                </section>
             </div>
         </main>
 
@@ -537,11 +451,11 @@
                 window.location.href = url;
             }
 
-            // Sync bar on load if items exist
+            // Do NOT auto-show compare bar on load.
+            // Compare bar only shows when user clicks "So sánh" button.
             window.addEventListener('load', () => {
                 if (currentCompare.length > 0) {
                     renderCompareBar();
-                    toggleCompareBar(true);
                 }
             });
         </script>
