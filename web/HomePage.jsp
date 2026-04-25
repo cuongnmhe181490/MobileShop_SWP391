@@ -20,9 +20,41 @@
                 margin-bottom: 40px;
             }
 
-            /* Hoặc nếu bạn muốn đẩy chính xác cái thanh chứa các logo */
             .categories__slider {
                 padding-top: 30px;
+            }
+
+            /* Căn giữa logo và chữ */
+            .categories__item {
+                background-position: center !important;
+                background-size: 70% !important; /* Scale logo vừa vặn */
+                background-repeat: no-repeat !important;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end; 
+                align-items: center;
+                height: 180px; 
+                border-radius: 20px;
+                background-color: #ffffff;
+                border: 1px solid #f1f5f9;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            }
+
+            .categories__item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            }
+
+            .categories__item h5 {
+                margin-bottom: 12px !important;
+                background: rgba(255, 255, 255, 0.95);
+                padding: 4px 12px;
+                border-radius: 99px;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             }
         </style>
     </head>
@@ -158,11 +190,6 @@
                             <c:set var="labelText" value="${status.index % 4 == 0 ? 'Nổi bật' : status.index % 4 == 1 ? 'Đáng mua' : status.index % 4 == 2 ? 'Giá tốt' : 'Mới về'}" />
                             <article class="product-card">
                                 <a class="product-card__media" href="${ctx}/detail?pid=${item.IdProduct}">
-                                    <c:if test="${item.Discount > 0}">
-                                        <span class="discount-badge">
-                                            Giảm <fmt:formatNumber value="${item.Discount * 100}" maxFractionDigits="0"/>%
-                                        </span>
-                                    </c:if>
                                     <img src="${item.ImagePath}" alt="${item.ProductName}">
                                 </a>
                                 <div class="product-card__body">
@@ -173,6 +200,18 @@
                                         <span class="status-chip ${toneClass}">${labelText}</span>
                                     </div>
                                     <div class="product-card__actions">
+                                        <c:choose>
+                                            <c:when test="${sessionScope.acc == null}">
+                                                <a class="pill-link pill-link--primary" href="${ctx}/login">Thêm giỏ hàng</a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <form action="${ctx}/cart/add" method="post" style="margin: 0; flex: 1;">
+                                                    <input type="hidden" name="idProduct" value="${item.IdProduct}">
+                                                    <input type="hidden" name="quantity" value="1">
+                                                    <button class="pill-button pill-button--primary" type="submit" style="width: 100%;">Thêm giỏ</button>
+                                                </form>
+                                            </c:otherwise>
+                                        </c:choose>
                                         <a class="pill-link pill-link--dark" href="${ctx}/detail?pid=${item.IdProduct}">Xem chi tiết</a>
                                     </div>
                                 </div>

@@ -180,6 +180,7 @@
             .ic-value.sm {
                 font-size: 13.5px;
             }
+            .ic-value.sm { font-size: 13.5px; }
 
             /* ── MAIN GRID ── */
             .main-grid {
@@ -684,6 +685,7 @@
                 border-color: var(--red) !important;
                 background: #fff1f2 !important;
             }
+            .is-invalid { border-color: var(--red) !important; background: #fff1f2 !important; }
 
             /* Responsive */
             @media (max-width: 992px) {

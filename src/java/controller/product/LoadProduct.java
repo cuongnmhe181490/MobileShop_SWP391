@@ -1,6 +1,6 @@
-package controller.storefront;
+package controller.product;
 
-import dao.DAO;
+import dao.product.ProductStorefrontDAO;
 import entity.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,7 +21,7 @@ public class LoadProduct extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         String keyword = normalizeTextInput(request.getParameter("txt"));
         String brand = normalizeTextInput(request.getParameter("brand"));
         String storage = normalizeTextInput(request.getParameter("storage"));

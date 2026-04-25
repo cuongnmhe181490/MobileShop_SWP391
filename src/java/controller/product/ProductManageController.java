@@ -1,6 +1,6 @@
-package controller;
+package controller.product;
 
-import dao.DAO;
+import dao.product.ProductAdminDAO;
 import entity.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -16,17 +16,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import jakarta.servlet.annotation.WebServlet;
 import util.CloudinaryUtil;
+import util.ProductCartValidationHelper;
 
+@WebServlet(name = "ProductManageController", urlPatterns = {"/admin/products"})
 @MultipartConfig(
         fileSizeThreshold = 1024 * 512,
         maxFileSize = 500 * 1024,
-        maxRequestSize = 1024 * 1024 
+        maxRequestSize = 1024 * 1024
 )
 public class ProductManageController extends HttpServlet {
 
@@ -51,7 +55,7 @@ public class ProductManageController extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        DAO dao = new DAO();
+        ProductAdminDAO dao = new ProductAdminDAO();
         String service = trim(request.getParameter("service"));
         if (service.isBlank()) {
             service = "listAll";
@@ -84,7 +88,7 @@ public class ProductManageController extends HttpServlet {
         }
     }
 
-    private void showExistingProductForm(HttpServletRequest request, HttpServletResponse response, DAO dao, boolean viewMode)
+    private void showExistingProductForm(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao, boolean viewMode)
             throws ServletException, IOException {
         String id = trim(request.getParameter("id"));
         Product product = dao.getProductByID(id);
@@ -96,7 +100,7 @@ public class ProductManageController extends HttpServlet {
         showForm(request, response, dao, product, new LinkedHashMap<>(), true, viewMode, null);
     }
 
-    private void showProductList(HttpServletRequest request, HttpServletResponse response, DAO dao)
+    private void showProductList(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao)
             throws ServletException, IOException {
         String keyword = trim(request.getParameter("keyword"));
         String supplierFilter = trim(request.getParameter("supplier"));
@@ -161,7 +165,7 @@ public class ProductManageController extends HttpServlet {
         request.setAttribute("showTrailingEllipsis", endPage < totalPages - 1);
     }
 
-    private void handleSave(HttpServletRequest request, HttpServletResponse response, DAO dao, boolean editMode)
+    private void handleSave(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao, boolean editMode)
             throws ServletException, IOException {
         Product product = buildProductFromRequest(request, dao);
         Product existingProduct = editMode ? dao.getProductByID(product.getIdProduct()) : null;
@@ -237,7 +241,7 @@ public class ProductManageController extends HttpServlet {
         );
     }
 
-    private void handleDelete(HttpServletRequest request, HttpServletResponse response, DAO dao)
+    private void handleDelete(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao)
             throws IOException {
         String id = trim(request.getParameter("id"));
         boolean success = !id.isBlank() && dao.deleteProduct(id);
@@ -248,7 +252,7 @@ public class ProductManageController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/products");
     }
 
-    private void showForm(HttpServletRequest request, HttpServletResponse response, DAO dao,
+    private void showForm(HttpServletRequest request, HttpServletResponse response, ProductAdminDAO dao,
             Product product, Map<String, String> errors, boolean editMode, boolean viewMode, String formError)
             throws ServletException, IOException {
         String resolvedImagePath = product != null && product.getImagePath() != null && !product.getImagePath().isBlank()
@@ -263,15 +267,16 @@ public class ProductManageController extends HttpServlet {
         request.setAttribute("supplierIds", dao.getSupplierIds());
         request.setAttribute("formError", formError);
         request.setAttribute("resolvedImagePath", resolvedImagePath);
+        request.setAttribute("todayDate", LocalDate.now().toString());
         request.getRequestDispatcher("/admin/editProduct.jsp").forward(request, response);
     }
 
-    private Product buildProductFromRequest(HttpServletRequest request, DAO dao) throws IOException, ServletException {
+    private Product buildProductFromRequest(HttpServletRequest request, ProductAdminDAO dao) throws IOException, ServletException {
         Product product = new Product();
         product.setIdProduct(trim(request.getParameter("idProduct")));
         product.setProductName(trim(request.getParameter("productName")));
         product.setIdSupplier(trim(request.getParameter("idSupplier")));
-        product.setReleaseDate(trim(request.getParameter("releaseDate")));
+        product.setReleaseDate(normalizeReleaseDate(trim(request.getParameter("releaseDate"))));
         product.setScreen(trim(request.getParameter("screen")));
         product.setOperatingSystem(trim(request.getParameter("operatingSystem")));
         product.setCpu(trim(request.getParameter("cpu")));
@@ -297,48 +302,76 @@ public class ProductManageController extends HttpServlet {
         Part imageFile = request.getPart("imageFile");
         boolean hasUploadedImage = imageFile != null && imageFile.getSize() > 0;
 
-        validateRequired(product.getProductName(), "productName", "Tên sản phẩm không được để trống.", errors);
+        putIfPresent(errors, "productName",
+                ProductCartValidationHelper.validateProductName(trim(request.getParameter("productName"))));
         validateRequired(product.getIdSupplier(), "idSupplier", "Nhà cung cấp không được để trống.", errors);
         if (!hasUploadedImage) {
             validateRequired(product.getImagePath(), "imagePath", "Vui lòng nhập URL ảnh hoặc tải ảnh lên.", errors);
         }
 
-        validateMaxLength(product.getProductName(), 150, "productName", "Tên sản phẩm tối đa 150 ký tự.", errors);
-        validateMaxLength(product.getScreen(), 50, "screen", "Màn hình tối đa 50 ký tự.", errors);
-        validateMaxLength(product.getOperatingSystem(), 30, "operatingSystem", "Hệ điều hành tối đa 30 ký tự.", errors);
-        validateMaxLength(product.getCpu(), 50, "cpu", "CPU tối đa 50 ký tự.", errors);
-        validateMaxLength(product.getRam(), 10, "ram", "RAM tối đa 10 ký tự.", errors);
-        validateMaxLength(product.getCamera(), 80, "camera", "Camera tối đa 80 ký tự.", errors);
-        validateMaxLength(product.getBattery(), 20, "battery", "Pin tối đa 20 ký tự.", errors);
-        validateMaxLength(product.getDescription(), 1000, "description", "Mô tả tối đa 1000 ký tự.", errors);
+        putIfPresent(errors, "price",
+                ProductCartValidationHelper.validatePriceRaw(trim(request.getParameter("price"))));
+        putIfPresent(errors, "quantity",
+                ProductCartValidationHelper.validateCurrentQuantityRaw(trim(request.getParameter("quantity"))));
+        putIfPresent(errors, "releaseDate",
+                ProductCartValidationHelper.validateReleaseDate(trim(request.getParameter("releaseDate"))));
+        putIfPresent(errors, "battery",
+                ProductCartValidationHelper.validateBattery(trim(request.getParameter("battery")), true));
+        putIfPresent(errors, "screen",
+                ProductCartValidationHelper.validateTrimmedOptional(
+                        trim(request.getParameter("screen")),
+                        ProductCartValidationHelper.SCREEN_MAX,
+                        null,
+                        "Màn hình tối đa 200 ký tự."
+                ));
+        putIfPresent(errors, "operatingSystem",
+                ProductCartValidationHelper.validateTrimmedOptional(
+                        trim(request.getParameter("operatingSystem")),
+                        ProductCartValidationHelper.OPERATING_SYSTEM_MAX,
+                        null,
+                        "Hệ điều hành tối đa 100 ký tự."
+                ));
+        putIfPresent(errors, "cpu",
+                ProductCartValidationHelper.validateTrimmedOptional(
+                        trim(request.getParameter("cpu")),
+                        ProductCartValidationHelper.CPU_MAX,
+                        null,
+                        "CPU tối đa 100 ký tự."
+                ));
+        putIfPresent(errors, "ram",
+                ProductCartValidationHelper.validateTrimmedOptional(
+                        trim(request.getParameter("ram")),
+                        ProductCartValidationHelper.RAM_MAX,
+                        null,
+                        "RAM tối đa 50 ký tự."
+                ));
+        putIfPresent(errors, "camera",
+                ProductCartValidationHelper.validateTrimmedOptional(
+                        trim(request.getParameter("camera")),
+                        ProductCartValidationHelper.CAMERA_MAX,
+                        null,
+                        "Camera tối đa 200 ký tự."
+                ));
+        putIfPresent(errors, "description",
+                ProductCartValidationHelper.validateTrimmedOptional(
+                        trim(request.getParameter("description")),
+                        ProductCartValidationHelper.DESCRIPTION_MAX,
+                        null,
+                        "Mô tả tối đa 2000 ký tự."
+                ));
         validateMaxLength(product.getImagePath(), 500, "imagePath", "Đường dẫn ảnh tối đa 500 ký tự.", errors);
-
-        if (product.getPrice() < 0) {
-            errors.put("price", "Giá phải là số lớn hơn hoặc bằng 0.");
-        }
-        if (product.getCurrentQuantity() < 0) {
-            errors.put("quantity", "Số lượng phải là số nguyên lớn hơn hoặc bằng 0.");
-        }
-
-        if (!product.getReleaseDate().isBlank()) {
-            try {
-                LocalDate.parse(product.getReleaseDate());
-            } catch (Exception ex) {
-                errors.put("releaseDate", "Ngày ra mắt không hợp lệ.");
-            }
-        }
 
         if (!product.getImagePath().isBlank() && !isValidImageReference(product.getImagePath())) {
             errors.put("imagePath", "Không thể tải ảnh từ đường dẫn đã nhập.");
         }
 
         if (hasUploadedImage) {
-            String contentType = imageFile.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                errors.put("imageFile", "Tệp tải lên phải là ảnh hợp lệ.");
-            }
-            if (imageFile.getSize() > MAX_IMAGE_SIZE) {
-                errors.put("imageFile", "Ảnh tải lên không được vượt quá 500KB.");
+            String uploadError = ProductCartValidationHelper.validateImageUpload(
+                    imageFile.getContentType(),
+                    imageFile.getSize()
+            );
+            if (uploadError != null) {
+                errors.put("imageFile", uploadError);
             }
         }
 
@@ -351,13 +384,17 @@ public class ProductManageController extends HttpServlet {
 
     private String resolveImagePath(HttpServletRequest request) throws IOException, ServletException {
         Part imageFile = request.getPart("imageFile");
-        if (imageFile != null && imageFile.getSize() > 0) {            String uploadedUrl = CloudinaryUtil.uploadImage(imageFile);
-            if (uploadedUrl != null && !uploadedUrl.isBlank()) {                return uploadedUrl;
+        if (imageFile != null && imageFile.getSize() > 0) {
+            String uploadedUrl = CloudinaryUtil.uploadImage(imageFile);
+            if (uploadedUrl != null && !uploadedUrl.isBlank()) {
+                return uploadedUrl;
             }
 
             String localUploadPath = saveLocalProductImage(request, imageFile);
-            if (localUploadPath != null && !localUploadPath.isBlank()) {                return localUploadPath;
-            }        }
+            if (localUploadPath != null && !localUploadPath.isBlank()) {
+                return localUploadPath;
+            }
+        }
 
         String imagePath = trim(request.getParameter("imagePath"));
         if (!imagePath.isBlank()) {
@@ -371,12 +408,15 @@ public class ProductManageController extends HttpServlet {
         try {
             String submittedName = imageFile.getSubmittedFileName();
             String extension = getSafeImageExtension(submittedName);
-            if (extension == null) {                return null;
+            if (extension == null) {
+                return null;
             }
 
             String webRoot = request.getServletContext().getRealPath("/");
-            if (webRoot == null || webRoot.isBlank()) {                return null;
-            }            Path uploadDir = Path.of(webRoot, "uploads", "products");
+            if (webRoot == null || webRoot.isBlank()) {
+                return null;
+            }
+            Path uploadDir = Path.of(webRoot, "uploads", "products");
             Files.createDirectories(uploadDir);
 
             String fileName = "product-" + UUID.randomUUID() + extension;
@@ -385,7 +425,8 @@ public class ProductManageController extends HttpServlet {
                 Files.copy(input, targetPath, StandardCopyOption.REPLACE_EXISTING);
             }
             return request.getContextPath() + "/uploads/products/" + fileName;
-        } catch (Exception ex) {            return null;
+        } catch (Exception ex) {
+            return null;
         }
     }
 
@@ -450,8 +491,26 @@ public class ProductManageController extends HttpServlet {
         }
     }
 
+    private void putIfPresent(Map<String, String> errors, String field, String message) {
+        if (message != null && !message.isBlank()) {
+            errors.put(field, message);
+        }
+    }
+
     private String trim(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String normalizeReleaseDate(String rawValue) {
+        String normalized = trim(rawValue);
+        if (normalized.isBlank()) {
+            return "";
+        }
+        try {
+            return LocalDate.parse(normalized).toString();
+        } catch (DateTimeParseException ex) {
+            return normalized;
+        }
     }
 
     private int parseIntOrDefault(String value, int defaultValue) {

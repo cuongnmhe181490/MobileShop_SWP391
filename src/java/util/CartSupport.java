@@ -1,9 +1,11 @@
 package util;
 
 import dao.DAO;
+import dao.order.UserCartDAO;
+import dao.product.ProductStorefrontDAO;
 import entity.CartItem;
-
 import entity.ProductModel;
+import entity.User;
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -35,6 +37,16 @@ public final class CartSupport {
         if (session == null || productId == null) {
             return 0;
         }
+        User user = getLoggedInUser(session);
+        if (user != null) {
+            List<CartItem> items = new UserCartDAO().getCartItems(user.getId());
+            for (CartItem item : items) {
+                if (item.getProduct() != null && productId.equals(item.getProduct().getIdProduct())) {
+                    return item.getQuantity();
+                }
+            }
+            return 0;
+        }
         return getCart(session).getOrDefault(productId, 0);
     }
 
@@ -42,7 +54,21 @@ public final class CartSupport {
         if (product == null) {
             return 0;
         }
+        if (getLoggedInUser(session) != null) {
+            return Math.max(0, product.getQuantity());
+        }
         return Math.max(0, product.getQuantity() - getReservedQuantity(session, product.getIdProduct()));
+    }
+
+    public static int getAvailableQuantity(HttpSession session, String productId, int currentQuantity) {
+        if (session == null || productId == null || productId.isBlank()) {
+            return Math.max(0, currentQuantity);
+        }
+        User user = getLoggedInUser(session);
+        if (user != null) {
+            return new UserCartDAO().getAvailableQuantity(productId, user.getId());
+        }
+        return Math.max(0, currentQuantity - getReservedQuantity(session, productId));
     }
 
     public static Map<String, Integer> buildDisplayStockMap(HttpSession session, List<? extends ProductModel> products) {
@@ -58,7 +84,14 @@ public final class CartSupport {
         return stockMap;
     }
 
-    public static List<CartItem> buildCartItems(HttpSession session, DAO dao) {
+    public static List<CartItem> buildCartItems(HttpSession session, ProductStorefrontDAO dao) {
+        User user = getLoggedInUser(session);
+        if (user != null) {
+            List<CartItem> items = new UserCartDAO().getCartItems(user.getId());
+            syncCartSize(session);
+            return items;
+        }
+
         Map<String, Integer> cart = getCart(session);
         List<CartItem> items = new ArrayList<>();
         List<String> invalidKeys = new ArrayList<>();
@@ -88,6 +121,43 @@ public final class CartSupport {
         return items;
     }
 
+    public static List<CartItem> buildCartItems(HttpSession session, DAO dao) {
+        User user = getLoggedInUser(session);
+        if (user != null) {
+            List<CartItem> items = new UserCartDAO().getCartItems(user.getId());
+            syncCartSize(session);
+            return items;
+        }
+
+        Map<String, Integer> cart = getCart(session);
+        List<CartItem> items = new ArrayList<>();
+        List<String> invalidKeys = new ArrayList<>();
+
+        for (Map.Entry<String, Integer> entry : cart.entrySet()) {
+            Integer quantity = entry.getValue();
+            if (quantity == null || quantity <= 0) {
+                invalidKeys.add(entry.getKey());
+                continue;
+            }
+
+            ProductModel product = dao.getProductByID(entry.getKey());
+            if (product == null) {
+                invalidKeys.add(entry.getKey());
+                continue;
+            }
+
+            int displayStock = Math.max(0, product.getQuantity() - quantity);
+            items.add(new CartItem(product, quantity, product.getQuantity(), displayStock));
+        }
+
+        for (String invalidKey : invalidKeys) {
+            cart.remove(invalidKey);
+        }
+
+        syncCartSize(session);
+        return items;
+    }
+
     public static int getTotalQuantity(Map<String, Integer> cart) {
         int total = 0;
         for (Integer quantity : cart.values()) {
@@ -99,6 +169,14 @@ public final class CartSupport {
     }
 
     public static void syncCartSize(HttpSession session) {
+        if (session == null) {
+            return;
+        }
+        User user = getLoggedInUser(session);
+        if (user != null) {
+            session.setAttribute(CART_SIZE_SESSION_KEY, new UserCartDAO().countCartQuantity(user.getId()));
+            return;
+        }
         session.setAttribute(CART_SIZE_SESSION_KEY, getTotalQuantity(getCart(session)));
     }
 
@@ -110,5 +188,13 @@ public final class CartSupport {
     public static void setError(HttpSession session, String message) {
         session.setAttribute(CART_ERROR_SESSION_KEY, message);
         session.removeAttribute(CART_MESSAGE_SESSION_KEY);
+    }
+
+    private static User getLoggedInUser(HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+        Object account = session.getAttribute("acc");
+        return account instanceof User ? (User) account : null;
     }
 }

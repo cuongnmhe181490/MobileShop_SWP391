@@ -82,6 +82,21 @@
                     <p>Vui lòng kiểm tra lại thông tin nhận hàng và danh sách sản phẩm trước khi xác nhận đặt hàng.</p>
                 </div>
 
+                <form id="checkoutForm" action="${ctx}/order/place" method="post">
+                    <div class="checkout-grid">
+                        <section class="auth-form" style="padding: 32px;">
+                            <h2 style="margin-bottom: 24px;">Thông tin giao hàng</h2>
+                            <c:if test="${not empty formError}">
+                                <div class="error-message" style="margin-bottom: 16px;">
+                                    <i class="fa-solid fa-circle-exclamation"></i> ${formError}
+                                </div>
+                            </c:if>
+
+
+                            <div class="auth-form__stack">
+                                <div class="filter-group">
+                                    <h3>Họ và tên người nhận</h3>
+                                    <input type="text" name="fullName" class="auth-input ${not empty errorFullName ? 'is-invalid' : ''}"
                 <form id="checkoutForm" action="${ctx}/checkout" method="post">
                     <div class="checkout-grid">
                         <section class="auth-form" style="padding: 32px;">
@@ -97,6 +112,9 @@
                                     </c:if>
                                 </div>
 
+                                <div class="filter-group">
+                                    <h3>Số điện thoại</h3>
+                                    <input type="tel" name="phone" class="auth-input ${not empty errorPhone ? 'is-invalid' : ''}"
                                 <!-- Số điện thoại -->
                                 <div class="filter-group">
                                     <h3>Số điện thoại</h3>
@@ -107,6 +125,9 @@
                                     </c:if>
                                 </div>
 
+                                <div class="filter-group">
+                                    <h3>Email</h3>
+                                    <input type="email" name="email" class="auth-input ${not empty errorEmail ? 'is-invalid' : ''}"
                                 <!-- Email -->
                                 <div class="filter-group">
                                     <h3>Email</h3>
@@ -117,6 +138,9 @@
                                     </c:if>
                                 </div>
 
+                                <div class="filter-group">
+                                    <h3>Địa chỉ nhận hàng (Chi tiết)</h3>
+                                    <input type="text" name="address" class="auth-input ${not empty errorAddress ? 'is-invalid' : ''}"
                                 <!-- Địa chỉ -->
                                 <div class="filter-group">
                                     <h3>Địa chỉ nhận hàng (Chi tiết)</h3>
@@ -150,6 +174,12 @@
                         <aside>
                             <div class="summary-card">
                                 <h2>Đơn hàng của bạn</h2>
+                                <c:if test="${not empty reservationExpiresAtMillis}">
+                                    <div class="reservation-countdown" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fa-regular fa-clock" style="color: #d97706; font-size: 16px;"></i>
+                                        <span style="font-size: 13.5px; color: #d97706; font-weight: 500;">Giữ hàng sắp hết trong <strong id="reservationCountdown">15:00</strong></span>
+                                    </div>
+                                </c:if>
                                 <div class="checkout-items-list" style="margin: 20px 0; max-height: 400px; overflow-y: auto;">
                                     <c:forEach items="${cartItems}" var="item">
                                         <div class="checkout-product-item">
@@ -187,11 +217,13 @@
         </main>
 
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
+
         
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const form = document.getElementById('checkoutForm');
                 const inputs = form.querySelectorAll('.auth-input');
+                const reservationExpiry = Number('${empty reservationExpiresAtMillis ? "" : reservationExpiresAtMillis}');
 
                 const validators = {
                     fullName: (val) => val.trim().length > 0 ? '' : 'Họ tên không được để trống',
@@ -240,6 +272,27 @@
                     });
                     if (!isValid) e.preventDefault();
                 });
+
+                if (Number.isFinite(reservationExpiry) && reservationExpiry > 0) {
+                    const countdownEl = document.getElementById('reservationCountdown');
+                    if (countdownEl) {
+                        const updateCountdown = () => {
+                            const remaining = reservationExpiry - Date.now();
+                            if (remaining <= 0) {
+                                countdownEl.textContent = '00:00';
+                                window.location.href = '${ctx}/checkout';
+                                return;
+                            }
+                            const totalSeconds = Math.floor(remaining / 1000);
+                            const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                            const seconds = String(totalSeconds % 60).padStart(2, '0');
+                            countdownEl.textContent = minutes + ':' + seconds;
+                        };
+
+                        updateCountdown();
+                        window.setInterval(updateCountdown, 1000);
+                    }
+                }
             });
         </script>
     </body>

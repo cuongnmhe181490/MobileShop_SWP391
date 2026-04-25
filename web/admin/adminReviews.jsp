@@ -310,17 +310,17 @@
                 <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
                     <li class="menu-item">
-                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                        <a href="${pageContext.request.contextPath}/admin/orders" class="menu-link">
                             <i class="fa-solid fa-receipt"></i>Đơn hàng
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="${pageContext.request.contextPath}/admin/products" class="menu-link">
                             <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link">
                             <i class="fa-solid fa-user-gear"></i>Tài khoản
                         </a>
                     </li>
@@ -385,24 +385,41 @@
                     <p style="text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 8px;">Hệ thống phản hồi</p>
                     <h1>Quản lý đánh giá</h1>
                 </div>
-                <div style="text-align: right;">
-                    <span style="font-weight: 700; color: var(--primary); font-size: 1.2rem;">${totalReviews}</span>
-                    <span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Tổng số đánh giá</span>
+                <div style="text-align: right; display: flex; gap: 24px; align-items: center;">
+                    <a href="${ctx}/admin/reviews?action=export&status=${statusFilter}&type=${typeFilter}&star=${starFilter}" class="btn-action btn-primary" style="text-decoration: none; padding: 12px 20px;">
+                        <i class="fa-solid fa-file-csv" style="margin-right: 8px;"></i> Xuất báo cáo CSV
+                    </a>
+                    <div style="text-align: right;">
+                        <span style="font-weight: 700; color: var(--primary); font-size: 1.2rem;">${totalReviews}</span>
+                        <span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Tổng số đánh giá</span>
+                    </div>
                 </div>
             </header>
 
             <%-- Filter tabs --%>
             <div style="display: flex; gap: 24px; margin-bottom: 32px; align-items: center; flex-wrap: wrap;">
+                <!-- Trạng thái -->
                 <div class="filter-tabs">
-                    <a class="tab ${empty statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=${typeFilter}">Tất cả trạng thái</a>
-                    <a class="tab ${'VISIBLE' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=VISIBLE&type=${typeFilter}">Đang hiện</a>
-                    <a class="tab ${'HIDDEN' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=HIDDEN&type=${typeFilter}">Đang ẩn</a>
+                    <a class="tab ${empty statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=${typeFilter}&star=${starFilter}">Tất cả trạng thái</a>
+                    <a class="tab ${'VISIBLE' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=VISIBLE&type=${typeFilter}&star=${starFilter}">Đang hiện</a>
+                    <a class="tab ${'HIDDEN' eq statusFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=HIDDEN&type=${typeFilter}&star=${starFilter}">Đang ẩn</a>
                 </div>
 
+                <!-- Loại đánh giá -->
                 <div class="filter-tabs">
-                    <a class="tab ${empty typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=${statusFilter}">Mọi loại đánh giá</a>
-                    <a class="tab ${'PRODUCT' eq typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=PRODUCT&status=${statusFilter}">Sản phẩm</a>
-                    <a class="tab ${'SERVICE' eq typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=SERVICE&status=${statusFilter}">Dịch vụ</a>
+                    <a class="tab ${empty typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=${statusFilter}&star=${starFilter}">Mọi loại đánh giá</a>
+                    <a class="tab ${'PRODUCT' eq typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=PRODUCT&status=${statusFilter}&star=${starFilter}">Sản phẩm</a>
+                    <a class="tab ${'SERVICE' eq typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=SERVICE&status=${statusFilter}&star=${starFilter}">Dịch vụ</a>
+                    <a class="tab ${'QUESTION' eq typeFilter ? 'active' : ''}" href="${ctx}/admin/reviews?type=QUESTION&status=${statusFilter}&star=${starFilter}">Hỏi đáp</a>
+                </div>
+
+                <!-- Đánh giá sao -->
+                <div class="filter-tabs">
+                    <a class="tab ${empty starFilter ? 'active' : ''}" href="${ctx}/admin/reviews?status=${statusFilter}&type=${typeFilter}">Mọi mốc sao</a>
+                    <c:forEach begin="1" end="5" var="s">
+                        <c:set var="rvStar" value="${6 - s}" /> <!-- Hiển thị 5, 4, 3, 2, 1 -->
+                        <a class="tab ${rvStar == starFilter ? 'active' : ''}" href="${ctx}/admin/reviews?star=${rvStar}&status=${statusFilter}&type=${typeFilter}">${rvStar} <i class="fa-solid fa-star" style="font-size: 10px; color: ${rvStar == starFilter ? '#fff' : '#ffb81c'};"></i></a>
+                    </c:forEach>
                 </div>
             </div>
 
@@ -424,6 +441,12 @@
                                             <c:when test="${rv.reviewType eq 'PRODUCT'}">
                                                 <h3 class="rv-product-name"><i class="fa-solid fa-box" style="font-size: 0.8rem; margin-right: 8px;"></i>${rv.productName}</h3>
                                             </c:when>
+                                            <c:when test="${rv.reviewType eq 'QUESTION'}">
+                                                <h3 class="rv-product-name" style="color: var(--success);"><i class="fa-solid fa-circle-question" style="font-size: 0.8rem; margin-right: 8px;"></i>Hỏi đáp (Q&A)</h3>
+                                                <div style="margin-top: 4px;">
+                                                    <span style="font-size: 11px; background: #e0f2fe; color: var(--primary); padding: 2px 8px; border-radius: 4px; font-weight: 700; margin-right: 4px;">SP: ${rv.productName}</span>
+                                                </div>
+                                            </c:when>
                                             <c:otherwise>
                                                 <h3 class="rv-product-name" style="color: var(--primary);"><i class="fa-solid fa-shop" style="font-size: 0.8rem; margin-right: 8px;"></i>Đánh giá dịch vụ</h3>
                                                 <c:if test="${not empty rv.reviewTopic}">
@@ -439,12 +462,14 @@
                                             <span style="font-weight: 700; color: var(--text-main);">${rv.reviewerName}</span>
                                             <span>&bull;</span>
                                             <fmt:formatDate value="${rv.reviewDate}" pattern="dd/MM/yyyy HH:mm"/>
-                                            <span>&bull;</span>
-                                            <span class="stars">
-                                                <c:forEach begin="1" end="5" var="s">
-                                                    <i class="fa-solid fa-star ${s <= rv.ranking ? '' : 'off'}"></i>
-                                                </c:forEach>
-                                            </span>
+                                            <c:if test="${rv.reviewType ne 'QUESTION'}">
+                                                <span>&bull;</span>
+                                                <span class="stars">
+                                                    <c:forEach begin="1" end="5" var="s">
+                                                        <i class="fa-solid fa-star ${s <= rv.ranking ? '' : 'off'}"></i>
+                                                    </c:forEach>
+                                                </span>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </div>
@@ -459,6 +484,7 @@
                                         <input type="hidden" name="page" value="${currentPage}"/>
                                         <input type="hidden" name="statusFilter" value="${statusFilter}"/>
                                         <input type="hidden" name="typeFilter" value="${typeFilter}"/>
+                                        <input type="hidden" name="starFilter" value="${starFilter}"/>
                                         <button type="submit" class="btn-action btn-toggle">
                                             ${rv.status eq 'VISIBLE' ? 'Ẩn đi' : 'Hiện lại'}
                                         </button>
@@ -482,6 +508,7 @@
                                     <input type="hidden" name="page" value="${currentPage}"/>
                                     <input type="hidden" name="statusFilter" value="${statusFilter}"/>
                                     <input type="hidden" name="typeFilter" value="${typeFilter}"/>
+                                    <input type="hidden" name="starFilter" value="${starFilter}"/>
                                     <div style="flex: 1; display: flex; flex-direction: column;">
                                         <textarea name="replyContent" class="reply-input admin-reply-input"
                                                   placeholder="${not empty rv.replyContent ? 'Sửa lại phản hồi...' : 'Gửi lời phản hồi tới khách hàng...'}"
@@ -501,14 +528,14 @@
             <c:if test="${totalPages > 1}">
                 <nav class="pagination">
                     <c:if test="${currentPage > 1}">
-                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage-1}&status=${statusFilter}&type=${typeFilter}"><i class="fa-solid fa-chevron-left"></i></a>
+                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage-1}&status=${statusFilter}&type=${typeFilter}&star=${starFilter}"><i class="fa-solid fa-chevron-left"></i></a>
                     </c:if>
                     <c:forEach begin="1" end="${totalPages}" var="p">
                         <a class="page-link ${currentPage == p ? 'active' : ''}"
-                           href="${ctx}/admin/reviews?page=${p}&status=${statusFilter}&type=${typeFilter}">${p}</a>
+                           href="${ctx}/admin/reviews?page=${p}&status=${statusFilter}&type=${typeFilter}&star=${starFilter}">${p}</a>
                     </c:forEach>
                     <c:if test="${currentPage < totalPages}">
-                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage+1}&status=${statusFilter}&type=${typeFilter}"><i class="fa-solid fa-chevron-right"></i></a>
+                        <a class="page-link" href="${ctx}/admin/reviews?page=${currentPage+1}&status=${statusFilter}&type=${typeFilter}&star=${starFilter}"><i class="fa-solid fa-chevron-right"></i></a>
                     </c:if>
                 </nav>
             </c:if>

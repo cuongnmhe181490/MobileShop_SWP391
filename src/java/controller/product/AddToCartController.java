@@ -1,7 +1,9 @@
-package controller.storefront;
+package controller.product;
 
-import dao.DAO;
+import dao.order.UserCartDAO;
+import dao.product.ProductStorefrontDAO;
 import entity.Product;
+import entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,7 +13,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import util.CartSupport;
 
 @WebServlet(name = "AddToCartController", urlPatterns = {"/cart/add"})
@@ -21,7 +22,7 @@ public class AddToCartController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        DAO dao = new DAO();
+        ProductStorefrontDAO dao = new ProductStorefrontDAO();
         String productId = safeTrim(request.getParameter("idProduct"));
         int quantity = parseQuantity(request.getParameter("quantity"));
 
@@ -59,8 +60,7 @@ public class AddToCartController extends HttpServlet {
             return;
         }
 
-        Map<String, Integer> cart = CartSupport.getCart(session);
-        int availableToAdd = CartSupport.getDisplayStock(session, product);
+        int availableToAdd = CartSupport.getAvailableQuantity(session, productId, product.getQuantity());
         if (availableToAdd <= 0) {
             CartSupport.setError(session, "Sản phẩm này hiện không còn số lượng khả dụng.");
             redirectBack(request, response, request.getContextPath() + "/detail?pid=" + productId);
@@ -73,8 +73,14 @@ public class AddToCartController extends HttpServlet {
             return;
         }
 
-        int existingQuantity = cart.getOrDefault(productId, 0);
-        cart.put(productId, existingQuantity + quantity);
+        User user = (User) session.getAttribute("acc");
+        String errorMessage = new UserCartDAO().addItem(user.getId(), productId, quantity);
+        if (errorMessage != null) {
+            CartSupport.setError(session, errorMessage);
+            redirectBack(request, response, request.getContextPath() + "/detail?pid=" + productId);
+            return;
+        }
+
         CartSupport.syncCartSize(session);
         CartSupport.setSuccess(session, "Đã thêm sản phẩm vào giỏ hàng.");
         redirectBack(request, response, request.getContextPath() + "/cart");

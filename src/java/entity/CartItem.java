@@ -6,11 +6,17 @@ public class CartItem {
 
     private final ProductModel product;
     private final int quantity;
+    private final int maxQuantity;
     private final int displayStock;
 
     public CartItem(ProductModel product, int quantity, int displayStock) {
+        this(product, quantity, product == null ? 0 : product.getQuantity(), displayStock);
+    }
+
+    public CartItem(ProductModel product, int quantity, int maxQuantity, int displayStock) {
         this.product = product;
         this.quantity = quantity;
+        this.maxQuantity = maxQuantity;
         this.displayStock = displayStock;
     }
 
@@ -27,7 +33,7 @@ public class CartItem {
     }
 
     public int getMaxQuantity() {
-        return product.getQuantity();
+        return maxQuantity;
     }
 
     public double getSubtotal() {
