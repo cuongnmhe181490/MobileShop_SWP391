@@ -326,12 +326,14 @@
                     <div class="sidebar-title">Danh mục</div>
                     <ul class="sidebar-menu">
                         <c:forEach items="${catList}" var="cat">
-                            <li>
-                                <a href="${ctx}/blog?cat=${cat.idBlogCat}" class="sidebar-link ${selectedCat == cat.idBlogCat ? 'is-active' : ''}">
-                                    <span class="sidebar-icon"><i class="fa-solid fa-folder"></i></span>
-                                    <span>${cat.categoryName}</span>
-                                </a>
-                            </li>
+                            <c:if test="${not empty cat.categoryName}">
+                                <li>
+                                    <a href="${ctx}/blog?cat=${cat.idBlogCat}" class="sidebar-link ${selectedCat == cat.idBlogCat ? 'is-active' : ''}">
+                                        <span class="sidebar-icon"><i class="fa-solid fa-folder"></i></span>
+                                        <span>${cat.categoryName}</span>
+                                    </a>
+                                </li>
+                            </c:if>
                         </c:forEach>
                         <c:if test="${empty catList}">
                             <li class="p-3 text-muted small">Chưa có danh mục</li>

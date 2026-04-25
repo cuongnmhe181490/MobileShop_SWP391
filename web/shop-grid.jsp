@@ -17,11 +17,6 @@
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
-        <!-- Css Styles -->
-        <link rel="stylesheet" href="${ctx}/css/bootstrap.min.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/owl.carousel.min.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/style.css" type="text/css">
-        <link rel="stylesheet" href="${ctx}/css/custom.css" type="text/css">
     </head>
     <body>
         <%@ include file="/WEB-INF/jspf/storefront/header.jspf" %>

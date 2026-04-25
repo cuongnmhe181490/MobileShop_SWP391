@@ -25,21 +25,16 @@ public class AdminContactServlet extends HttpServlet {
         if (pageStr != null && !pageStr.isEmpty()) {
             try { page = Integer.parseInt(pageStr); } catch (NumberFormatException ignored) {}
         }
-        
-        String status = request.getParameter("status");
-        String topic  = request.getParameter("topic");
 
         try {
-            List<ContactMessage> list = dao.getFiltered(status, topic, page, pageSize);
-            int total = dao.countFiltered(status, topic);
+            List<ContactMessage> list = dao.getAll(page, pageSize);
+            int total = dao.countAll();
             int totalPages = (int) Math.ceil((double) total / pageSize);
 
             request.setAttribute("contacts", list);
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("totalMessages", total);
-            request.setAttribute("selectedStatus", status);
-            request.setAttribute("selectedTopic", topic);
             
             request.getRequestDispatcher("/admin/contact-manage.jsp").forward(request, response);
         } catch (Exception e) {
@@ -61,15 +56,8 @@ public class AdminContactServlet extends HttpServlet {
             if ("update".equals(action)) {
                 dao.updateStatus(contactId, status, adminNotes);
             }
-            String page   = request.getParameter("page");
-            String fStatus = request.getParameter("fStatus");
-            String fTopic  = request.getParameter("fTopic");
-            
-            StringBuilder redirect = new StringBuilder(request.getContextPath() + "/admin/contacts?page=" + (page != null ? page : "1"));
-            if (fStatus != null && !fStatus.isEmpty()) redirect.append("&status=").append(fStatus);
-            if (fTopic  != null && !fTopic.isEmpty())  redirect.append("&topic=").append(fTopic);
-            
-            response.sendRedirect(redirect.toString());
+            String page = request.getParameter("page");
+            response.sendRedirect(request.getContextPath() + "/admin/contacts?page=" + (page != null ? page : "1"));
         } catch (Exception e) {
             throw new ServletException(e);
         }

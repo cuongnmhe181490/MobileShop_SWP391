@@ -1,8 +1,8 @@
 USE [master]
 GO
-CREATE DATABASE [MOBILESHOP_DEMO5]
+CREATE DATABASE [MOBILESHOP_DEM05]
 GO
-USE [MOBILESHOP_DEMO5]
+USE [MOBILESHOP_DEM05]
 GO
 
 -- 1. Table Role
@@ -48,7 +48,16 @@ INSERT [dbo].[User] ([UserId], [Username], [Gender], [Password], [Address], [Ema
 SET IDENTITY_INSERT [dbo].[User] OFF
 GO
 
--- 4. Table Blog
+-- 4. Table BlogCategory
+CREATE TABLE [dbo].[BlogCategory](
+	[IdBlogCat] [int] IDENTITY(1,1) NOT NULL,
+	[CategoryName] [nvarchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED ([IdBlogCat] ASC))
+GO
+INSERT INTO [dbo].[BlogCategory] ([CategoryName]) VALUES (N'Tin tức'), (N'Đánh giá'), (N'Mẹo vặt')
+GO
+
+-- 5. Table Blog
 CREATE TABLE [dbo].[Blog](
 	[IdPost] [int] IDENTITY(1,1) NOT NULL,
 	[Title] [nvarchar](255) NOT NULL,
@@ -58,18 +67,18 @@ CREATE TABLE [dbo].[Blog](
 	[ThumbnailPath] [nvarchar](255) NULL,
 	[CreatedDate] [date] DEFAULT (getdate()),
 	[UserId] [int] NULL,
-	[IdSupplier] [varchar](100) NULL,
+	[IdBlogCat] [int] NULL,
 PRIMARY KEY CLUSTERED ([IdPost] ASC),
 FOREIGN KEY([UserId]) REFERENCES [dbo].[User] ([UserId]),
-FOREIGN KEY([IdSupplier]) REFERENCES [dbo].[Supplier] ([IdSupplier]))
+FOREIGN KEY([IdBlogCat]) REFERENCES [dbo].[BlogCategory] ([IdBlogCat]))
 GO
 SET IDENTITY_INSERT [dbo].[Blog] ON 
-INSERT [dbo].[Blog] ([IdPost], [Title], [SubTitle], [Summary], [Content], [ThumbnailPath], [CreatedDate], [UserId], [IdSupplier]) VALUES (1, N'iPhone 17 Pro Max Review', N'TIN HOT', N'Đánh giá siêu phẩm 2026', N'Nội dung chi tiết...', N'https://picsum.photos/1200/800', CAST(N'2026-04-16' AS Date), 1, N'Apple')
-INSERT [dbo].[Blog] ([IdPost], [Title], [SubTitle], [Summary], [Content], [ThumbnailPath], [CreatedDate], [UserId], [IdSupplier]) VALUES (2, N'Mẹo dùng Samsung', N'CẨM NANG', N'Cách tiết kiệm pin', N'Nội dung chi tiết...', N'https://picsum.photos/1200/801', CAST(N'2026-04-16' AS Date), 1, N'Samsung')
+INSERT [dbo].[Blog] ([IdPost], [Title], [SubTitle], [Summary], [Content], [ThumbnailPath], [CreatedDate], [UserId], [IdBlogCat]) VALUES (1, N'iPhone 17 Pro Max Review', N'TIN HOT', N'Đánh giá siêu phẩm 2026', N'Nội dung chi tiết...', N'https://picsum.photos/1200/800', CAST(N'2026-04-16' AS Date), 1, 2)
+INSERT [dbo].[Blog] ([IdPost], [Title], [SubTitle], [Summary], [Content], [ThumbnailPath], [CreatedDate], [UserId], [IdBlogCat]) VALUES (2, N'Mẹo dùng Samsung', N'CẨM NANG', N'Cách tiết kiệm pin', N'Nội dung chi tiết...', N'https://picsum.photos/1200/801', CAST(N'2026-04-16' AS Date), 1, 3)
 SET IDENTITY_INSERT [dbo].[Blog] OFF
 GO
 
--- 5. Table ProductDetail
+-- 6. Table ProductDetail
 CREATE TABLE [dbo].[ProductDetail](
 	[IdProduct] [nvarchar](50) NOT NULL,
 	[ProductName] [nvarchar](100) NULL,
@@ -90,7 +99,7 @@ PRIMARY KEY CLUSTERED ([IdProduct] ASC),
 FOREIGN KEY([IdSupplier]) REFERENCES [dbo].[Supplier] ([IdSupplier]))
 GO
 
--- 6. Table Order
+-- 7. Table Order
 CREATE TABLE [dbo].[Order](
 	[IdOrder] [int] IDENTITY(1,1) NOT NULL,
 	[UserId] [int] NULL,
@@ -107,7 +116,7 @@ PRIMARY KEY CLUSTERED ([IdOrder] ASC),
 FOREIGN KEY([UserId]) REFERENCES [dbo].[User] ([UserId]))
 GO
 
--- 7. Table OrderDetail
+-- 8. Table OrderDetail
 CREATE TABLE [dbo].[OrderDetail](
 	[IdOrder] [int] NOT NULL,
 	[IdProduct] [nvarchar](50) NOT NULL,

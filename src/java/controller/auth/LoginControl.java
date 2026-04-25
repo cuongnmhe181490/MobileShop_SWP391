@@ -86,15 +86,18 @@ public class LoginControl extends HttpServlet {
                 return;
             }
         
-            if (loginUser != null && BCrypt.checkpw(pass, loginUser.getPass())) {
-
+            if (BCrypt.checkpw(pass, loginUser.getPass())) {
                 HttpSession session = request.getSession();
                 session.setAttribute("acc", loginUser);
                 response.sendRedirect("home"); 
             } else {
-                request.setAttribute("mess", "Email hoặc mật khẩu không chính xác!");
+                request.setAttribute("mess", "Tên đăng nhập hoặc mật khẩu không chính xác!");
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }
+        } else {
+            // Xử lý khi không tìm thấy user hoặc lỗi kết nối database
+            request.setAttribute("mess", "Tên đăng nhập hoặc mật khẩu không chính xác!");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
 

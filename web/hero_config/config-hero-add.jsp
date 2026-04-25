@@ -291,6 +291,11 @@
             margin-top: 4px;
             display: none;
         }
+        .field.has-error .input, 
+        .field.has-error .textarea {
+            border-color: var(--danger-border) !important;
+            background-color: var(--danger-bg) !important;
+        }
         .field.has-error .error-feedback {
             display: block;
         }
@@ -406,50 +411,53 @@
 
                     <form action="${ctx}/HeroAddServlet" method="post" id="heroForm" enctype="multipart/form-data">
                         <div class="form-grid-3">
-                            <div class="field ${not empty errors.eyebrow ? 'has-error' : ''}">
+                            <div class="field">
                                 <label>Nhãn phụ</label>
                                 <input class="input" type="text" name="eyebrow" id="eyebrow"
                                        placeholder="Ví dụ: Đợt mở bán nổi bật"
-                                       maxlength="50" value="${hero.eyebrow}">
-                                <div class="error-feedback">${errors.eyebrow}</div>
+                                       maxlength="50">
+                                <div class="error-feedback"></div>
                             </div>
-                            <div class="field ${not empty errors.ctaPrimary ? 'has-error' : ''}">
+                            <div class="field">
                                 <label>CTA chính <span style="color:#ea4f68">*</span></label>
                                 <input class="input" type="text" name="ctaPrimary" id="ctaPrimary"
                                        placeholder="Ví dụ: Xem cửa hàng"
-                                       required maxlength="30" value="${hero.ctaPrimary}">
-                                <div class="error-feedback">${errors.ctaPrimary}</div>
+                                       required maxlength="30"
+                                       title="Bắt buộc, tối đa 30 ký tự">
+                                <div class="error-feedback"></div>
                             </div>
-                            <div class="field ${not empty errors.ctaSecondary ? 'has-error' : ''}">
+                            <div class="field">
                                 <label>CTA phụ</label>
                                 <input class="input" type="text" name="ctaSecondary" id="ctaSecondary"
                                        placeholder="Ví dụ: Định giá máy cũ"
-                                       maxlength="30" value="${hero.ctaSecondary}">
-                                <div class="error-feedback">${errors.ctaSecondary}</div>
+                                       maxlength="30">
+                                <div class="error-feedback"></div>
                             </div>
                         </div>
 
                         <div class="form-grid-1" style="margin-top: 16px;">
-                            <div class="field ${not empty errors.title ? 'has-error' : ''}">
+                            <div class="field">
                                 <label>Tiêu đề chính <span style="color:#ea4f68">*</span></label>
                                 <input class="input" type="text" name="title" id="title" placeholder="Nhập tiêu đề hero"
-                                       required minlength="5" maxlength="120" value="${hero.title}">
-                                <div class="error-feedback">${errors.title}</div>
+                                       required minlength="5" maxlength="120"
+                                       title="Bắt buộc, 5-120 ký tự">
+                                <div class="error-feedback"></div>
                             </div>
 
-                            <div class="field ${not empty errors.description ? 'has-error' : ''}">
+                            <div class="field">
                                 <label>Mô tả ngắn <span style="color:#ea4f68">*</span></label>
                                 <textarea class="textarea" name="description" id="description"
                                           placeholder="Nhập mô tả ngắn"
-                                          required maxlength="300">${hero.description}</textarea>
-                                <div class="error-feedback">${errors.description}</div>
+                                          required maxlength="300"
+                                          title="Bắt buộc, tối đa 300 ký tự"></textarea>
+                                <div class="error-feedback"></div>
                             </div>
 
-                            <div class="field ${not empty errors.imageFile ? 'has-error' : ''}">
+                            <div class="field">
                                 <label>Ảnh visual (Tải lên từ máy) <span style="color:#ea4f68">*</span></label>
                                 <input class="input" type="file" name="imageFile" id="imageFile"
                                        accept="image/*" required>
-                                <div class="error-feedback">${errors.imageFile}</div>
+                                <div class="error-feedback"></div>
                                 <small style="font-size: 11px; color: #7e8eb8; margin-top: 4px; display: block;">
                                     Định dạng: JPG, PNG, WEBP. Dung lượng: < 500 KB. <br>
                                     Kích thước khuyên dùng: <b>600 x 800 px</b> (Tỷ lệ 3:4).
@@ -467,12 +475,13 @@
                                 </div>
 
                                 <%-- STAT 2: Thời gian phản hồi – admin nhập thủ công --%>
-                                <div class="field ${not empty errors.stat2 ? 'has-error' : ''}">
+                                <div class="field">
                                     <label>Thời gian phản hồi <span style="color:#ea4f68">*</span></label>
                                     <input class="input" type="text" name="stat2" id="stat2"
                                            placeholder="Ví dụ: 24h"
-                                           required maxlength="20" value="${hero.stat2Label}">
-                                    <div class="error-feedback">${errors.stat2}</div>
+                                           required maxlength="20"
+                                           title="Bắt buộc, tối đa 20 ký tự">
+                                    <div class="error-feedback"></div>
                                 </div>
 
                                 <%-- STAT 3: Số mẫu máy – tự động đếm COUNT(*) ProductDetail --%>
@@ -585,12 +594,11 @@
                 const container = field.closest('.field');
                 const errorDiv = container.querySelector('.error-feedback');
                 const rules = validationRules[id];
-                const rawValue = field.type === 'file' ? field.value : field.value;
-                const value = rawValue.trim();
+                const value = field.type === 'file' ? field.value : field.value.trim();
                 let errorMsg = '';
 
-                if (rules.required && (!value || value.length === 0)) {
-                    errorMsg = `\${rules.label} không được để trống hoặc chỉ chứa khoảng trắng.`;
+                if (rules.required && !value) {
+                    errorMsg = `\${rules.label} không được để trống.`;
                 } else if (rules.min && value.length < rules.min) {
                     errorMsg = `\${rules.label} phải có ít nhất \${rules.min} ký tự.`;
                 } else if (rules.max && value.length > rules.max) {
@@ -634,40 +642,24 @@
                 }
             });
 
-            // Client-side validation for image size and dimensions
+            // Client-side validation for image size (enrich existing)
             document.getElementById('imageFile').addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                const fieldId = 'imageFile';
-                const field = document.getElementById(fieldId);
-                const container = field.closest('.field');
-                const errorDiv = container.querySelector('.error-feedback');
-
                 if (file) {
                     if (file.size > 500 * 1024) { // 500 KB
                         showToast('Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB.', 'error');
                         e.target.value = ''; // Reset input
-                        container.classList.add('has-error');
-                        errorDiv.textContent = 'Dung lượng ảnh tối đa 500KB.';
                     } else {
+                        // Check image dimensions (optional enrichment)
                         const img = new Image();
                         img.onload = function() {
-                            const ratio = this.width / this.height;
-                            let errorMsg = '';
-                            
+                            // Enforce reasonable limits for Hero Portrait
                             if (this.width > 1200 || this.height > 1600) {
-                                errorMsg = 'Độ phân giải quá lớn! Tối đa 1200x1600px.';
-                            } else if (ratio > 0.85) { 
-                                errorMsg = 'Vui lòng chọn ảnh dọc (Portrait)! Tỷ lệ chuẩn 3:4 (600x800px).';
-                            }
-
-                            if (errorMsg) {
-                                showToast(errorMsg, 'error');
+                                showToast('Kích thước ảnh quá lớn! Khuyên dùng 600x800px.', 'error');
                                 e.target.value = '';
-                                container.classList.add('has-error');
-                                errorDiv.textContent = errorMsg;
-                            } else {
-                                container.classList.remove('has-error');
-                                errorDiv.textContent = '';
+                            } else if (this.width > this.height) {
+                                showToast('Vui lòng chọn ảnh dọc (Portrait)! Khuyên dùng 600x800px.', 'error');
+                                e.target.value = '';
                             }
                         };
                         img.src = URL.createObjectURL(file);

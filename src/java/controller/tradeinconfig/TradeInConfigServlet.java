@@ -29,14 +29,24 @@ public class TradeInConfigServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        String action = request.getParameter("action");
+
         try {
-            // Luôn hiển thị form chỉnh sửa cấu hình duy nhất
-            Map<String, Object> config = tradeInDAO.getConfig();
-            request.setAttribute("config", config);
-            request.getRequestDispatcher("tradein_config/config-trade-in-edit.jsp").forward(request, response);
+            if ("edit".equals(action)) {
+                // Hiển thị form chỉnh sửa
+                Map<String, Object> config = tradeInDAO.getConfig();
+                request.setAttribute("config", config);
+                request.getRequestDispatcher("tradein_config/config-trade-in-edit.jsp").forward(request, response);
+            } else {
+                // Hiển thị danh sách (chỉ có 1 bản ghi)
+                Map<String, Object> config = tradeInDAO.getConfig();
+                request.setAttribute("tradeInConfig", config);
+                request.getRequestDispatcher("tradein_config/admin-trade-in-list.jsp").forward(request, response);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/AdminHomeConfigServlet");
+            request.setAttribute("error", "Lỗi: " + e.getMessage());
+            request.getRequestDispatcher("tradein_config/admin-trade-in-list.jsp").forward(request, response);
         }
     }
 

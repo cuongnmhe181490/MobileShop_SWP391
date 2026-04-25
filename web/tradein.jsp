@@ -17,8 +17,8 @@
                 <section class="tradein-hero">
                     <div class="tradein-hero__copy">
                         <span class="hero-card__eyebrow">Định giá</span>
-                        <h1>Thu cũ đổi mới, định giá ngay.</h1>
-                        <p>Chọn hãng, tên máy và mức độ mới để xem mức định giá tạm tính ngay bên dưới. Đây là bước nhanh để người dùng biết mình đang ở đâu trước khi chốt nâng cấp.</p>
+                        <h1>Máy cũ của bạn đáng bao nhiêu?</h1>
+                        <p>Hãy chọn hãng, model và tình trạng máy để hệ thống tính mức thu cũ tạm thời.</p>
                     </div>
                 </section>
 
@@ -27,14 +27,15 @@
                         <div class="section-heading section-heading--compact">
                             <div>
                                 <span class="section-eyebrow">Định giá ngay</span>
-                                <h2>Nhập nhanh thông tin máy cũ</h2>
+                                <h2>Cho chúng tôi biết về máy của bạn</h2>
                             </div>
                         </div>
 
                         <form action="${ctx}/tradein" method="post" class="tradein-form">
                             <label>
                                 <span>Hãng sản phẩm</span>
-                                <select name="brand">
+                                <select name="brand" id="brandSelect" onchange="updateProductModels()">
+                                    <option value="" disabled ${empty selectedBrand ? 'selected' : ''}>-- Chọn hãng --</option>
                                     <c:forEach items="${brands}" var="brand">
                                         <option value="${brand}" ${selectedBrand == brand ? 'selected' : ''}>${brand}</option>
                                     </c:forEach>
@@ -42,11 +43,20 @@
                             </label>
                             <label>
                                 <span>Tên sản phẩm</span>
-                                <input type="text" name="modelName" value="${modelName}" placeholder="Ví dụ: iPhone 16 Pro Max">
+                                <select name="modelName" id="modelSelect" onchange="calculatePrice()">
+                                    <c:choose>
+                                        <c:when test="${not empty modelName}">
+                                            <option value="${modelName}" selected>${modelName}</option>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <option value="" disabled selected>-- Chọn máy --</option>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </select>
                             </label>
                             <label>
                                 <span>Mức độ mới</span>
-                                <select name="condition">
+                                <select name="condition" id="conditionSelect" onchange="calculatePrice()">
                                     <c:forEach items="${conditionLabels}" var="entry">
                                         <option value="${entry.key}" ${selectedCondition == entry.key ? 'selected' : ''}>${entry.value}</option>
                                     </c:forEach>
@@ -76,7 +86,7 @@
                                             
                                             <div class="tradein-quote__actions" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
                                                 <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Dùng số tiền này để trừ trực tiếp khi mua máy mới tại MobileShop.</p>
-                                                <a href="${ctx}/home" class="pill-button pill-button--primary" style="display: block; text-align: center; text-decoration: none;">Lên đời ngay</a>
+                                                <a href="${ctx}/home" class="pill-button pill-button--primary" style="display: flex; align-items: center; justify-content: center; text-decoration: none; width: 100%;">Lên đời ngay</a>
                                             </div>
                                             <c:if test="${quote.matchedProduct != null}">
                                                 <div class="tradein-quote__matched">
@@ -110,6 +120,38 @@
             </div>
         </main>
 
+        <script>
+            function updateProductModels() {
+                const brand = document.getElementById('brandSelect').value;
+                const modelSelect = document.getElementById('modelSelect');
+                
+                modelSelect.innerHTML = '<option value="" disabled selected>Đang tải...</option>';
+                if (!brand) return;
+
+                fetch('${ctx}/get-products-by-brand?brand=' + encodeURIComponent(brand))
+                    .then(response => response.json())
+                    .then(data => {
+                        let html = '<option value="" disabled selected>-- Chọn máy --</option>';
+                        data.forEach(item => {
+                            // Check if this was the previously selected model to keep it selected
+                            const isSelected = item.name === '${modelName}' ? 'selected' : '';
+                            html += '<option value="' + item.name + '" ' + isSelected + '>' + item.name + '</option>';
+                        });
+                        modelSelect.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        modelSelect.innerHTML = '<option value="" disabled selected>Lỗi tải dữ liệu</option>';
+                    });
+            }
+
+            window.addEventListener('load', () => {
+                const brandSelect = document.getElementById('brandSelect');
+                if (brandSelect.value) {
+                    updateProductModels();
+                }
+            });
+        </script>
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
     </body>
 </html>

@@ -8,10 +8,7 @@ import entity.Product;
 import entity.ProductModel;
 import entity.Review;
 import entity.Role;
-import entity.Order;
-import entity.OrderDetail;
 import java.sql.SQLException;
-import java.sql.Statement;
 import entity.User;
 import java.util.*;
 import java.lang.*;
@@ -992,18 +989,26 @@ public class DAO {
             e.printStackTrace();
         }
     }
-    public int getTotalProducts() {
+    public int getTotalProducts(String start, String end) {
         String query = "SELECT COUNT(*) FROM ProductDetail";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (start != null && end != null) {
+            query += " WHERE ReleaseDate BETWEEN ? AND ?";
         }
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            if (start != null && end != null) {
+                ps.setString(1, start);
+                ps.setString(2, end);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
         return 0;
+    }
+
+    public int getTotalProducts() {
+        return getTotalProducts(null, null);
     }
 
     public int getPendingOrdersCount() {
@@ -1017,27 +1022,53 @@ public class DAO {
     }
 
     public String getMonthlyRevenue() {
-        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+        return getMonthlyRevenue(null, null);
+    }
+
+    public String getMonthlyRevenue(String start, String end) {
+        String query = "SELECT SUM(TotalPrice) FROM [Order] WHERE OrderStatus = N'Đã hoàn thành'";
+        if (start != null && end != null) {
+            query += " AND OrderDate BETWEEN ? AND ?";
+        } else {
+            query += " AND MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE())";
+        }
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                double total = rs.getDouble(1);
-                if (total >= 1000000) return String.format("%.1fM", total / 1000000.0);
-                return String.format("%.0f", total);
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            if (start != null && end != null) {
+                ps.setString(1, start);
+                ps.setString(2, end);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double total = rs.getDouble(1);
+                    if (total >= 1000000) return String.format("%.1fM", total / 1000000.0);
+                    return String.format("%.0f", total);
+                }
             }
         } catch (Exception e) { e.printStackTrace(); }
         return "0";
     }
 
     public List<Map<String, String>> getRecentOrders(int limit) {
+        return getRecentOrders(limit, null, null);
+    }
+
+    public List<Map<String, String>> getRecentOrders(int limit, String start, String end) {
         List<Map<String, String>> list = new ArrayList<>();
         String query = "SELECT TOP (?) o.IdOrder, u.FullName, o.OrderDate, o.TotalPrice, o.OrderStatus " +
-                      "FROM [Order] o JOIN [User] u ON o.UserId = u.UserId " +
-                      "ORDER BY o.IdOrder DESC";
+                      "FROM [Order] o JOIN [User] u ON o.UserId = u.UserId";
+        if (start != null && end != null) {
+            query += " WHERE o.OrderDate BETWEEN ? AND ?";
+        }
+        query += " ORDER BY o.IdOrder DESC";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setInt(1, limit);
+            int paramIdx = 1;
+            ps.setInt(paramIdx++, limit);
+            if (start != null && end != null) {
+                ps.setString(paramIdx++, start);
+                ps.setString(paramIdx++, end);
+            }
             try (ResultSet rs = ps.executeQuery()) {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm dd/MM");
                 while (rs.next()) {
@@ -1055,20 +1086,37 @@ public class DAO {
     }
 
     public List<Map<String, String>> getBestSellers(int limit) {
+        return getBestSellers(limit, null, null);
+    }
+
+    public List<Map<String, String>> getBestSellers(int limit, String start, String end) {
         List<Map<String, String>> list = new ArrayList<>();
-        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, p.Quantity, SUM(od.Quantity) as Sold " +
+        String query = "SELECT TOP (?) p.ProductName, p.IdSupplier, p.Quantity, p.Price, SUM(od.Quantity) as Sold " +
                       "FROM ProductDetail p JOIN OrderDetail od ON p.IdProduct = od.IdProduct " +
-                      "GROUP BY p.ProductName, p.IdSupplier, p.Quantity " +
-                      "ORDER BY Sold DESC";
+                      "JOIN [Order] o ON od.IdOrder = o.IdOrder";
+        if (start != null && end != null) {
+            query += " WHERE o.OrderDate BETWEEN ? AND ?";
+        }
+        query += " GROUP BY p.ProductName, p.IdSupplier, p.Quantity, p.Price " +
+                 "ORDER BY Sold DESC";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setInt(1, limit);
+            int paramIdx = 1;
+            ps.setInt(paramIdx++, limit);
+            if (start != null && end != null) {
+                ps.setString(paramIdx++, start);
+                ps.setString(paramIdx++, end);
+            }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, String> map = new HashMap<>();
                     map.put("name", rs.getString("ProductName"));
                     map.put("brand", rs.getString("IdSupplier"));
                     map.put("stock", "Còn " + rs.getInt("Quantity") + " máy");
+                    map.put("sold", rs.getString("Sold"));
+                    double revenue = rs.getInt("Sold") * rs.getDouble("Price");
+                    if (revenue >= 1000000) map.put("revenue", String.format("%.1fM", revenue / 1000000.0));
+                    else map.put("revenue", String.format("%.0f", revenue));
                     list.add(map);
                 }
             }
@@ -1112,18 +1160,30 @@ public class DAO {
     }
 
     public Map<String, Integer> getOrderStatusStatistics() {
+        return getOrderStatusStatistics(null, null);
+    }
+
+    public Map<String, Integer> getOrderStatusStatistics(String start, String end) {
         Map<String, Integer> stats = new HashMap<>();
-        // Khởi tạo các trạng thái mặc định
-        stats.put("Hoàn thành", 0);
+        stats.put("Đã hoàn thành", 0);
         stats.put("Chờ xử lý", 0);
         stats.put("Đã hủy", 0);
         
-        String query = "SELECT OrderStatus, COUNT(*) as Total FROM [Order] GROUP BY OrderStatus";
+        String query = "SELECT OrderStatus, COUNT(*) as Total FROM [Order]";
+        if (start != null && end != null) {
+            query += " WHERE OrderDate BETWEEN ? AND ?";
+        }
+        query += " GROUP BY OrderStatus";
         try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                stats.put(rs.getString("OrderStatus"), rs.getInt("Total"));
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            if (start != null && end != null) {
+                ps.setString(1, start);
+                ps.setString(2, end);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    stats.put(rs.getString("OrderStatus"), rs.getInt("Total"));
+                }
             }
         } catch (Exception e) { e.printStackTrace(); }
         return stats;
@@ -1139,6 +1199,24 @@ public class DAO {
         return 0;
     }
 
+    public int getTotalUsers(String start, String end) {
+        String query = "SELECT COUNT(*) FROM [User]";
+        if (start != null && end != null) {
+            query += " WHERE CreatedDate BETWEEN ? AND ?";
+        }
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            if (start != null && end != null) {
+                ps.setString(1, start);
+                ps.setString(2, end);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
     public int getNewOrdersThisMonthCount() {
         String query = "SELECT COUNT(*) FROM [Order] WHERE OrderDate >= DATEADD(day, -30, GETDATE())";
         try (Connection conn = new DBContext().getConnection();
@@ -1150,8 +1228,8 @@ public class DAO {
     }
 
     public double getRevenueGrowth() {
-        String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'Hoàn thành'";
-        String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Hoàn thành'";
+        String sqlPrev = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(OrderDate) = YEAR(DATEADD(month, -1, GETDATE())) AND OrderStatus = N'Đã hoàn thành'";
+        String sqlCurr = "SELECT SUM(TotalPrice) FROM [Order] WHERE MONTH(OrderDate) = MONTH(GETDATE()) AND YEAR(OrderDate) = YEAR(GETDATE()) AND OrderStatus = N'Đã hoàn thành'";
         try (Connection conn = new DBContext().getConnection()) {
             double prev = 0, curr = 0;
             try (PreparedStatement ps = conn.prepareStatement(sqlPrev); ResultSet rs = ps.executeQuery()) {
@@ -1165,55 +1243,6 @@ public class DAO {
         } catch (Exception e) { e.printStackTrace(); }
         return 0.0;
     }
-
-    // ─── Order & OrderDetail Management ───
-
-    public int addOrder(Order order) {
-        String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, CustomerNote, OrderStatus, PaymentMethod) "
-                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            if (order.getUserId() != null) {
-                ps.setInt(1, order.getUserId());
-            } else {
-                ps.setNull(1, java.sql.Types.INTEGER);
-            }
-            ps.setDate(2, order.getOrderDate());
-            ps.setDouble(3, order.getTotalPrice());
-            ps.setString(4, order.getReceiverName());
-            ps.setString(5, order.getReceiverPhone());
-            ps.setString(6, order.getReceiverAddress());
-            ps.setString(7, order.getCustomerNote());
-            ps.setString(8, order.getOrderStatus());
-            ps.setString(9, order.getPaymentMethod());
-            
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    public boolean addOrderDetail(OrderDetail detail) {
-        String query = "INSERT INTO OrderDetail (IdOrder, IdProduct, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-            ps.setInt(1, detail.getIdOrder());
-            ps.setString(2, detail.getIdProduct());
-            ps.setInt(3, detail.getQuantity());
-            ps.setDouble(4, detail.getUnitPrice());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     
     public List<String> getActiveSuppliers() {
         List<String> list = new ArrayList<>();
@@ -1223,6 +1252,57 @@ public class DAO {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(rs.getString(1));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public double[] getMonthlyRevenueArray(String start, String end) {
+        double[] monthlyRev = new double[12];
+        String query = "SELECT MONTH(OrderDate) as Month, SUM(TotalPrice) as Total " +
+                      "FROM [Order] WHERE OrderStatus = N'Đã hoàn thành'";
+        if (start != null && end != null) {
+            query += " AND OrderDate BETWEEN ? AND ?";
+        } else {
+            query += " AND YEAR(OrderDate) = YEAR(GETDATE())";
+        }
+        query += " GROUP BY MONTH(OrderDate)";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            if (start != null && end != null) {
+                ps.setString(1, start);
+                ps.setString(2, end);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int month = rs.getInt("Month");
+                    if (month >= 1 && month <= 12) {
+                        monthlyRev[month - 1] = rs.getDouble("Total") / 1000000.0;
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return monthlyRev;
+    }
+
+    public double[] getMonthlyRevenueArray() {
+        return getMonthlyRevenueArray(null, null);
+    }
+    public List<ProductModel> getProductsBySupplier(String supplierId) {
+        List<ProductModel> list = new ArrayList<>();
+        String query = "SELECT ProductName, Price FROM ProductDetail WHERE IdSupplier = ? ORDER BY ProductName ASC";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            ps.setString(1, supplierId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductModel p = new ProductModel();
+                    p.setProductName(rs.getString("ProductName"));
+                    p.setPrice(rs.getDouble("Price"));
+                    list.add(p);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

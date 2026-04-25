@@ -16,7 +16,6 @@ import entity.HeroBanner;
 
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
-import java.util.Map;
 import util.CloudinaryUtil;
 
 @WebServlet(name = "HeroAddServlet", urlPatterns = {"/HeroAddServlet"})
@@ -51,38 +50,28 @@ public class HeroAddServlet extends HttpServlet {
         String ctaSecondary = trim(request.getParameter("ctaSecondary"));
         String stat2        = trim(request.getParameter("stat2"));
 
-        Map<String, String> errors = new java.util.HashMap<>();
+        StringBuilder errors = new StringBuilder();
         
-        if (eyebrow != null && eyebrow.length() > 50) {
-            errors.put("eyebrow", "Nhãn phụ tối đa 50 ký tự.");
-        }
-
-        if (title == null || title.isBlank()) {
-            errors.put("title", "Tiêu đề không được để trống.");
+        if (title == null || title.isEmpty()) {
+            errors.append("Tiêu đề không được để trống. ");
         } else if (title.length() < 5 || title.length() > 120) {
-            errors.put("title", "Tiêu đề phải từ 5-120 ký tự.");
+            errors.append("Tiêu đề phải từ 5-120 ký tự. ");
         }
 
-        if (ctaPrimary == null || ctaPrimary.isBlank()) {
-            errors.put("ctaPrimary", "CTA chính không được để trống.");
+        if (ctaPrimary == null || ctaPrimary.isEmpty()) {
+            errors.append("CTA chính không được để trống. ");
         } else if (ctaPrimary.length() > 30) {
-            errors.put("ctaPrimary", "CTA chính tối đa 30 ký tự.");
+            errors.append("CTA chính tối đa 30 ký tự. ");
         }
 
-        if (ctaSecondary != null && ctaSecondary.length() > 30) {
-            errors.put("ctaSecondary", "CTA phụ tối đa 30 ký tự.");
-        }
-
-        if (description == null || description.isBlank()) {
-            errors.put("description", "Mô tả ngắn không được để trống.");
+        if (description == null || description.isEmpty()) {
+            errors.append("Mô tả ngắn không được để trống. ");
         } else if (description.length() > 300) {
-            errors.put("description", "Mô tả tối đa 300 ký tự.");
+            errors.append("Mô tả tối đa 300 ký tự. ");
         }
         
-        if (stat2 == null || stat2.isBlank()) {
-            errors.put("stat2", "Thời gian phản hồi không được để trống.");
-        } else if (stat2.length() > 20) {
-            errors.put("stat2", "Thời gian phản hồi tối đa 20 ký tự.");
+        if (stat2 == null || stat2.isEmpty()) {
+            errors.append("Thời gian phản hồi không được để trống. ");
         }
 
         // Xử lý File Upload
@@ -90,45 +79,27 @@ public class HeroAddServlet extends HttpServlet {
         String imageUrl = null;
 
         if (filePart == null || filePart.getSize() == 0) {
-            errors.put("imageFile", "Vui lòng chọn ảnh visual.");
+            errors.append("Vui lòng chọn ảnh visual. ");
         } else {
-            String contentType = filePart.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                errors.put("imageFile", "Định dạng file không hợp lệ. Vui lòng chọn ảnh.");
-            } else if (filePart.getSize() > 500 * 1024) {
-                errors.put("imageFile", "Kích thước ảnh vượt quá giới hạn 500 KB.");
+            // Validate size (500 KB)
+            if (filePart.getSize() > 500 * 1024) {
+                errors.append("Kích thước ảnh vượt quá giới hạn 500 KB. ");
             } else {
-                imageUrl = CloudinaryUtil.upload(filePart, 600, 800, "fill");
+                // Upload to Cloudinary
+                imageUrl = CloudinaryUtil.upload(filePart);
                 if (imageUrl == null) {
-                    errors.put("imageFile", "Lỗi tải ảnh lên Cloudinary.");
+                    errors.append("Lỗi tải ảnh lên Cloudinary. ");
                 }
             }
         }
 
-        if (!errors.isEmpty()) {
-            request.setAttribute("errors", errors);
-            HeroBanner tempHero = new HeroBanner();
-            tempHero.setEyebrow(eyebrow);
-            tempHero.setTitle(title);
-            tempHero.setDescription(description);
-            tempHero.setCtaPrimary(ctaPrimary);
-            tempHero.setCtaSecondary(ctaSecondary);
-            tempHero.setImageUrl(imageUrl);
-            tempHero.setStat2Label(stat2);
-            request.setAttribute("hero", tempHero);
+        if (errors.length() > 0) {
+            request.setAttribute("error", errors.toString().trim());
             request.setAttribute("satisfactionRate", getLiveSatisfactionRate());
             request.setAttribute("productCount", getLiveProductCount());
             request.getRequestDispatcher("hero_config/config-hero-add.jsp").forward(request, response);
             return;
         }
-
-        // Sanitization
-        title = util.ValidationUtil.escapeHtml(title);
-        description = util.ValidationUtil.escapeHtml(description);
-        eyebrow = util.ValidationUtil.escapeHtml(eyebrow);
-        ctaPrimary = util.ValidationUtil.escapeHtml(ctaPrimary);
-        ctaSecondary = util.ValidationUtil.escapeHtml(ctaSecondary);
-        stat2 = util.ValidationUtil.escapeHtml(stat2);
 
         HeroBanner banner = new HeroBanner();
         banner.setEyebrow(eyebrow);
@@ -165,7 +136,20 @@ public class HeroAddServlet extends HttpServlet {
      * Yêu cầu giáo viên: AVG(Ranking), không fix cứng.
      */
     private String getLiveSatisfactionRate() {
-        return dao.getLiveSatisfactionRate();
+        String sql = "SELECT AVG(CAST(Ranking AS FLOAT)) AS Average FROM ProductReview";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                double avg = rs.getDouble("Average");
+                if (avg > 0) {
+                    return String.format("%.1f/5", avg);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "0.0/5";
     }
 
     /**
@@ -173,7 +157,17 @@ public class HeroAddServlet extends HttpServlet {
      * Yêu cầu giáo viên: COUNT(*), không fix số 30.
      */
     private int getLiveProductCount() {
-        return dao.getLiveProductCount();
+        String sql = "SELECT COUNT(*) FROM ProductDetail";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     /** Null-safe trim */

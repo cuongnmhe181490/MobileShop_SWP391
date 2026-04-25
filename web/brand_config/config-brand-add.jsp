@@ -399,16 +399,10 @@
 
                         <div class="field">
                             <label>Logo Thương Hiệu (Tải lên từ máy) <span style="color:#ea4f68">*</span></label>
-                            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 8px;">
-                                <div id="previewContainer" style="display: none; width: 120px; height: 120px; border-radius: 20px; overflow: hidden; border: 2px solid #e2e8f0; background: white; align-items: center; justify-content: center; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                                     <img id="logoPreview" src="#" style="width: 100%; height: 100%; object-fit: contain;" alt="Brand Logo Preview">
-                                 </div>
-                                 <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
-                                     <input class="input" type="file" name="logoFile" id="logoFile" accept="image/*" required style="flex: 1;">
-                                     <div class="error-feedback"></div>
-                                 </div>
-                            </div>
-                            <small style="font-size: 11px; color: #7e8eb8; margin-top: 8px; display: block;">
+                            <input class="input" type="file" name="logoFile" id="logoFile" 
+                                   accept="image/*" required>
+                            <div class="error-feedback"></div>
+                            <small style="font-size: 11px; color: #7e8eb8; margin-top: 4px; display: block;">
                                 Định dạng: JPG, PNG, WEBP, SVG. Dung lượng: < 500 KB.<br>
                                 Kích thước khuyên dùng: <b>400 x 400 px</b> (Tỷ lệ 1:1).
                             </small>
@@ -432,8 +426,8 @@
             const validationRules = {
                 idSupplier: { required: true, max: 100, label: 'Mã thương hiệu' },
                 name: { required: true, max: 100, label: 'Tên thương hiệu' },
-                 email: { required: true, max: 100, format: 'email', label: 'Email liên hệ' },
-                phoneNumber: { max: 15, format: 'phone', label: 'Số điện thoại' },
+                email: { required: true, max: 100, format: 'email', label: 'Email liên hệ' },
+                phoneNumber: { max: 15, label: 'Số điện thoại' },
                 address: { max: 255, label: 'Địa chỉ' },
                 logoFile: { required: true, label: 'Logo thương hiệu' }
             };
@@ -454,11 +448,6 @@
                     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!re.test(value)) {
                         errorMsg = 'Định dạng email không hợp lệ.';
-                    }
-                } else if (value && rules.format === 'phone') {
-                    const re = /^[\d +()]{7,20}$/;
-                    if (!re.test(value)) {
-                        errorMsg = 'Định dạng số điện thoại không hợp lệ.';
                     }
                 }
 
@@ -533,47 +522,16 @@
 
             document.getElementById('logoFile').addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                const container = document.getElementById('previewContainer');
-                const preview = document.getElementById('logoPreview');
-                const fieldId = 'logoFile';
-                const field = document.getElementById(fieldId);
-                const fieldContainer = field.closest('.field');
-                const errorDiv = fieldContainer.querySelector('.error-feedback');
-
                 if (file) {
                     if (file.size > 500 * 1024) {
                         showToast('Ảnh quá lớn! Vui lòng chọn ảnh dưới 500KB.', 'error');
                         e.target.value = '';
-                        container.style.display = 'none';
-                        fieldContainer.classList.add('has-error');
-                        errorDiv.textContent = 'Dung lượng logo tối đa 500KB.';
                     } else {
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            preview.src = event.target.result;
-                            container.style.display = 'flex';
-                        };
-                        reader.readAsDataURL(file);
-
                         const img = new Image();
                         img.onload = function() {
-                            const ratio = this.width / this.height;
-                            let errorMsg = '';
-                            if (this.width > 1000 || this.height > 1000) {
-                                errorMsg = 'Độ phân giải logo quá lớn! Tối đa 1000x1000px.';
-                            } else if (ratio < 0.8 || ratio > 1.2) {
-                                errorMsg = 'Vui lòng chọn ảnh vuông! Tỷ lệ chuẩn 1:1 (400x400px).';
-                            }
-
-                            if (errorMsg) {
-                                showToast(errorMsg, 'error');
+                            if (this.width > 800 || this.height > 800) {
+                                showToast('Kích thước logo quá lớn! Khuyên dùng 400x400px.', 'error');
                                 e.target.value = '';
-                                container.style.display = 'none';
-                                fieldContainer.classList.add('has-error');
-                                errorDiv.textContent = errorMsg;
-                            } else {
-                                fieldContainer.classList.remove('has-error');
-                                errorDiv.textContent = '';
                             }
                         };
                         img.src = URL.createObjectURL(file);

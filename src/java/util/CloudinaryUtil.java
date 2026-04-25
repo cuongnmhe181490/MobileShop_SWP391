@@ -28,17 +28,10 @@ public class CloudinaryUtil {
      */
 
     public static String upload(Part filePart) {
-        return uploadImage(filePart, 0, 0, null);
+        return uploadImage(filePart);
     }
 
-    /**
-     * Upload with transformation (Resize/Crop)
-     */
-    public static String upload(Part filePart, int width, int height, String cropMode) {
-        return uploadImage(filePart, width, height, cropMode);
-    }
-
-    private static String uploadImage(Part filePart, int width, int height, String cropMode) {
+    public static String uploadImage(Part filePart) {
         if (filePart == null || filePart.getSize() == 0) {
             return null;
         }
@@ -62,24 +55,11 @@ public class CloudinaryUtil {
                 }
             }
 
-            // Transformation options
-            Map params = ObjectUtils.emptyMap();
-            if (width > 0 && height > 0) {
-                params = ObjectUtils.asMap(
-                    "transformation", new com.cloudinary.Transformation()
-                        .width(width)
-                        .height(height)
-                        .crop(cropMode != null ? cropMode : "fill")
-                        .gravity("center")
-                );
-            }
-
             @SuppressWarnings("rawtypes")
-            Map uploadResult = cloudinary.uploader().upload(tempFile, params);
+            Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
             Object secureUrl = uploadResult.get("secure_url");
             return secureUrl == null ? null : secureUrl.toString();
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         } finally {
             if (tempFile != null && tempFile.exists()) {

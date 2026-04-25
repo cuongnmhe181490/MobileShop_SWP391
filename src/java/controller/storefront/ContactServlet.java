@@ -29,14 +29,13 @@ public class ContactServlet extends HttpServlet {
         String nameStr  = request.getParameter("name");
         String emailStr = request.getParameter("email");
         String phoneStr = request.getParameter("phone");
-        String topic    = request.getParameter("topic");
         String message  = request.getParameter("message");
         
         ContactMessage m = new ContactMessage();
         m.setFullName(nameStr);
         m.setEmail(emailStr);
         m.setPhoneNumber(phoneStr);
-        m.setSubject(topic != null && !topic.isBlank() ? topic : "Yêu cầu hỗ trợ từ Contact Page");
+        m.setSubject("Yêu cầu hỗ trợ từ Contact Page");
         m.setMessageContent(message);
         
         try {

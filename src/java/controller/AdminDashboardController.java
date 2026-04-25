@@ -17,20 +17,23 @@ public class AdminDashboardController extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        
         DAO dao = new DAO();
         UserDAO userDAO = new UserDAO();
         BlogDAO blogDAO = new BlogDAO();
         
-        int totalProducts = dao.getTotalProducts();
-        int totalUsers = userDAO.getTotalUsers();
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        
+        int totalProducts = dao.getTotalProducts(startDate, endDate);
+        int totalUsers = userDAO.getTotalUsers(startDate, endDate);
         int totalBlogs = blogDAO.getTotalBlogs();
         int pendingOrders = dao.getPendingOrdersCount();
-        String monthlyRevenue = dao.getMonthlyRevenue();
         
-        List<Map<String, String>> recentOrders = dao.getRecentOrders(5);
-        List<Map<String, String>> bestSellers = dao.getBestSellers(5);
+        // Dữ liệu lọc theo ngày
+        String monthlyRevenue = dao.getMonthlyRevenue(startDate, endDate);
+        List<Map<String, String>> recentOrders = dao.getRecentOrders(5, startDate, endDate);
+        List<Map<String, String>> bestSellers = dao.getBestSellers(5, startDate, endDate);
+        Map<String, Integer> orderStats = dao.getOrderStatusStatistics(startDate, endDate);
         
         request.setAttribute("totalProducts", totalProducts);
         request.setAttribute("totalUsers", totalUsers);
@@ -39,14 +42,13 @@ public class AdminDashboardController extends HttpServlet {
         request.setAttribute("monthlyRevenue", monthlyRevenue);
         request.setAttribute("recentOrders", recentOrders);
         request.setAttribute("bestSellers", bestSellers);
-        request.setAttribute("newProductsMonth", dao.getNewProductsThisMonthCount());
-        request.setAttribute("newUsersMonth", dao.getNewUsersThisMonthCount());
-        request.setAttribute("newOrdersMonth", dao.getNewOrdersThisMonthCount());
-        request.setAttribute("revenueGrowth", dao.getRevenueGrowth());
-        
-        // Pass order status statistics as JSON-like structure for Chart.js
-        Map<String, Integer> orderStats = dao.getOrderStatusStatistics();
         request.setAttribute("orderStats", orderStats);
+        request.setAttribute("monthlyRevenueArray", dao.getMonthlyRevenueArray(startDate, endDate));
+        
+        request.setAttribute("startDate", startDate);
+        request.setAttribute("endDate", endDate);
+        
+        request.setAttribute("revenueGrowth", dao.getRevenueGrowth());
         
         // Add current date for dashboard
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");

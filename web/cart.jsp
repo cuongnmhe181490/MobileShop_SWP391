@@ -82,8 +82,7 @@
                                     <strong><fmt:formatNumber value="${cartTotal}" type="number" maxFractionDigits="0"/> đ</strong>
                                 </div>
                                 <div class="summary-actions">
-                                    <a class="pill-link pill-link--primary" href="${ctx}/checkout">Thanh toán ngay</a>
-                                    <a class="pill-link" href="${ctx}/product">Tiếp tục mua sắm</a>
+                                    <a class="pill-link pill-link--primary" href="${ctx}/product">Tiếp tục mua sắm</a>
                                 </div>
                             </div>
                         </aside>

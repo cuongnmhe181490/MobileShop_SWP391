@@ -90,18 +90,28 @@ public class UserDAO extends DBContext{
         }
     }
  
-    public int getTotalUsers() {
+    public int getTotalUsers(String start, String end) {
         String query = "SELECT COUNT(*) FROM [User]";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1);
+        if (start != null && !start.isEmpty() && end != null && !end.isEmpty()) {
+            query += " WHERE CreatedDate BETWEEN ? AND ?";
+        }
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            if (start != null && !start.isEmpty() && end != null && !end.isEmpty()) {
+                ps.setString(1, start);
+                ps.setString(2, end);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public int getTotalUsers() {
+        return getTotalUsers(null, null);
     }
     
     public List<User> getAllUsers() {

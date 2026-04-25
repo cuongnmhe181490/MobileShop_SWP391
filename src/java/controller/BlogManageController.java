@@ -37,46 +37,32 @@ public class BlogManageController extends HttpServlet {
             
             switch (service) {
                 case "listAll":
-                    String filterCatId = request.getParameter("filterCat");
+                    String filterCatIdStr = request.getParameter("filterCat");
                     String searchTitle = request.getParameter("searchTitle");
                     String pageStr = request.getParameter("page");
                     
-                    int pageSizeAdmin = 7;
+                    int pageSizeAdmin = 7; // Hiển thị 7 bài mỗi trang cho Admin theo yêu cầu
                     int pageIndexAdmin = 1;
                     try {
                         if (pageStr != null) pageIndexAdmin = Integer.parseInt(pageStr);
                     } catch (Exception e) { pageIndexAdmin = 1; }
                     
-                    List<BlogPost> list = dao.getAllBlogs();
+                    Integer filterCatId = null;
+                    try {
+                        if (filterCatIdStr != null && !filterCatIdStr.isEmpty()) filterCatId = Integer.parseInt(filterCatIdStr);
+                    } catch (Exception e) { filterCatId = null; }
                     
-                    // Filter by Category if selected
-                    if (filterCatId != null && !filterCatId.isEmpty()) {
-                        int catId = Integer.parseInt(filterCatId);
-                        list = list.stream()
-                                   .filter(b -> b.getIdBlogCat() == catId)
-                                   .collect(java.util.stream.Collectors.toList());
-                    }
-                    
-                    // Search by title if searchTitle provided
-                    if (searchTitle != null && !searchTitle.isEmpty()) {
-                        String searchLower = searchTitle.toLowerCase();
-                        list = list.stream()
-                                   .filter(b -> b.getTitle().toLowerCase().contains(searchLower))
-                                   .collect(java.util.stream.Collectors.toList());
-                    }
-                    
-                    int totalBlogsAdmin = list.size();
+                    // Lấy tổng số bài viết để tính số trang
+                    int totalBlogsAdmin = dao.getTotalBlogsAdmin(searchTitle, filterCatId);
                     int totalPagesAdmin = (int) Math.ceil((double) totalBlogsAdmin / pageSizeAdmin);
+                    if (pageIndexAdmin > totalPagesAdmin && totalPagesAdmin > 0) pageIndexAdmin = totalPagesAdmin;
                     
-                    // Slice for pagination
-                    list = list.stream()
-                               .skip((long) (pageIndexAdmin - 1) * pageSizeAdmin)
-                               .limit(pageSizeAdmin)
-                               .collect(java.util.stream.Collectors.toList());
+                    int offset = (pageIndexAdmin - 1) * pageSizeAdmin;
+                    List<BlogPost> list = dao.getBlogsWithPaginationAdmin(offset, pageSizeAdmin, searchTitle, filterCatId);
                     
                     request.setAttribute("blogList", list);
                     request.setAttribute("catList", dao.getAllBlogCategories());
-                    request.setAttribute("selectedCat", filterCatId);
+                    request.setAttribute("selectedCat", filterCatIdStr);
                     request.setAttribute("searchTitle", searchTitle);
                     request.setAttribute("currentPage", pageIndexAdmin);
                     request.setAttribute("totalPages", totalPagesAdmin);
@@ -148,6 +134,8 @@ public class BlogManageController extends HttpServlet {
                                     blog.setDescription(description);
                                     blog.setContent(content);
                                     blog.setIdBlogCat(idBlogCat);
+                                    String statusFromForm = request.getParameter("status");
+                                    if(statusFromForm != null) blog.setStatus(statusFromForm);
                                 
                                 if(dao.updateBlog(blog)) {
                                     request.getSession().setAttribute("successMessage", "Cập nhật bài viết thành công!");
@@ -232,6 +220,26 @@ public class BlogManageController extends HttpServlet {
                     json.append("]");
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write(json.toString());
+                    return;
+
+                case "toggleStatus":
+                    try {
+                        String bId = request.getParameter("blogId");
+                        String nStatus = request.getParameter("status");
+                        if (bId == null || nStatus == null) {
+                            response.getWriter().write("error: thieu tham so");
+                            return;
+                        }
+                        int blogId = Integer.parseInt(bId);
+                        if (dao.updateBlogStatus(blogId, nStatus)) {
+                            response.getWriter().write("success");
+                        } else {
+                            response.getWriter().write("fail: khong tim thay blog hoac trung trang thai");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        response.getWriter().write("error: " + e.getMessage());
+                    }
                     return;
                     
                 default:
