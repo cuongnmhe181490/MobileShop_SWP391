@@ -41,7 +41,10 @@ public class BlogControl extends HttpServlet {
             int catId = Integer.parseInt(catStr);
             allFiltered = dao.getBlogsByCategory(catId);
         } else {
-            allFiltered = dao.getAllBlogs();
+            // Lọc chỉ lấy các bài viết có trạng thái VISIBLE cho trang người dùng
+            allFiltered = dao.getAllBlogs().stream()
+                    .filter(b -> "VISIBLE".equalsIgnoreCase(b.getStatus()))
+                    .collect(java.util.stream.Collectors.toList());
         }
         
         if (search != null && !search.isEmpty()) {

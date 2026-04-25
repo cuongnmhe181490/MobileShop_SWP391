@@ -7,6 +7,7 @@
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
+        <!-- Css Styles -->
         <link rel="stylesheet" href="${ctx}/css/bootstrap.min.css" type="text/css">
         <link rel="stylesheet" href="${ctx}/css/style.css" type="text/css">
         <link rel="stylesheet" href="${ctx}/css/mobileshop.css" type="text/css">
@@ -62,6 +63,7 @@
                 text-align: right;
                 white-space: nowrap;
             }
+            /* Đảm bảo chữ tiêu đề card trắng */
             .summary-card h2 { color: #ffffff; font-size: 24px; margin-bottom: 20px; }
             .summary-row span { color: rgba(255, 255, 255, 0.8); font-size: 15px; }
             .summary-row strong { color: #ffffff; font-size: 16px; }
@@ -95,6 +97,15 @@
                                 <div class="filter-group">
                                     <h3>Họ và tên người nhận</h3>
                                     <input type="text" name="fullName" class="auth-input ${not empty errorFullName ? 'is-invalid' : ''}"
+                <form id="checkoutForm" action="${ctx}/checkout" method="post">
+                    <div class="checkout-grid">
+                        <section class="auth-form" style="padding: 32px;">
+                            <h2 style="margin-bottom: 24px;">Thông tin giao hàng</h2>
+                            <div class="auth-form__stack">
+                                <!-- Họ tên -->
+                                <div class="filter-group">
+                                    <h3>Họ và tên người nhận</h3>
+                                    <input type="text" name="fullName" class="auth-input ${not empty errorFullName ? 'is-invalid' : ''}" 
                                            value="${not empty fullName ? fullName : sessionScope.acc.name}" placeholder="Ví dụ: Nguyễn Văn A">
                                     <c:if test="${not empty errorFullName}">
                                         <div class="error-message"><i class="fa-solid fa-circle-exclamation"></i> ${errorFullName}</div>
@@ -104,6 +115,10 @@
                                 <div class="filter-group">
                                     <h3>Số điện thoại</h3>
                                     <input type="tel" name="phone" class="auth-input ${not empty errorPhone ? 'is-invalid' : ''}"
+                                <!-- Số điện thoại -->
+                                <div class="filter-group">
+                                    <h3>Số điện thoại</h3>
+                                    <input type="tel" name="phone" class="auth-input ${not empty errorPhone ? 'is-invalid' : ''}" 
                                            value="${not empty phone ? phone : sessionScope.acc.phone}" placeholder="Ví dụ: 0912345678">
                                     <c:if test="${not empty errorPhone}">
                                         <div class="error-message"><i class="fa-solid fa-circle-exclamation"></i> ${errorPhone}</div>
@@ -113,6 +128,10 @@
                                 <div class="filter-group">
                                     <h3>Email</h3>
                                     <input type="email" name="email" class="auth-input ${not empty errorEmail ? 'is-invalid' : ''}"
+                                <!-- Email -->
+                                <div class="filter-group">
+                                    <h3>Email</h3>
+                                    <input type="email" name="email" class="auth-input ${not empty errorEmail ? 'is-invalid' : ''}" 
                                            value="${not empty email ? email : sessionScope.acc.email}" placeholder="Ví dụ: email@domain.com">
                                     <c:if test="${not empty errorEmail}">
                                         <div class="error-message"><i class="fa-solid fa-circle-exclamation"></i> ${errorEmail}</div>
@@ -122,17 +141,23 @@
                                 <div class="filter-group">
                                     <h3>Địa chỉ nhận hàng (Chi tiết)</h3>
                                     <input type="text" name="address" class="auth-input ${not empty errorAddress ? 'is-invalid' : ''}"
+                                <!-- Địa chỉ -->
+                                <div class="filter-group">
+                                    <h3>Địa chỉ nhận hàng (Chi tiết)</h3>
+                                    <input type="text" name="address" class="auth-input ${not empty errorAddress ? 'is-invalid' : ''}" 
                                            value="${not empty address ? address : sessionScope.acc.address}" placeholder="Số nhà, tên đường, phường/xã, quận/huyện...">
                                     <c:if test="${not empty errorAddress}">
                                         <div class="error-message"><i class="fa-solid fa-circle-exclamation"></i> ${errorAddress}</div>
                                     </c:if>
                                 </div>
 
+                                <!-- Ghi chú -->
                                 <div class="filter-group">
                                     <h3>Ghi chú (Tùy chọn)</h3>
                                     <textarea name="note" class="auth-input" style="min-height: 100px; padding: 12px; resize: vertical;" placeholder="Lời nhắn cho nhân viên giao hàng...">${note}</textarea>
                                 </div>
 
+                                <!-- Phương thức thanh toán -->
                                 <div class="filter-group">
                                     <h3>Phương thức thanh toán</h3>
                                     <div class="filter-chip-row">
@@ -193,6 +218,7 @@
 
         <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
 
+        
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const form = document.getElementById('checkoutForm');

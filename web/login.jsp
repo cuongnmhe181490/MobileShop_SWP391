@@ -8,7 +8,6 @@
 <html lang="vi">
     <head>
         <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
-        
     </head>
     <body>
         <main class="page-section">
@@ -45,15 +44,7 @@
                                 <span class="subtle-link">Mật khẩu</span>
                                 <div style="position: relative;">
                                     <input class="auth-input" name="pass" id="passInput"
-                                           type="password" placeholder="••••••••" required
-                                           style="padding-right: 48px;">
-                                    <button type="button" onclick="togglePass()"
-                                            style="position: absolute; right: 14px; top: 50%;
-                                                   transform: translateY(-50%); background: none;
-                                                   border: none; cursor: pointer; color: #6b7280;
-                                                   font-size: 18px; padding: 0; line-height: 1;">
-                                        <i id="eyeIcon" class="fa fa-eye"></i>
-                                    </button>
+                                           type="password" placeholder="••••••••" required>
                                 </div>
                             </label>                            <c:if test="${not empty mess}">
                                 <p style="margin: 0; color: var(--danger); font-weight: 600;">${mess}</p>
@@ -68,18 +59,5 @@
                 </div>
             </div>
         </main>
-        <script>
-            function togglePass() {
-                const input = document.getElementById("passInput");
-                const icon  = document.getElementById("eyeIcon");
-                if (input.type === "password") {
-                    input.type = "text";
-                    icon.className = "fa fa-eye-slash";
-                } else {
-                    input.type = "password";
-                    icon.className = "fa fa-eye";
-                }
-            }
-        </script>
     </body>
 </html>

@@ -14,34 +14,39 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-        
+
         <style>
             :root {
-              --navy: #0E1D35;
-              --navy2: #1B2B4B;
-              --navy3: #243654;
-              --blue: #3B6FE8;
-              --blue-dark: #2C59C8;
-              --blue-light: #EEF3FD;
-              --page-bg: #F2F4F8;
-              --white: #FFFFFF;
-              --gray-50: #F8F9FC;
-              --gray-100: #ECEEF4;
-              --gray-200: #D8DCE8;
-              --gray-300: #B8BECE;
-              --gray-500: #6B7491;
-              --gray-700: #374060;
-              --text: #1A2340;
-              --text2: #4A5370;
-              --text3: #8A92A8;
-              --green: #12B76A;
-              --orange: #F59E0B;
-              --red: #EF4444;
-              --r-xs: 4px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px; --r-2xl: 28px;
-              --shadow-sm: 0 1px 3px rgba(14,29,53,.07), 0 1px 2px rgba(14,29,53,.04);
-              --shadow-md: 0 4px 16px rgba(14,29,53,.09), 0 2px 4px rgba(14,29,53,.05);
-              --shadow-lg: 0 12px 40px rgba(14,29,53,.12), 0 4px 8px rgba(14,29,53,.06);
-              --font: 'Be Vietnam Pro', sans-serif;
+                --navy: #0E1D35;
+                --navy2: #1B2B4B;
+                --navy3: #243654;
+                --blue: #3B6FE8;
+                --blue-dark: #2C59C8;
+                --blue-light: #EEF3FD;
+                --page-bg: #F2F4F8;
+                --white: #FFFFFF;
+                --gray-50: #F8F9FC;
+                --gray-100: #ECEEF4;
+                --gray-200: #D8DCE8;
+                --gray-300: #B8BECE;
+                --gray-500: #6B7491;
+                --gray-700: #374060;
+                --text: #1A2340;
+                --text2: #4A5370;
+                --text3: #8A92A8;
+                --green: #12B76A;
+                --orange: #F59E0B;
+                --red: #EF4444;
+                --r-xs: 4px;
+                --r-sm: 8px;
+                --r-md: 12px;
+                --r-lg: 16px;
+                --r-xl: 20px;
+                --r-2xl: 28px;
+                --shadow-sm: 0 1px 3px rgba(14,29,53,.07), 0 1px 2px rgba(14,29,53,.04);
+                --shadow-md: 0 4px 16px rgba(14,29,53,.09), 0 2px 4px rgba(14,29,53,.05);
+                --shadow-lg: 0 12px 40px rgba(14,29,53,.12), 0 4px 8px rgba(14,29,53,.06);
+                --font: 'Be Vietnam Pro', sans-serif;
             }
 
             *, *::before, *::after {
@@ -67,7 +72,9 @@
             }
 
             /* ── PAGE HEADING ── */
-            .page-heading { margin-bottom: 36px; }
+            .page-heading {
+                margin-bottom: 36px;
+            }
             .page-kicker {
                 font-size: 11px;
                 font-weight: 700;
@@ -134,7 +141,9 @@
                 box-shadow: var(--shadow-md);
                 transform: translateY(-2px);
             }
-            .info-card:hover::before { opacity: 1; }
+            .info-card:hover::before {
+                opacity: 1;
+            }
             .ic-icon {
                 width: 40px;
                 height: 40px;
@@ -167,6 +176,9 @@
                 font-weight: 700;
                 color: var(--navy);
                 line-height: 1.3;
+            }
+            .ic-value.sm {
+                font-size: 13.5px;
             }
             .ic-value.sm { font-size: 13.5px; }
 
@@ -202,8 +214,15 @@
                 color: var(--text2);
                 line-height: 1.6;
             }
-            .form-body { padding: 28px 32px 32px; }
-            .fg { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+            .form-body {
+                padding: 28px 32px 32px;
+            }
+            .fg {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                margin-bottom: 16px;
+            }
             .fl {
                 font-size: 11px;
                 font-weight: 700;
@@ -211,7 +230,10 @@
                 letter-spacing: .1em;
                 color: var(--gray-700);
             }
-            .fl .req { color: var(--red); margin-left: 2px; }
+            .fl .req {
+                color: var(--red);
+                margin-left: 2px;
+            }
             .fi {
                 border: 1px solid var(--gray-200);
                 border-radius: var(--r-md);
@@ -229,8 +251,14 @@
                 background: var(--white);
                 box-shadow: 0 0 0 3px rgba(59, 111, 232, .1);
             }
-            .fi::placeholder { color: var(--gray-300); }
-            textarea.fi { resize: none; min-height: 120px; line-height: 1.65; }
+            .fi::placeholder {
+                color: var(--gray-300);
+            }
+            textarea.fi {
+                resize: none;
+                min-height: 120px;
+                line-height: 1.65;
+            }
 
             .form-foot {
                 margin-top: 20px;
@@ -320,7 +348,13 @@
                 position: relative;
                 z-index: 1;
             }
-            .map-pin-inner { width: 16px; height: 16px; background: white; border-radius: 50%; transform: rotate(45deg); }
+            .map-pin-inner {
+                width: 16px;
+                height: 16px;
+                background: white;
+                border-radius: 50%;
+                transform: rotate(45deg);
+            }
             .map-pin-ring {
                 position: absolute;
                 width: 64px;
@@ -329,9 +363,20 @@
                 border-radius: 50%;
                 animation: pulse 2s infinite;
             }
-            @keyframes pulse { 0% { transform: scale(.8); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+            @keyframes pulse {
+                0% {
+                    transform: scale(.8);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(1.4);
+                    opacity: 0;
+                }
+            }
 
-            .map-info { padding: 20px 22px; }
+            .map-info {
+                padding: 20px 22px;
+            }
             .map-info-row {
                 display: flex;
                 align-items: center;
@@ -339,7 +384,9 @@
                 padding: 8px 0;
                 border-bottom: 1px solid rgba(255, 255, 255, .07);
             }
-            .map-info-row:last-child { border: none; }
+            .map-info-row:last-child {
+                border: none;
+            }
             .mrow-ic {
                 width: 28px;
                 height: 28px;
@@ -350,7 +397,10 @@
                 justify-content: center;
                 flex-shrink: 0;
             }
-            .mrow-ic i { font-size: 13px; color: rgba(255, 255, 255, .6); }
+            .mrow-ic i {
+                font-size: 13px;
+                color: rgba(255, 255, 255, .6);
+            }
             .mrow-label {
                 font-size: 10px;
                 font-weight: 600;
@@ -359,7 +409,11 @@
                 color: rgba(255, 255, 255, .3);
                 margin-bottom: 1px;
             }
-            .mrow-val { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, .85); }
+            .mrow-val {
+                font-size: 13px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, .85);
+            }
 
             /* quick actions card */
             .quick-card {
@@ -376,7 +430,11 @@
                 margin-bottom: 14px;
                 letter-spacing: -.01em;
             }
-            .quick-actions { display: flex; flex-direction: column; gap: 8px; }
+            .quick-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
             .qa-link {
                 display: flex;
                 align-items: center;
@@ -407,14 +465,38 @@
                 flex-shrink: 0;
                 transition: .18s;
             }
-            .qa-btn-ic i { font-size: 15px; color: var(--navy2); transition: .18s; }
-            .qa-link:hover .qa-btn-ic { background: var(--blue); }
-            .qa-link:hover .qa-btn-ic i { color: white; }
-            .qa-btn-text { flex: 1; }
-            .qa-btn-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 1px; }
-            .qa-btn-sub { font-size: 11.5px; color: var(--text3); }
-            .qa-btn-arr { font-size: 16px; color: var(--gray-300); transition: .18s; }
-            .qa-link:hover .qa-btn-arr { color: var(--blue); }
+            .qa-btn-ic i {
+                font-size: 15px;
+                color: var(--navy2);
+                transition: .18s;
+            }
+            .qa-link:hover .qa-btn-ic {
+                background: var(--blue);
+            }
+            .qa-link:hover .qa-btn-ic i {
+                color: white;
+            }
+            .qa-btn-text {
+                flex: 1;
+            }
+            .qa-btn-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--navy);
+                margin-bottom: 1px;
+            }
+            .qa-btn-sub {
+                font-size: 11.5px;
+                color: var(--text3);
+            }
+            .qa-btn-arr {
+                font-size: 16px;
+                color: var(--gray-300);
+                transition: .18s;
+            }
+            .qa-link:hover .qa-btn-arr {
+                color: var(--blue);
+            }
 
             /* hours card */
             .hours-card {
@@ -424,7 +506,12 @@
                 padding: 22px;
                 box-shadow: var(--shadow-sm);
             }
-            .hours-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 14px; }
+            .hours-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--navy);
+                margin-bottom: 14px;
+            }
             .hours-row {
                 display: flex;
                 justify-content: space-between;
@@ -433,9 +520,17 @@
                 border-bottom: 1px solid var(--gray-100);
                 font-size: 13px;
             }
-            .hours-row:last-child { border: none; }
-            .hours-day { color: var(--text2); font-weight: 500; }
-            .hours-time { font-weight: 700; color: var(--navy); }
+            .hours-row:last-child {
+                border: none;
+            }
+            .hours-day {
+                color: var(--text2);
+                font-weight: 500;
+            }
+            .hours-time {
+                font-weight: 700;
+                color: var(--navy);
+            }
             .hours-badge {
                 display: inline-flex;
                 align-items: center;
@@ -447,7 +542,13 @@
                 background: rgba(18, 183, 106, .12);
                 color: var(--green);
             }
-            .hours-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+            .hours-badge::before {
+                content: '';
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: var(--green);
+            }
 
             /* ── CTA BANNER ── */
             .cta-banner {
@@ -482,10 +583,29 @@
                 border-radius: 50%;
                 background: rgba(59, 111, 232, .1);
             }
-            .cta-left { position: relative; z-index: 1; }
-            .cta-left h3 { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: -.02em; margin-bottom: 5px; }
-            .cta-left p { font-size: 13px; color: rgba(255, 255, 255, .5); line-height: 1.6; }
-            .cta-btns { display: flex; gap: 10px; position: relative; z-index: 1; flex-shrink: 0; }
+            .cta-left {
+                position: relative;
+                z-index: 1;
+            }
+            .cta-left h3 {
+                font-size: 18px;
+                font-weight: 800;
+                color: var(--white);
+                letter-spacing: -.02em;
+                margin-bottom: 5px;
+            }
+            .cta-left p {
+                font-size: 13px;
+                color: rgba(255, 255, 255, .5);
+                line-height: 1.6;
+            }
+            .cta-btns {
+                display: flex;
+                gap: 10px;
+                position: relative;
+                z-index: 1;
+                flex-shrink: 0;
+            }
             .btn-cta-white {
                 background: var(--white);
                 color: var(--navy);
@@ -501,8 +621,10 @@
                 text-decoration: none;
             }
             .btn-cta-white:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 6px 20px rgba(0, 0, 0, .15);
+                background: var(--white);
+                color: var(--navy);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, .2);
             }
             .btn-cta-outline {
                 background: transparent;
@@ -525,12 +647,21 @@
 
             /* Responsive */
             @media (max-width: 992px) {
-                .main-grid { grid-template-columns: 1fr; }
-                .info-row { grid-template-columns: repeat(2, 1fr); }
+                .main-grid {
+                    grid-template-columns: 1fr;
+                }
+                .info-row {
+                    grid-template-columns: repeat(2, 1fr);
+                }
             }
             @media (max-width: 600px) {
-                .info-row { grid-template-columns: 1fr; }
-                .cta-banner { flex-direction: column; align-items: flex-start; }
+                .info-row {
+                    grid-template-columns: 1fr;
+                }
+                .cta-banner {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
             }
 
             .alert-success {
@@ -550,16 +681,28 @@
                 margin-top: 4px;
                 display: none;
             }
+            .is-invalid {
+                border-color: var(--red) !important;
+                background: #fff1f2 !important;
+            }
             .is-invalid { border-color: var(--red) !important; background: #fff1f2 !important; }
 
             /* Responsive */
             @media (max-width: 992px) {
-                .contact-main { grid-template-columns: 1fr; }
-                .info-grid { grid-template-columns: repeat(2, 1fr); }
+                .contact-main {
+                    grid-template-columns: 1fr;
+                }
+                .info-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
             }
             @media (max-width: 600px) {
-                .info-grid { grid-template-columns: 1fr; }
-                .rb-actions { flex-direction: column; }
+                .info-grid {
+                    grid-template-columns: 1fr;
+                }
+                .rb-actions {
+                    flex-direction: column;
+                }
             }
 
             /* ─── Login Modal ─── */
@@ -588,12 +731,19 @@
                 animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             }
             @keyframes modalIn {
-                from { opacity: 0; transform: scale(0.92) translateY(16px); }
-                to   { opacity: 1; transform: scale(1)    translateY(0);     }
+                from {
+                    opacity: 0;
+                    transform: scale(0.92) translateY(16px);
+                }
+                to   {
+                    opacity: 1;
+                    transform: scale(1)    translateY(0);
+                }
             }
             .login-modal__close {
                 position: absolute;
-                top: 16px; right: 20px;
+                top: 16px;
+                right: 20px;
                 background: none;
                 border: none;
                 font-size: 22px;
@@ -727,7 +877,7 @@
                                             <div id="err-phone" class="error-text">Số điện thoại không đúng định dạng.</div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="fg">
                                         <label class="fl">Chủ đề</label>
                                         <select name="topic" id="topic" class="fi select-custom-arrow">
@@ -745,7 +895,7 @@
                                         <textarea name="message" id="message" class="fi" placeholder="Bạn cần hỗ trợ điều gì? Mô tả chi tiết để chúng tôi hỗ trợ nhanh hơn..." style="height: 160px;"></textarea>
                                         <div id="err-message" class="error-text">Nội dung phải có ít nhất 10 ký tự.</div>
                                     </div>
-                                    
+
                                     <div class="form-foot">
                                         <p class="form-note">Chúng tôi sẽ liên hệ lại trong vòng <strong>24 giờ</strong> làm việc. Thông tin của bạn được bảo mật hoàn toàn.</p>
                                         <button type="submit" class="btn-submit">
@@ -780,12 +930,16 @@
                     <%-- Right: Side Panel --%>
                     <div class="side-panel">
                         <div class="map-card">
-                            <div class="map-placeholder">
-                                <div class="map-grid"></div>
-                                <div style="position:relative">
-                                    <div class="map-pin-ring"></div>
-                                    <div class="map-pin"><div class="map-pin-inner"></div></div>
-                                </div>
+                            <div class="map-placeholder" style="padding:0; display:block;">
+                                <iframe
+                                    src="https://maps.google.com/maps?q=21.007859,105.540790&z=16&output=embed&hl=vi"
+                                    width="100%"
+                                    height="180"
+                                    style="border:0; display:block; width:100%; height:180px;"
+                                    allowfullscreen=""
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
                             </div>
                             <div class="map-info">
                                 <div class="map-info-row">
@@ -831,7 +985,7 @@
                                     </div>
                                     <span class="qa-btn-arr">›</span>
                                 </a>
-                              
+
                             </div>
                         </div>
                     </div>
@@ -862,7 +1016,7 @@
                 const val = inputs[id].value;
                 const isValid = validate[id](val);
                 const errEl = document.getElementById('err-' + id);
-                
+
                 if (!isValid) {
                     inputs[id].classList.add('is-invalid');
                     errEl.style.display = 'block';
@@ -913,8 +1067,9 @@
             }
 
             // Close when pressing Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') closeLoginModal();
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape')
+                    closeLoginModal();
             });
         </script>
         <div class="login-modal-overlay" id="loginModalOverlay" onclick="handleOverlayClick(event)">

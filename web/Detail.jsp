@@ -269,7 +269,6 @@
                                     </div>
                                     <span>${reviewCount} đánh giá</span>
                                 </div>
-                                <a class="review-summary-card__link" href="${ctx}/reviews?pid=${detail.idProduct}">Xem chi tiết</a>
                             </div>
                             <p>Người mua có thể xem chi tiết theo từng mức sao và toàn bộ nhận xét ở màn đánh giá riêng.</p>
                         </section>

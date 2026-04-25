@@ -6,13 +6,14 @@ public class BlogPost {
     private int blogId;
     private int userId;
     private String title;
-    private String subTitle;    // Phụ đề (NVARCHAR(255))
-    private String description; // Tóm tắt ngắn (NVARCHAR(MAX))
-    private String content;     // Nội dung chi tiết (NVARCHAR(4000))
-    private String imagePath;   // Ảnh bìa
-    private int idBlogCat;      // Mã danh mục mới (FK to BlogCategory)
-    private String categoryName; // Tên danh mục (để hiển thị)
+    private String subTitle;    
+    private String description; 
+    private String content;     
+    private String imagePath;   
+    private int idBlogCat;      
+    private String categoryName; 
     private Date createdDate;
+    private String status;     // Chuyển sang String để khớp DB (VISIBLE/HIDDEN)
 
     public BlogPost() {
     }
@@ -27,6 +28,11 @@ public class BlogPost {
         this.imagePath = imagePath;
         this.idBlogCat = idBlogCat;
         this.createdDate = createdDate;
+    }
+
+    public BlogPost(int blogId, int userId, String title, String subTitle, String description, String content, String imagePath, int idBlogCat, Date createdDate, String status) {
+        this(blogId, userId, title, subTitle, description, content, imagePath, idBlogCat, createdDate);
+        this.status = status;
     }
 
     public int getBlogId() { return blogId; }
@@ -58,4 +64,7 @@ public class BlogPost {
 
     public Date getCreatedDate() { return createdDate; }
     public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
