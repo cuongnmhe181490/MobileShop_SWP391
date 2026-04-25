@@ -105,9 +105,9 @@
         <main class="main-content">
             <header class="header">
                 <div class="welcome">
-                    <p class="admin-shell-eyebrow">QUẢN LÝ SẢN PHẨM</p>
+                    
                     <h1>Quản lý sản phẩm</h1>
-                    <p class="admin-shell-subtitle">Quản trị danh sách sản phẩm và thao tác nhanh trong đúng shell dashboard hiện tại.</p>
+                    
                 </div>
                 <div class="header-actions">
                     <a href="${ctx}/admin/products?service=addProduct" class="btn-primary" style="text-decoration: none;">Thêm sản phẩm</a>

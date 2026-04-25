@@ -238,9 +238,9 @@
         <main class="main-content">
             <header class="header">
                 <div class="welcome">
-                    <p class="admin-shell-eyebrow">QUẢN LÝ ĐƠN HÀNG</p>
+                    
                     <h1>Quản lý đơn hàng</h1>
-                    <p class="admin-shell-subtitle">Theo dõi đơn mới nhất, lọc theo khách hàng hoặc trạng thái và cập nhật xử lý ngay tại đây.</p>
+                    
                 </div>
             </header>
 
