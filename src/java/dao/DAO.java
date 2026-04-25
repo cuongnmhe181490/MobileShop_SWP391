@@ -1346,4 +1346,20 @@ public class DAO {
     }
     return -1; // Trả về -1 nếu có lỗi hoặc không thêm được
 }
+    public boolean addOrderDetail(OrderDetail detail) {
+    String query = "INSERT INTO OrderDetail (IdOrder, IdProduct, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
+    try (Connection conn = new DBContext().getConnection();
+          PreparedStatement ps = conn.prepareStatement(query)) {
+        
+        ps.setInt(1, detail.getIdOrder());
+        ps.setString(2, detail.getIdProduct());
+        ps.setInt(3, detail.getQuantity());
+        ps.setDouble(4, detail.getUnitPrice());
+        
+        return ps.executeUpdate() > 0;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return false;
+}
 }
