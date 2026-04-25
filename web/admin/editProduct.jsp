@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -15,7 +15,6 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- ===== SIDEBAR (đồng bộ từ dashboard.jsp) ===== -->
         <aside class="sidebar">
             <a href="${ctx}/admin/dashboard" class="brand">
                 <h2>MobileShop</h2>
@@ -25,79 +24,42 @@
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${ctx}/admin/dashboard" class="menu-link">
-                            <i class="fa-solid fa-chart-line"></i>Dashboard
-                        </a>
-                    </li>
+                    <li class="menu-item"><a href="${ctx}/admin/dashboard" class="menu-link"><i class="fa-solid fa-table-columns"></i>Dashboard</a></li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
+                <span class="nav-label">QUẢN LÝ</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${ctx}/admin/orders" class="menu-link">
-                            <i class="fa-solid fa-receipt"></i>Đơn hàng
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${ctx}/admin/products" class="menu-link active">
-                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${ctx}/admin/accounts" class="menu-link">
-                            <i class="fa-solid fa-user-gear"></i>Tài khoản
-                        </a>
-                    </li>
+                    <li class="menu-item"><a href="javascript:void(0)" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
+                    <li class="menu-item"><a href="${ctx}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
+                    <li class="menu-item"><a href="${ctx}/admin/products" class="menu-link active"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
+                    <li class="menu-item"><a href="${ctx}/admin/blog" class="menu-link"><i class="fa-solid fa-newspaper"></i>Blog</a></li>
+                    <li class="menu-item"><a href="${ctx}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
+                    <li class="menu-item"><a href="${ctx}/AdminHomeConfigServlet" class="menu-link"><i class="fa-solid fa-sliders"></i>Trang chủ</a></li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
+                <span class="nav-label">CẤU HÌNH TRANG CHỦ</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${ctx}/admin/contacts" class="menu-link">
-                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${ctx}/admin/reviews" class="menu-link">
-                            <i class="fa-solid fa-star"></i>Đánh giá
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${ctx}/admin/blog" class="menu-link">
-                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
-                        </a>
-                    </li>
+                    <li class="menu-item"><a href="${ctx}/HeroListServlet" class="menu-link"><i class="fa-solid fa-image"></i>Biểu ngữ chính</a></li>
+                    <li class="menu-item"><a href="${ctx}/BrandListServlet" class="menu-link"><i class="fa-solid fa-tags"></i>Thương hiệu</a></li>
+                    <li class="menu-item"><a href="${ctx}/TopProductListServlet" class="menu-link"><i class="fa-solid fa-star"></i>Sản phẩm nổi bật</a></li>
+                    <li class="menu-item"><a href="${ctx}/TradeInConfigServlet" class="menu-link"><i class="fa-solid fa-arrows-rotate"></i>Cấu hình Trade-in</a></li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
+                <span class="nav-label">HỆ THỐNG</span>
                 <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${ctx}/admin-home-config.jsp" class="menu-link">
-                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
-                        </a>
-                    </li>
+                    <li class="menu-item"><a href="${ctx}/home" class="menu-link"><i class="fa-solid fa-house"></i>Về trang chủ</a></li>
                 </ul>
             </div>
 
-            <div style="margin-top: auto; padding-bottom: 24px;">
+            <div style="margin-top: auto;">
                 <ul class="sidebar-menu">
-                    <li class="menu-item">
-                        <a href="${ctx}/home" class="menu-link">
-                            <i class="fa-solid fa-globe"></i>Xem Website
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="${ctx}/logout" class="menu-link">
-                            <i class="fa-solid fa-power-off"></i>Đăng xuất
-                        </a>
-                    </li>
+                    <li class="menu-item"><a href="${ctx}/logout" class="menu-link"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất</a></li>
                 </ul>
             </div>
         </aside>
@@ -105,12 +67,13 @@
         <main class="main-content">
             <header class="header">
                 <div class="welcome">
-                    <p class="admin-shell-eyebrow">QUẢN LÝ SẢN PHẨM</p>
+                    <p class="admin-shell-eyebrow">Quản lý sản phẩm</p>
                     <h1>${viewMode ? 'Chi tiết sản phẩm' : (editMode ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm')}</h1>
                     <p class="admin-shell-subtitle">${viewMode ? 'Xem thông tin chi tiết sản phẩm trong đúng shell dashboard admin.' : 'Cập nhật thông tin sản phẩm với cùng sidebar, spacing và vùng nội dung như dashboard gốc.'}</p>
                 </div>
                 <div class="header-actions">
                     <a href="${ctx}/admin/products" class="btn-outline" style="text-decoration: none;">Quay lại</a>
+                    <div class="notification"><i class="fa-regular fa-bell"></i></div>
                     <div class="user-profile">
                         <div class="avatar">${sessionScope.acc != null ? sessionScope.acc.name.substring(0,1).toUpperCase() : "A"}</div>
                         <span style="font-weight: 600;">${sessionScope.acc != null ? sessionScope.acc.name : "Admin"}</span>
@@ -135,7 +98,7 @@
                     <div class="product-form-grid">
                         <label class="field-block">
                             <span class="field-label">Tên sản phẩm</span>
-                            <input class="form-control form-input admin-product-input" type="text" name="productName" value="${param.productName != null ? param.productName : productForm.productName}" minlength="2" maxlength="200" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="text" name="productName" value="${param.productName != null ? param.productName : productForm.productName}" maxlength="150" ${viewMode ? 'disabled' : ''}>
                             <span class="field-error" data-error-for="productName">${errors.productName}</span>
                         </label>
 
@@ -161,7 +124,7 @@
                                         pageContext.setAttribute("formattedPriceValue", formattedPriceValue);
                                     %>
                                     <div class="input-suffix-wrap">
-                                        <input class="form-control form-input admin-product-input admin-product-input--suffix" type="text" inputmode="numeric" name="price" id="price" value="${param.price != null ? param.price : formattedPriceValue}">
+                                        <input class="form-control form-input admin-product-input admin-product-input--suffix" type="text" inputmode="decimal" name="price" id="price" value="${param.price != null ? param.price : formattedPriceValue}">
                                         <span class="input-suffix">VNĐ</span>
                                     </div>
                                 </c:otherwise>
@@ -173,12 +136,13 @@
                         <label class="field-block">
                             <span class="field-label">Số lượng hiện tại</span>
                             <input class="form-control form-input admin-product-input" type="text" inputmode="numeric" name="quantity" id="quantity" value="${param.quantity != null ? param.quantity : productForm.quantity}" ${viewMode ? 'disabled' : ''}>
+                            <span class="field-help">Số lượng hiển thị và chỉnh sửa theo CurrentQuantity.</span>
                             <span class="field-error" data-error-for="quantity">${errors.quantity}</span>
                         </label>
 
                         <label class="field-block">
                             <span class="field-label">Ngày ra mắt</span>
-                            <input class="form-control form-input admin-product-input" type="date" name="releaseDate" value="${param.releaseDate != null ? param.releaseDate : productForm.releaseDate}" max="${todayDate}" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="date" name="releaseDate" value="${param.releaseDate != null ? param.releaseDate : productForm.releaseDate}" ${viewMode ? 'disabled' : ''}>
                             <span class="field-help">Nếu bỏ trống khi thêm mới, hệ thống sẽ dùng ngày hiện tại.</span>
                             <span class="field-error" data-error-for="releaseDate">${errors.releaseDate}</span>
                         </label>
@@ -196,49 +160,50 @@
                                 <option value="Realme" ${selectedSupplier == 'Realme' ? 'selected' : ''}>Realme</option>
                                 <option value="Google" ${selectedSupplier == 'Google' ? 'selected' : ''}>Google</option>
                             </select>
+                            <span class="field-help">idCat sẽ tự cập nhật theo nhà cung cấp đã chọn.</span>
                             <span class="field-error" data-error-for="idSupplier">${errors.idSupplier}</span>
                         </label>
 
                         <label class="field-block">
                             <span class="field-label">Màn hình</span>
-                            <input class="form-control form-input admin-product-input" type="text" name="screen" value="${param.screen != null ? param.screen : productForm.screen}" maxlength="200" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="text" name="screen" value="${param.screen != null ? param.screen : productForm.screen}" maxlength="50" ${viewMode ? 'disabled' : ''}>
                             <span class="field-error" data-error-for="screen">${errors.screen}</span>
                         </label>
 
                         <label class="field-block">
                             <span class="field-label">Hệ điều hành</span>
-                            <input class="form-control form-input admin-product-input" type="text" name="operatingSystem" value="${param.operatingSystem != null ? param.operatingSystem : productForm.operatingSystem}" maxlength="100" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="text" name="operatingSystem" value="${param.operatingSystem != null ? param.operatingSystem : productForm.operatingSystem}" maxlength="30" ${viewMode ? 'disabled' : ''}>
                             <span class="field-error" data-error-for="operatingSystem">${errors.operatingSystem}</span>
                         </label>
 
                         <label class="field-block">
                             <span class="field-label">CPU</span>
-                            <input class="form-control form-input admin-product-input" type="text" name="cpu" value="${param.cpu != null ? param.cpu : productForm.cpu}" maxlength="100" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="text" name="cpu" value="${param.cpu != null ? param.cpu : productForm.cpu}" maxlength="50" ${viewMode ? 'disabled' : ''}>
                             <span class="field-error" data-error-for="cpu">${errors.cpu}</span>
                         </label>
 
                         <label class="field-block">
                             <span class="field-label">RAM</span>
-                            <input class="form-control form-input admin-product-input" type="text" name="ram" id="ram" value="${param.ram != null ? param.ram : productForm.ram}" maxlength="50" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="text" name="ram" id="ram" value="${param.ram != null ? param.ram : productForm.ram}" maxlength="10" inputmode="numeric" ${viewMode ? 'disabled' : ''}>
                             <span class="field-error" data-error-for="ram">${errors.ram}</span>
                         </label>
 
                         <label class="field-block">
                             <span class="field-label">Camera</span>
-                            <input class="form-control form-input admin-product-input" type="text" name="camera" value="${param.camera != null ? param.camera : productForm.camera}" maxlength="200" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="text" name="camera" value="${param.camera != null ? param.camera : productForm.camera}" maxlength="80" ${viewMode ? 'disabled' : ''}>
                             <span class="field-error" data-error-for="camera">${errors.camera}</span>
                         </label>
 
                         <label class="field-block">
                             <span class="field-label">Pin</span>
-                            <input class="form-control form-input admin-product-input" type="text" name="battery" id="battery" value="${param.battery != null ? param.battery : productForm.battery}" maxlength="5" inputmode="numeric" ${viewMode ? 'disabled' : ''}>
+                            <input class="form-control form-input admin-product-input" type="text" name="battery" value="${param.battery != null ? param.battery : productForm.battery}" maxlength="20" ${viewMode ? 'disabled' : ''}>
                             <span class="field-error" data-error-for="battery">${errors.battery}</span>
                         </label>
                     </div>
 
                     <label class="field-block field-block--full">
                         <span class="field-label">Mô tả</span>
-                        <textarea class="form-control form-input admin-product-input admin-textarea" name="description" maxlength="2000" ${viewMode ? 'disabled' : ''}>${param.description != null ? param.description : productForm.description}</textarea>
+                        <textarea class="form-control form-input admin-product-input admin-textarea" name="description" maxlength="1000" ${viewMode ? 'disabled' : ''}>${param.description != null ? param.description : productForm.description}</textarea>
                         <span class="field-error" data-error-for="description">${errors.description}</span>
                     </label>
 
@@ -253,7 +218,7 @@
                         <label class="field-block">
                             <span class="field-label">Tải ảnh từ máy</span>
                             <input class="form-control form-input admin-product-input" type="file" name="imageFile" id="imageFile" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" ${viewMode ? 'disabled' : ''}>
-                            <span class="field-help">Chỉ nhận ảnh hợp lệ, tối đa 500KB.</span>
+                            <span class="field-help">Chỉ nhận ảnh hợp lệ, tối đa 10MB.</span>
                             <span class="field-error" data-error-for="imageFile">${errors.imageFile}</span>
                         </label>
                     </div>
@@ -297,7 +262,7 @@
         const preview = document.getElementById('imagePreview');
         const priceInput = document.getElementById('price');
         const quantityInput = document.getElementById('quantity');
-        const batteryInput = document.getElementById('battery');
+        const ramInput = document.getElementById('ram');
 
         function setError(field, message) {
             const el = document.querySelector('[data-error-for="' + field + '"]');
@@ -308,9 +273,31 @@
 
         function clearClientErrors() {
             document.querySelectorAll('.field-error').forEach((item) => {
-                item.dataset.serverMessage = item.textContent || '';
                 item.textContent = item.dataset.serverMessage || '';
             });
+        }
+
+        function validateNonNegative(fieldName, isInteger) {
+            const input = form.elements[fieldName];
+            const value = input.value.trim();
+            if (!value) {
+                return false;
+            }
+
+            const number = Number(value);
+            if (!Number.isFinite(number)) {
+                setError(fieldName, isInteger ? 'Chỉ được nhập số nguyên.' : 'Chỉ được nhập số hợp lệ.');
+                return true;
+            }
+            if (number < 0) {
+                setError(fieldName, 'Giá trị không được âm.');
+                return true;
+            }
+            if (isInteger && !Number.isInteger(number)) {
+                setError(fieldName, 'Chỉ được nhập số nguyên.');
+                return true;
+            }
+            return false;
         }
 
         function validateMaxLength(fieldName, maxLength, message) {
@@ -320,55 +307,6 @@
             }
             if (input.value.trim().length > maxLength) {
                 setError(fieldName, message);
-                return true;
-            }
-            return false;
-        }
-
-        function validatePositiveIntegerNoLeadingZero(fieldName, options) {
-            const input = form.elements[fieldName];
-            const value = input.value.trim();
-            if (!value) {
-                if (options.required) {
-                    setError(fieldName, options.requiredMessage || 'Trường này là bắt buộc.');
-                    return true;
-                }
-                return false;
-            }
-
-            if (!/^[0-9]+$/.test(value)) {
-                setError(fieldName, options.invalidMessage || 'Chỉ được nhập số nguyên dương.');
-                return true;
-            }
-
-            if (value.length > 1 && value.startsWith('0')) {
-                setError(fieldName, options.leadingZeroMessage || 'Giá trị không được bắt đầu bằng số 0.');
-                return true;
-            }
-
-            const number = Number(value);
-            if (!Number.isSafeInteger(number) || number <= 0) {
-                setError(fieldName, options.invalidMessage || 'Chỉ được nhập số nguyên dương.');
-                return true;
-            }
-
-            if (options.maxDigits && value.length > options.maxDigits) {
-                setError(fieldName, options.maxDigitsMessage || ('Giá trị tối đa ' + options.maxDigits + ' chữ số.'));
-                return true;
-            }
-
-            return false;
-        }
-
-        function validateQuantity(fieldName) {
-            const input = form.elements[fieldName];
-            const value = input.value.trim();
-            if (!value) {
-                setError(fieldName, 'Trường này là bắt buộc.');
-                return true;
-            }
-            if (!/^[0-9]+$/.test(value)) {
-                setError(fieldName, 'Số lượng phải là số nguyên hợp lệ.');
                 return true;
             }
             return false;
@@ -403,7 +341,7 @@
             });
         }
 
-        function restrictNumericInput(input) {
+        function restrictNumericInput(input, allowDecimal) {
             if (!input) {
                 return;
             }
@@ -413,20 +351,32 @@
                 if (allowedKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
                     return;
                 }
-                if (!/^[0-9]$/.test(event.key)) {
+
+                const isDigit = /^[0-9]$/.test(event.key);
+                const isDecimalPoint = allowDecimal && event.key === '.' && !input.value.includes('.');
+                if (!isDigit && !isDecimalPoint) {
                     event.preventDefault();
                 }
             });
 
             input.addEventListener('input', () => {
-                input.value = input.value.replace(/[^0-9]/g, '');
+                let nextValue = input.value.trim();
+                nextValue = allowDecimal ? nextValue.replace(/[^0-9.]/g, '') : nextValue.replace(/[^0-9]/g, '');
+                if (allowDecimal) {
+                    const firstDotIndex = nextValue.indexOf('.');
+                    if (firstDotIndex !== -1) {
+                        nextValue = nextValue.substring(0, firstDotIndex + 1)
+                                + nextValue.substring(firstDotIndex + 1).replace(/\./g, '');
+                    }
+                }
+                input.value = nextValue;
             });
         }
 
         if (!viewMode) {
-            restrictNumericInput(priceInput);
-            restrictNumericInput(quantityInput);
-            restrictNumericInput(batteryInput);
+            restrictNumericInput(priceInput, true);
+            restrictNumericInput(quantityInput, false);
+            restrictNumericInput(ramInput, false);
 
             imageUrlInput.addEventListener('blur', async () => {
                 const value = imageUrlInput.value.trim();
@@ -453,7 +403,7 @@
                     return;
                 }
                 if (file.size > 500 * 1024) {
-                    setError('imageFile', 'Kích thước ảnh tối đa là 500KB.');
+                    setError('imageFile', 'Kích thước ảnh tối đa là 500kb.');
                     imageFileInput.value = '';
                     return;
                 }
@@ -461,45 +411,35 @@
             });
 
             form.addEventListener('submit', async (event) => {
+                document.querySelectorAll('.field-error').forEach((item) => {
+                    item.dataset.serverMessage = item.textContent || '';
+                });
+
                 clearClientErrors();
                 trimFormValues();
 
                 let hasError = false;
-                ['productName', 'idSupplier', 'price', 'quantity', 'battery'].forEach((field) => {
+                ['productName', 'idSupplier', 'price', 'quantity'].forEach((field) => {
                     if (!form.elements[field].value.trim()) {
                         setError(field, 'Trường này là bắt buộc.');
                         hasError = true;
                     }
                 });
 
-                if (form.elements['productName'].value.trim().length > 0 && form.elements['productName'].value.trim().length < 2) {
-                    setError('productName', 'Tên sản phẩm phải có ít nhất 2 ký tự.');
-                    hasError = true;
+                hasError = validateNonNegative('price', false) || hasError;
+                hasError = validateNonNegative('quantity', true) || hasError;
+                if (ramInput.value.trim()) {
+                    hasError = validateNonNegative('ram', true) || hasError;
                 }
 
-                hasError = validatePositiveIntegerNoLeadingZero('price', {
-                    required: true,
-                    invalidMessage: 'Giá phải là số nguyên dương lớn hơn 0.',
-                    leadingZeroMessage: 'Giá không được bắt đầu bằng số 0.'
-                }) || hasError;
-
-                hasError = validateQuantity('quantity') || hasError;
-
-                hasError = validatePositiveIntegerNoLeadingZero('battery', {
-                    required: true,
-                    invalidMessage: 'Pin phải là giá trị số hợp lệ.',
-                    leadingZeroMessage: 'Pin không được bắt đầu bằng số 0.',
-                    maxDigits: 5,
-                    maxDigitsMessage: 'Pin không được vượt quá 5 chữ số.'
-                }) || hasError;
-
-                hasError = validateMaxLength('productName', 200, 'Tên sản phẩm không được vượt quá 200 ký tự.') || hasError;
-                hasError = validateMaxLength('screen', 200, 'Màn hình không được vượt quá 200 ký tự.') || hasError;
-                hasError = validateMaxLength('operatingSystem', 100, 'Hệ điều hành không được vượt quá 100 ký tự.') || hasError;
-                hasError = validateMaxLength('cpu', 100, 'CPU không được vượt quá 100 ký tự.') || hasError;
-                hasError = validateMaxLength('ram', 50, 'RAM không được vượt quá 50 ký tự.') || hasError;
-                hasError = validateMaxLength('camera', 200, 'Camera không được vượt quá 200 ký tự.') || hasError;
-                hasError = validateMaxLength('description', 2000, 'Mô tả không được vượt quá 2000 ký tự.') || hasError;
+                hasError = validateMaxLength('productName', 150, 'Tên sản phẩm không được vượt quá 150 ký tự.') || hasError;
+                hasError = validateMaxLength('screen', 50, 'Màn hình không được vượt quá 50 ký tự.') || hasError;
+                hasError = validateMaxLength('operatingSystem', 30, 'Hệ điều hành không được vượt quá 30 ký tự.') || hasError;
+                hasError = validateMaxLength('cpu', 50, 'CPU không được vượt quá 50 ký tự.') || hasError;
+                hasError = validateMaxLength('ram', 10, 'RAM không được vượt quá 10 ký tự.') || hasError;
+                hasError = validateMaxLength('camera', 80, 'Camera không được vượt quá 80 ký tự.') || hasError;
+                hasError = validateMaxLength('battery', 20, 'Pin không được vượt quá 20 ký tự.') || hasError;
+                hasError = validateMaxLength('description', 1000, 'Mô tả không được vượt quá 1000 ký tự.') || hasError;
                 hasError = validateMaxLength('imagePath', 500, 'Đường dẫn ảnh không được vượt quá 500 ký tự.') || hasError;
 
                 if (!imageFileInput.files.length && !imageUrlInput.value.trim() && !form.elements['existingImagePath'].value.trim()) {
