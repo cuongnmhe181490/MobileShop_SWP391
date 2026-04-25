@@ -1,1093 +1,418 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="vi">
     <head>
-        <%@ include file="/WEB-INF/jspf/storefront/head.jspf" %>
-        <%-- Additional core stylesheets for Header/Footer consistency --%>
-        <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-        <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
-        <link rel="stylesheet" href="css/style.css" type="text/css">
-        <link rel="stylesheet" href="css/mobileshop.css" type="text/css">
-        <link rel="stylesheet" href="css/custom.css" type="text/css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quản lý liên hệ - Admin MobileShop</title>
+        
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        
         <style>
             :root {
-                --navy: #0E1D35;
-                --navy2: #1B2B4B;
-                --navy3: #243654;
-                --blue: #3B6FE8;
-                --blue-dark: #2C59C8;
-                --blue-light: #EEF3FD;
-                --page-bg: #F2F4F8;
-                --white: #FFFFFF;
-                --gray-50: #F8F9FC;
-                --gray-100: #ECEEF4;
-                --gray-200: #D8DCE8;
-                --gray-300: #B8BECE;
-                --gray-500: #6B7491;
-                --gray-700: #374060;
-                --text: #1A2340;
-                --text2: #4A5370;
-                --text3: #8A92A8;
-                --green: #12B76A;
-                --orange: #F59E0B;
-                --red: #EF4444;
-                --r-xs: 4px;
-                --r-sm: 8px;
-                --r-md: 12px;
-                --r-lg: 16px;
-                --r-xl: 20px;
-                --r-2xl: 28px;
-                --shadow-sm: 0 1px 3px rgba(14,29,53,.07), 0 1px 2px rgba(14,29,53,.04);
-                --shadow-md: 0 4px 16px rgba(14,29,53,.09), 0 2px 4px rgba(14,29,53,.05);
-                --shadow-lg: 0 12px 40px rgba(14,29,53,.12), 0 4px 8px rgba(14,29,53,.06);
-                --font: 'Be Vietnam Pro', sans-serif;
+                --bg-body: #f4f7fe;
+                --bg-sidebar: #1e293b;
+                --bg-card: #ffffff;
+                --primary: #4318ff;
+                --text-main: #1b2559;
+                --text-muted: #a3aed0;
+                --border: #e9edf7;
+                --success: #05cd99;
+                --warning: #ffb81c;
+                --shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+                --sidebar-active: #aff22f;
             }
 
-            *, *::before, *::after {
-                box-sizing: border-box;
-            }
+            * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+            body { background-color: var(--bg-body); color: var(--text-main); }
+            
+            .container { display: flex; min-height: 100vh; }
+            
+        /* ===== SIDEBAR – Version Gold ===== */
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            z-index: 100;
+            color: white;
+            overflow-y: auto;
+        }
+        .sidebar .brand {
+            padding: 0 24px;
+            margin-bottom: 40px;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+        .sidebar .brand h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .sidebar .brand p  { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+        
+        .nav-section { margin-bottom: 32px; }
+        .nav-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            display: block;
+            padding: 0 24px;
+        }
+        
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .menu-link i { width: 20px; text-align: center; }
+        .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-link.active {
+            background: rgba(175, 242, 47, 0.1);
+            color: #aff22f;
+            border-left-color: #aff22f;
+            font-weight: 600;
+        }
+        /* ===== END SIDEBAR ===== */
 
-            html, body, h1, h2, h3, h4, h5, h6, input, select, textarea, button, span, p, a, div {
-                font-family: var(--font) !important;
-            }
+            .main { flex: 1; margin-left: 260px; padding: 40px; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+            
+            .msg-card { background: white; border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid transparent; }
+            .msg-header { display: flex; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+            .user-info h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+            .user-info p { font-size: 0.85rem; color: var(--text-muted); }
+            
+            .badge { padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+            .badge-new { background: #e9e3ff; color: var(--primary); }
+            .badge-read { background: #e6f9f4; color: var(--success); }
+            .badge-replied { background: #fff8e6; color: var(--warning); }
+            
+            .content { font-size: 0.95rem; line-height: 1.6; color: #475569; margin-bottom: 20px; }
+            
+            .admin-action { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid var(--border); }
+            .notes-area { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 0.9rem; margin-bottom: 12px; }
+            .btn-save { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+            
+            .pagination { display: flex; gap: 8px; justify-content: center; margin-top: 32px; }
+            .page-link { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 8px; text-decoration: none; color: inherit; font-weight: 700; box-shadow: var(--shadow); }
+            .page-link.active { background: var(--primary); color: white; }
 
-            body {
-                background: var(--page-bg);
-                color: var(--text);
-                -webkit-font-smoothing: antialiased;
-                font-size: 14px;
-                line-height: 1.6;
-            }
-
-            .page-wrap {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 48px 40px 80px;
-            }
-
-            /* ── PAGE HEADING ── */
-            .page-heading {
-                margin-bottom: 36px;
-            }
-            .page-kicker {
+            /* Validation styles */
+            .error-feedback {
+                color: #ee5d50;
                 font-size: 11px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: .14em;
-                color: var(--blue);
-                margin-bottom: 10px;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .page-kicker::before {
-                content: '';
-                width: 22px;
-                height: 2px;
-                background: var(--blue);
-                border-radius: 2px;
-            }
-            .page-heading h1 {
-                font-size: 36px;
-                font-weight: 800;
-                color: var(--navy);
-                letter-spacing: -.03em;
-                line-height: 1.08;
-                margin-bottom: 10px;
-            }
-            .page-heading p {
-                font-size: 14.5px;
-                color: var(--text2);
-                max-width: 520px;
-                line-height: 1.7;
-            }
-
-            /* ── INFO CARDS ROW ── */
-            .info-row {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 14px;
-                margin-bottom: 36px;
-            }
-            .info-card {
-                background: var(--white);
-                border: 1px solid var(--gray-100);
-                border-radius: var(--r-xl);
-                padding: 22px 22px 20px;
-                box-shadow: var(--shadow-sm);
-                transition: .2s;
-                position: relative;
-                overflow: hidden;
-            }
-            .info-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 3px;
-                border-radius: var(--r-xl) var(--r-xl) 0 0;
-                background: var(--blue);
-                opacity: 0;
-                transition: .2s;
-            }
-            .info-card:hover {
-                box-shadow: var(--shadow-md);
-                transform: translateY(-2px);
-            }
-            .info-card:hover::before {
-                opacity: 1;
-            }
-            .ic-icon {
-                width: 40px;
-                height: 40px;
-                border-radius: var(--r-md);
-                background: var(--blue-light);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-bottom: 14px;
-            }
-            .ic-icon svg, .ic-icon i {
-                width: 18px;
-                height: 18px;
-                color: var(--blue);
-                font-size: 18px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .ic-label {
-                font-size: 10.5px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: .1em;
-                color: var(--gray-500);
-                margin-bottom: 5px;
-            }
-            .ic-value {
-                font-size: 15px;
-                font-weight: 700;
-                color: var(--navy);
-                line-height: 1.3;
-            }
-            .ic-value.sm {
-                font-size: 13.5px;
-            }
-
-            /* ── MAIN GRID ── */
-            .main-grid {
-                display: grid;
-                grid-template-columns: 1fr 360px;
-                gap: 24px;
-                align-items: start;
-            }
-
-            /* ── FORM CARD ── */
-            .form-card {
-                background: var(--white);
-                border: 1px solid var(--gray-100);
-                border-radius: var(--r-2xl);
-                box-shadow: var(--shadow-sm);
-                overflow: hidden;
-            }
-            .form-card-head {
-                padding: 28px 32px 24px;
-                border-bottom: 1px solid var(--gray-100);
-            }
-            .form-card-head h2 {
-                font-size: 20px;
-                font-weight: 800;
-                color: var(--navy);
-                letter-spacing: -.02em;
-                margin-bottom: 4px;
-            }
-            .form-card-head p {
-                font-size: 13.5px;
-                color: var(--text2);
-                line-height: 1.6;
-            }
-            .form-body {
-                padding: 28px 32px 32px;
-            }
-            .fg {
-                display: flex;
-                flex-direction: column;
-                gap: 7px;
-                margin-bottom: 16px;
-            }
-            .fl {
-                font-size: 11px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: .1em;
-                color: var(--gray-700);
-            }
-            .fl .req {
-                color: var(--red);
-                margin-left: 2px;
-            }
-            .fi {
-                border: 1px solid var(--gray-200);
-                border-radius: var(--r-md);
-                padding: 11px 14px;
-                font-family: var(--font);
-                font-size: 13.5px;
-                color: var(--text);
-                outline: none;
-                background: var(--gray-50);
-                transition: .18s;
-                width: 100%;
-            }
-            .fi:focus {
-                border-color: var(--blue);
-                background: var(--white);
-                box-shadow: 0 0 0 3px rgba(59, 111, 232, .1);
-            }
-            .fi::placeholder {
-                color: var(--gray-300);
-            }
-            textarea.fi {
-                resize: none;
-                min-height: 120px;
-                line-height: 1.65;
-            }
-
-            .form-foot {
-                margin-top: 20px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 16px;
-            }
-            .form-note {
-                font-size: 12px;
-                color: var(--text3);
-                line-height: 1.5;
-                max-width: 280px;
-            }
-            .btn-submit {
-                background: var(--blue);
-                color: var(--white);
-                border: none;
-                border-radius: var(--r-2xl);
-                padding: 13px 28px;
-                font-family: var(--font);
-                font-size: 14px;
-                font-weight: 700;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                transition: .18s;
-                white-space: nowrap;
-            }
-            .btn-submit:hover {
-                background: var(--blue-dark);
-                transform: translateY(-1px);
-                box-shadow: 0 6px 20px rgba(59, 111, 232, .35);
-            }
-
-            .select-custom-arrow {
-                cursor: pointer;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                appearance: none;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7491' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-                background-repeat: no-repeat;
-                background-position: right 14px center;
-                padding-right: 36px !important;
-            }
-
-            /* ── SIDE PANEL ── */
-            .side-panel {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            /* map card */
-            .map-card {
-                background: var(--navy2);
-                border-radius: var(--r-2xl);
-                overflow: hidden;
-                box-shadow: var(--shadow-md);
-            }
-            .map-placeholder {
-                height: 180px;
-                background: var(--navy3);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                overflow: hidden;
-            }
-            .map-grid {
-                position: absolute;
-                inset: 0;
-                background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
-                background-size: 28px 28px;
-            }
-            .map-pin {
-                width: 44px;
-                height: 44px;
-                background: var(--blue);
-                border-radius: 50% 50% 50% 0;
-                transform: rotate(-45deg);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 4px 16px rgba(59, 111, 232, .5);
-                position: relative;
-                z-index: 1;
-            }
-            .map-pin-inner {
-                width: 16px;
-                height: 16px;
-                background: white;
-                border-radius: 50%;
-                transform: rotate(45deg);
-            }
-            .map-pin-ring {
-                position: absolute;
-                width: 64px;
-                height: 64px;
-                border: 2px solid rgba(59, 111, 232, .35);
-                border-radius: 50%;
-                animation: pulse 2s infinite;
-            }
-            @keyframes pulse {
-                0% {
-                    transform: scale(.8);
-                    opacity: 1;
-                }
-                100% {
-                    transform: scale(1.4);
-                    opacity: 0;
-                }
-            }
-
-            .map-info {
-                padding: 20px 22px;
-            }
-            .map-info-row {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 8px 0;
-                border-bottom: 1px solid rgba(255, 255, 255, .07);
-            }
-            .map-info-row:last-child {
-                border: none;
-            }
-            .mrow-ic {
-                width: 28px;
-                height: 28px;
-                border-radius: var(--r-sm);
-                background: rgba(255, 255, 255, .07);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-            .mrow-ic i {
-                font-size: 13px;
-                color: rgba(255, 255, 255, .6);
-            }
-            .mrow-label {
-                font-size: 10px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: .08em;
-                color: rgba(255, 255, 255, .3);
-                margin-bottom: 1px;
-            }
-            .mrow-val {
-                font-size: 13px;
-                font-weight: 600;
-                color: rgba(255, 255, 255, .85);
-            }
-
-            /* quick actions card */
-            .quick-card {
-                background: var(--white);
-                border: 1px solid var(--gray-100);
-                border-radius: var(--r-2xl);
-                padding: 22px;
-                box-shadow: var(--shadow-sm);
-            }
-            .quick-title {
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--navy);
-                margin-bottom: 14px;
-                letter-spacing: -.01em;
-            }
-            .quick-actions {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-            .qa-link {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 12px 14px;
-                border-radius: var(--r-lg);
-                border: 1.5px solid var(--gray-100);
-                background: var(--gray-50);
-                cursor: pointer;
-                transition: .18s;
-                text-align: left;
-                width: 100%;
-                text-decoration: none;
-            }
-            .qa-link:hover {
-                border-color: var(--blue);
-                background: var(--blue-light);
-                transform: translateX(2px);
-            }
-            .qa-btn-ic {
-                width: 34px;
-                height: 34px;
-                border-radius: var(--r-sm);
-                background: var(--gray-100);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-                transition: .18s;
-            }
-            .qa-btn-ic i {
-                font-size: 15px;
-                color: var(--navy2);
-                transition: .18s;
-            }
-            .qa-link:hover .qa-btn-ic {
-                background: var(--blue);
-            }
-            .qa-link:hover .qa-btn-ic i {
-                color: white;
-            }
-            .qa-btn-text {
-                flex: 1;
-            }
-            .qa-btn-title {
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--navy);
-                margin-bottom: 1px;
-            }
-            .qa-btn-sub {
-                font-size: 11.5px;
-                color: var(--text3);
-            }
-            .qa-btn-arr {
-                font-size: 16px;
-                color: var(--gray-300);
-                transition: .18s;
-            }
-            .qa-link:hover .qa-btn-arr {
-                color: var(--blue);
-            }
-
-            /* hours card */
-            .hours-card {
-                background: var(--white);
-                border: 1px solid var(--gray-100);
-                border-radius: var(--r-2xl);
-                padding: 22px;
-                box-shadow: var(--shadow-sm);
-            }
-            .hours-title {
-                font-size: 13px;
-                font-weight: 700;
-                color: var(--navy);
-                margin-bottom: 14px;
-            }
-            .hours-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 8px 0;
-                border-bottom: 1px solid var(--gray-100);
-                font-size: 13px;
-            }
-            .hours-row:last-child {
-                border: none;
-            }
-            .hours-day {
-                color: var(--text2);
-                font-weight: 500;
-            }
-            .hours-time {
-                font-weight: 700;
-                color: var(--navy);
-            }
-            .hours-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 11px;
-                font-weight: 700;
-                padding: 3px 9px;
-                border-radius: 999px;
-                background: rgba(18, 183, 106, .12);
-                color: var(--green);
-            }
-            .hours-badge::before {
-                content: '';
-                width: 5px;
-                height: 5px;
-                border-radius: 50%;
-                background: var(--green);
-            }
-
-            /* ── CTA BANNER ── */
-            .cta-banner {
-                background: var(--navy);
-                border-radius: var(--r-2xl);
-                padding: 28px 36px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 24px;
-                margin-top: 24px;
-                position: relative;
-                overflow: hidden;
-            }
-            .cta-banner::before {
-                content: '';
-                position: absolute;
-                right: -40px;
-                top: -40px;
-                width: 200px;
-                height: 200px;
-                border-radius: 50%;
-                background: rgba(59, 111, 232, .18);
-            }
-            .cta-banner::after {
-                content: '';
-                position: absolute;
-                right: 40px;
-                bottom: -60px;
-                width: 140px;
-                height: 140px;
-                border-radius: 50%;
-                background: rgba(59, 111, 232, .1);
-            }
-            .cta-left {
-                position: relative;
-                z-index: 1;
-            }
-            .cta-left h3 {
-                font-size: 18px;
-                font-weight: 800;
-                color: var(--white);
-                letter-spacing: -.02em;
-                margin-bottom: 5px;
-            }
-            .cta-left p {
-                font-size: 13px;
-                color: rgba(255, 255, 255, .5);
-                line-height: 1.6;
-            }
-            .cta-btns {
-                display: flex;
-                gap: 10px;
-                position: relative;
-                z-index: 1;
-                flex-shrink: 0;
-            }
-            .btn-cta-white {
-                background: var(--white);
-                color: var(--navy);
-                border: none;
-                border-radius: var(--r-2xl);
-                padding: 12px 22px;
-                font-family: var(--font);
-                font-size: 13.5px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: .15s;
-                white-space: nowrap;
-                text-decoration: none;
-            }
-            .btn-cta-white:hover {
-                background: var(--white);
-                color: var(--navy);
-                transform: translateY(-2px);
-                box-shadow: 0 8px 25px rgba(0, 0, 0, .2);
-            }
-            .btn-cta-outline {
-                background: transparent;
-                color: var(--white);
-                border: 1.5px solid rgba(255, 255, 255, .25);
-                border-radius: var(--r-2xl);
-                padding: 12px 22px;
-                font-family: var(--font);
-                font-size: 13.5px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: .15s;
-                white-space: nowrap;
-                text-decoration: none;
-            }
-            .btn-cta-outline:hover {
-                border-color: rgba(255, 255, 255, .5);
-                background: rgba(255, 255, 255, .06);
-            }
-
-            /* Responsive */
-            @media (max-width: 992px) {
-                .main-grid {
-                    grid-template-columns: 1fr;
-                }
-                .info-row {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-            }
-            @media (max-width: 600px) {
-                .info-row {
-                    grid-template-columns: 1fr;
-                }
-                .cta-banner {
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
-            }
-
-            .alert-success {
-                padding: 16px;
-                background: #f0fdf4;
-                color: #166534;
-                border: 1px solid #bbf7d0;
-                border-radius: 12px;
-                margin-bottom: 24px;
-                font-weight: 600;
-            }
-
-            .error-text {
-                color: var(--red);
-                font-size: 12px;
                 font-weight: 600;
                 margin-top: 4px;
                 display: none;
             }
-            .is-invalid {
-                border-color: var(--red) !important;
-                background: #fff1f2 !important;
+            .has-error .notes-area {
+                border-color: #ee5d50 !important;
+                background-color: #fff5f5 !important;
             }
-
-            /* Responsive */
-            @media (max-width: 992px) {
-                .contact-main {
-                    grid-template-columns: 1fr;
-                }
-                .info-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-            }
-            @media (max-width: 600px) {
-                .info-grid {
-                    grid-template-columns: 1fr;
-                }
-                .rb-actions {
-                    flex-direction: column;
-                }
-            }
-
-            /* ─── Login Modal ─── */
-            .login-modal-overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(15, 23, 42, 0.5);
-                backdrop-filter: blur(4px);
-                z-index: 1000;
-                align-items: center;
-                justify-content: center;
-            }
-            .login-modal-overlay.active {
-                display: flex;
-            }
-            .login-modal {
-                background: #ffffff;
-                border-radius: 24px;
-                padding: 40px 36px;
-                max-width: 380px;
-                width: 90%;
-                text-align: center;
-                position: relative;
-                box-shadow: 0 25px 60px rgba(0,0,0,0.15);
-                animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-            @keyframes modalIn {
-                from {
-                    opacity: 0;
-                    transform: scale(0.92) translateY(16px);
-                }
-                to   {
-                    opacity: 1;
-                    transform: scale(1)    translateY(0);
-                }
-            }
-            .login-modal__close {
-                position: absolute;
-                top: 16px;
-                right: 20px;
-                background: none;
-                border: none;
-                font-size: 22px;
-                color: #94a3b8;
-                cursor: pointer;
-                line-height: 1;
-                padding: 4px;
-                border-radius: 6px;
-                transition: color 0.2s, background 0.2s;
-            }
-            .login-modal__close:hover {
-                color: #0f172a;
-                background: #f1f5f9;
-            }
-            .login-modal__icon {
-                font-size: 48px;
-                margin-bottom: 16px;
+            .has-error .error-feedback {
                 display: block;
             }
-            .login-modal__title {
-                font-size: 20px;
-                font-weight: 800;
-                color: #0f172a;
-                margin: 0 0 10px;
+            .char-counter {
+                font-size: 10px;
+                color: var(--text-muted);
+                text-align: right;
+                margin-top: 2px;
             }
-            .login-modal__desc {
-                font-size: 14px;
-                color: #64748b;
-                line-height: 1.6;
-                margin: 0 0 28px;
-            }
-            .login-modal__actions {
+
+            /* Filter styles */
+            .filter-bar {
+                background: white;
+                border-radius: 16px;
+                padding: 20px 24px;
+                margin-bottom: 24px;
+                box-shadow: var(--shadow);
                 display: flex;
-                gap: 10px;
-                justify-content: center;
+                gap: 20px;
+                align-items: flex-end;
+                flex-wrap: wrap;
             }
-            .login-modal__btn-primary {
-                padding: 12px 28px;
-                border-radius: 999px;
-                background: linear-gradient(135deg, #0284c7, #2563eb);
-                color: #fff;
-                font-size: 14px;
-                font-weight: 700;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-            }
-            .login-modal__btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-            }
-            .login-modal__btn-secondary {
-                padding: 12px 24px;
-                border-radius: 999px;
-                background: #f1f5f9;
-                color: #475569;
-                font-size: 14px;
-                font-weight: 600;
-                border: none;
+            .filter-group { display: flex; flex-direction: column; gap: 6px; }
+            .filter-label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+            .filter-select {
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 10px 14px;
+                font-size: 13px;
+                color: var(--text-main);
+                background: #f8fafc;
+                min-width: 180px;
+                outline: none;
                 cursor: pointer;
-                transition: all 0.2s ease;
             }
-            .login-modal__btn-secondary:hover {
-                background: #e2e8f0;
-                color: #0f172a;
+            .filter-select:focus { border-color: var(--primary); background: white; }
+            .btn-filter {
+                background: var(--primary);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 10px 24px;
+                font-weight: 700;
+                font-size: 13px;
+                cursor: pointer;
+                transition: 0.2s;
             }
+            .btn-filter:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(67, 24, 255, 0.2); }
+            .btn-reset {
+                background: #f1f5f9;
+                color: #64748b;
+                text-decoration: none;
+                border-radius: 10px;
+                padding: 10px 16px;
+                font-weight: 700;
+                font-size: 13px;
+                transition: 0.2s;
+            }
+            .btn-reset:hover { background: #e2e8f0; }
         </style>
     </head>
     <body>
-        <%@ include file="/WEB-INF/jspf/storefront/header.jspf" %>
+        <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="brand">
+                <h2>MobileShop</h2>
+                <p>Quản trị hệ thống</p>
+            </a>
 
-        <main>
-            <div class="page-wrap">
-                <div class="page-heading">
-                    <div class="page-kicker">Kết nối</div>
-                    <h1>Liên hệ</h1>
-                </div>
-
-                <div class="info-row">
-                    <div class="info-card">
-                        <div class="ic-icon"><i class="fa-solid fa-phone"></i></div>
-                        <div class="ic-label">Điện thoại</div>
-                        <div class="ic-value">0385 842 752</div>
-                    </div>
-                    <div class="info-card">
-                        <div class="ic-icon"><i class="fa-solid fa-location-dot"></i></div>
-                        <div class="ic-label">Địa chỉ</div>
-                        <div class="ic-value">Khu CNC, Hoà Lạc, Hà Nội</div>
-                    </div>
-                    <div class="info-card">
-                        <div class="ic-icon"><i class="fa-solid fa-clock"></i></div>
-                        <div class="ic-label">Giờ mở cửa</div>
-                        <div class="ic-value">08:00 – 22:00</div>
-                    </div>
-                    <div class="info-card">
-                        <div class="ic-icon"><i class="fa-solid fa-envelope"></i></div>
-                        <div class="ic-label">Email</div>
-                        <div class="ic-value sm">mobileshop@example.com</div>
-                    </div>
-                </div>
-
-                <div class="main-grid">
-                    <%-- Left: Form --%>
-                    <div>
-                        <div class="form-card">
-                            <div class="form-card-head">
-                                <h2>Gửi yêu cầu tư vấn</h2>
-                                <p>Điền thông tin bên dưới, đội ngũ của chúng tôi sẽ liên hệ lại trong vòng 24h.</p>
-                            </div>
-
-                            <div class="form-body">
-                                <c:if test="${param.success eq 'true'}">
-                                    <div class="alert-success">Cảm ơn bạn! Yêu cầu của bạn đã được gửi thành công.</div>
-                                </c:if>
-
-                                <form action="${pageContext.request.contextPath}/contact" method="post" id="contactForm">
-                                    <div class="field-row">
-                                        <div class="fg">
-                                            <label class="fl">Họ và tên <span class="req">*</span></label>
-                                            <input type="text" name="name" id="name" class="fi" placeholder="Nhập tên của bạn">
-                                            <div id="err-name" class="error-text">Họ tên không được để trống.</div>
-                                        </div>
-                                        <div class="fg">
-                                            <label class="fl">Email <span class="req">*</span></label>
-                                            <input type="email" name="email" id="email" class="fi" placeholder="example@gmail.com">
-                                            <div id="err-email" class="error-text">Vui lòng nhập email hợp lệ.</div>
-                                        </div>
-                                        <div class="fg">
-                                            <label class="fl">Số điện thoại <span class="req">*</span></label>
-                                            <input type="tel" name="phone" id="phone" class="fi" placeholder="0xxx...">
-                                            <div id="err-phone" class="error-text">Số điện thoại không đúng định dạng.</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="fg">
-                                        <label class="fl">Chủ đề</label>
-                                        <select name="topic" id="topic" class="fi select-custom-arrow">
-                                            <option value="" disabled selected>Chọn chủ đề hỗ trợ...</option>
-                                            <option value="Tư vấn mua hàng">Tư vấn mua hàng</option>
-                                            <option value="Thu cũ đổi mới">Thu cũ đổi mới</option>
-                                            <option value="Bảo hành & sửa chữa">Bảo hành & sửa chữa</option>
-                                            <option value="Đơn hàng & vận chuyển">Đơn hàng & vận chuyển</option>
-                                            <option value="Khác">Khác</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="fg" style="margin-bottom:0">
-                                        <label class="fl">Nội dung <span class="req">*</span></label>
-                                        <textarea name="message" id="message" class="fi" placeholder="Bạn cần hỗ trợ điều gì? Mô tả chi tiết để chúng tôi hỗ trợ nhanh hơn..." style="height: 160px;"></textarea>
-                                        <div id="err-message" class="error-text">Nội dung phải có ít nhất 10 ký tự.</div>
-                                    </div>
-
-                                    <div class="form-foot">
-                                        <p class="form-note">Chúng tôi sẽ liên hệ lại trong vòng <strong>24 giờ</strong> làm việc. Thông tin của bạn được bảo mật hoàn toàn.</p>
-                                        <button type="submit" class="btn-submit">
-                                            Gửi liên hệ
-                                            <i class="fa-solid fa-paper-plane"></i>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <%-- CTA Banner --%>
-                        <div class="cta-banner">
-                            <div class="cta-left">
-                                <h3>Bạn thấy dịch vụ của chúng tôi thế nào?</h3>
-                                <p>Ý kiến của bạn giúp chúng tôi cải thiện chất lượng dịch vụ mỗi ngày.</p>
-                            </div>
-                            <div class="cta-btns">
-                                <c:choose>
-                                    <c:when test="${sessionScope.acc != null}">
-                                        <a href="${ctx}/review/write?type=SERVICE" class="btn-cta-white">Đánh giá dịch vụ</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <button class="btn-cta-white" onclick="openLoginModal()" style="border:none; cursor:pointer;">Đánh giá dịch vụ</button>
-                                    </c:otherwise>
-                                </c:choose>
-                                <a href="${ctx}/reviews?type=SERVICE" class="btn-cta-outline">Xem đánh giá</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <%-- Right: Side Panel --%>
-                    <div class="side-panel">
-                        <div class="map-card">
-                            <div class="map-placeholder" style="padding:0; display:block;">
-                                <iframe
-                                    src="https://maps.google.com/maps?q=21.007859,105.540790&z=16&output=embed&hl=vi"
-                                    width="100%"
-                                    height="180"
-                                    style="border:0; display:block; width:100%; height:180px;"
-                                    allowfullscreen=""
-                                    loading="lazy"
-                                    referrerpolicy="no-referrer-when-downgrade">
-                                </iframe>
-                            </div>
-                            <div class="map-info">
-                                <div class="map-info-row">
-                                    <div class="mrow-ic"><i class="fa-solid fa-location-dot"></i></div>
-                                    <div>
-                                        <div class="mrow-label">Địa chỉ</div>
-                                        <div class="mrow-val">Khu CNC, Hoà Lạc, TP.Hà Nội</div>
-                                    </div>
-                                </div>
-                                <div class="map-info-row">
-                                    <div class="mrow-ic"><i class="fa-solid fa-phone"></i></div>
-                                    <div>
-                                        <div class="mrow-label">Hotline</div>
-                                        <div class="mrow-val">0385 842 752</div>
-                                    </div>
-                                </div>
-                                <div class="map-info-row">
-                                    <div class="mrow-ic"><i class="fa-solid fa-clock"></i></div>
-                                    <div>
-                                        <div class="mrow-label">Giờ mở cửa</div>
-                                        <div class="mrow-val">08:00 – 22:00 hàng ngày</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="quick-card">
-                            <div class="quick-title">Liên hệ nhanh</div>
-                            <div class="quick-actions">
-                                <a href="tel:0385842752" class="qa-link">
-                                    <div class="qa-btn-ic"><i class="fa-solid fa-phone-volume"></i></div>
-                                    <div class="qa-btn-text">
-                                        <div class="qa-btn-title">Gọi ngay</div>
-                                        <div class="qa-btn-sub">0385 842 752</div>
-                                    </div>
-                                    <span class="qa-btn-arr">›</span>
-                                </a>
-                                <a href="mailto:mobileshop@example.com" class="qa-link">
-                                    <div class="qa-btn-ic"><i class="fa-solid fa-envelope-open-text"></i></div>
-                                    <div class="qa-btn-text">
-                                        <div class="qa-btn-title">Gửi email</div>
-                                        <div class="qa-btn-sub">mobileshop@example.com</div>
-                                    </div>
-                                    <span class="qa-btn-arr">›</span>
-                                </a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- 1. TỔNG QUAN -->
+            <div class="nav-section">
+                <span class="nav-label">TỔNG QUAN</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </main>
 
-        <%@ include file="/WEB-INF/jspf/storefront/footer.jspf" %>
+            <!-- 2. QUẢN LÝ BÁN HÀNG -->
+            <div class="nav-section">
+                <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
+            <!-- 3. TƯƠNG TÁC & NỘI DUNG -->
+            <div class="nav-section">
+                <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link active">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 4. CẤU HÌNH GIAO DIỆN -->
+            <div class="nav-section">
+                <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 5. HỆ THỐNG -->
+            <div style="margin-top: auto; padding-bottom: 24px;">
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+            <main class="main">
+                <div class="header">
+                    <h1>Liên hệ khách hàng</h1>
+                    <div>
+                        <span style="font-weight: 800; color: var(--primary); font-size: 1.5rem;">${totalMessages}</span>
+                        <p style="font-size: 12px; color: var(--text-muted); text-align: right;">Tin nhắn yêu cầu</p>
+                    </div>
+                </div>
+
+                <form action="${ctx}/admin/contacts" method="get" class="filter-bar">
+                    <div class="filter-group">
+                        <label class="filter-label">Trạng thái</label>
+                        <select name="status" class="filter-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="NEW" ${selectedStatus eq 'NEW' ? 'selected' : ''}>Mới tiếp nhận</option>
+                            <option value="READ" ${selectedStatus eq 'READ' ? 'selected' : ''}>Đang xử lý / Đã đọc</option>
+                            <option value="REPLIED" ${selectedStatus eq 'REPLIED' ? 'selected' : ''}>Đã phản hồi khách</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Chủ đề</label>
+                        <select name="topic" class="filter-select">
+                            <option value="">Tất cả chủ đề</option>
+                            <option value="Tư vấn mua hàng" ${selectedTopic eq 'Tư vấn mua hàng' ? 'selected' : ''}>Tư vấn mua hàng</option>
+                            <option value="Thu cũ đổi mới" ${selectedTopic eq 'Thu cũ đổi mới' ? 'selected' : ''}>Thu cũ đổi mới</option>
+                            <option value="Bảo hành & sửa chữa" ${selectedTopic eq 'Bảo hành & sửa chữa' ? 'selected' : ''}>Bảo hành & sửa chữa</option>
+                            <option value="Đơn hàng & vận chuyển" ${selectedTopic eq 'Đơn hàng & vận chuyển' ? 'selected' : ''}>Đơn hàng & vận chuyển</option>
+                            <option value="Khác" ${selectedTopic eq 'Khác' ? 'selected' : ''}>Khác</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-filter">Lọc kết quả</button>
+                    <a href="${ctx}/admin/contacts" class="btn-reset">Đặt lại</a>
+                </form>
+
+                <c:forEach items="${contacts}" var="m">
+                    <div class="msg-card">
+                        <div class="msg-header">
+                            <div class="user-info">
+                                <h4>${m.fullName}</h4>
+                                <p><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> ${m.email} &nbsp; | &nbsp; <i class="fa-solid fa-phone" style="margin-right: 5px;"></i> ${m.phoneNumber}</p>
+                            </div>
+                            <div>
+                                <span class="badge badge-${m.status.toLowerCase()}">${m.status}</span>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: right;">
+                                    <fmt:formatDate value="${m.sentDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="content">
+                            <div style="margin-bottom: 12px;">
+                                <p style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Chủ đề:</p>
+                                <span style="font-weight: 600; color: var(--primary); background: #f0f3ff; padding: 4px 10px; border-radius: 6px; font-size: 0.9rem;">
+                                    ${m.subject != null ? m.subject : 'Yêu cầu tư vấn'}
+                                </span>
+                            </div>
+                            <p style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Nội dung yêu cầu:</p>
+                            ${m.messageContent}
+                        </div>
+
+                        <div class="admin-action">
+                            <form action="${ctx}/admin/contacts" method="post">
+                                <input type="hidden" name="action" value="update"/>
+                                <input type="hidden" name="id" value="${m.contactId}"/>
+                                <input type="hidden" name="page" value="${currentPage}"/>
+                                <input type="hidden" name="fStatus" value="${selectedStatus}"/>
+                                <input type="hidden" name="fTopic" value="${selectedTopic}"/>
+                                
+                                <div style="display: flex; gap: 16px; align-items: flex-start;">
+                                    <div style="flex: 1;">
+                                        <label style="font-size: 11px; font-weight: 800; margin-bottom: 4px; display: block;">GHI CHÚ / PHẢN HỒI NỘI BỘ</label>
+                                        <textarea name="adminNotes" class="notes-area admin-notes-input" rows="2" placeholder="Ghi chú kết quả xử lý tại đây..." maxlength="500">${m.adminNotes}</textarea>
+                                        <div class="char-counter">0/500</div>
+                                        <div class="error-feedback">Ghi chú không được vượt quá 500 ký tự.</div>
+                                    </div>
+                                    <div style="width: 180px;">
+                                        <label style="font-size: 11px; font-weight: 800; margin-bottom: 4px; display: block;">TRẠNG THÁI</label>
+                                        <select name="status" class="notes-area" style="margin-bottom: 12px;">
+                                            <option value="NEW" ${m.status eq 'NEW' ? 'selected' : ''}>Mới tiếp nhận</option>
+                                            <option value="READ" ${m.status eq 'READ' ? 'selected' : ''}>Đang xử lý / Đã đọc</option>
+                                            <option value="REPLIED" ${m.status eq 'REPLIED' ? 'selected' : ''}>Đã phản hồi khách</option>
+                                        </select>
+                                        <button type="submit" class="btn-save" style="width: 100%;">Cập nhật lưu</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </c:forEach>
+
+                <c:if test="${totalPages > 1}">
+                    <div class="pagination">
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="?page=${i}&status=${selectedStatus}&topic=${selectedTopic}" class="page-link ${currentPage == i ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+                    </div>
+                </c:if>
+            </main>
+        </div>
         <script>
-            const form = document.getElementById('contactForm');
-            const inputs = {
-                name: document.getElementById('name'),
-                email: document.getElementById('email'),
-                phone: document.getElementById('phone'),
-                message: document.getElementById('message')
-            };
+            document.querySelectorAll('.admin-notes-input').forEach(textarea => {
+                const container = textarea.parentElement;
+                const counter = container.querySelector('.char-counter');
+                const errorFeedback = container.querySelector('.error-feedback');
 
-            // Validation rules
-            const validate = {
-                name: (val) => val.trim().length > 0,
-                email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-                phone: (val) => /^0[0-9]{9}$/.test(val.replace(/\s/g, '')),
-                message: (val) => val.trim().length >= 10
-            };
+                const validate = () => {
+                    const len = textarea.value.length;
+                    counter.textContent = `\${len}/500`;
+                    
+                    if (len > 500) {
+                        container.classList.add('has-error');
+                        return false;
+                    } else {
+                        container.classList.remove('has-error');
+                        return true;
+                    }
+                };
 
-            function checkField(id) {
-                const val = inputs[id].value;
-                const isValid = validate[id](val);
-                const errEl = document.getElementById('err-' + id);
+                textarea.addEventListener('input', validate);
+                textarea.addEventListener('blur', validate);
+                
+                // Initialize
+                validate();
 
-                if (!isValid) {
-                    inputs[id].classList.add('is-invalid');
-                    errEl.style.display = 'block';
-                } else {
-                    inputs[id].classList.remove('is-invalid');
-                    errEl.style.display = 'none';
-                }
-                return isValid;
-            }
-
-            // Real-time listeners
-            Object.keys(inputs).forEach(id => {
-                inputs[id].addEventListener('input', () => checkField(id));
-                inputs[id].addEventListener('blur', () => checkField(id));
-            });
-
-            form.addEventListener('submit', (e) => {
-                let isFormValid = true;
-                Object.keys(inputs).forEach(id => {
-                    if (!checkField(id)) {
-                        isFormValid = false;
-                        inputs[id].classList.add('is-invalid');
-                        document.getElementById('err-' + id).style.display = 'block';
+                // Form submit validation
+                const form = textarea.closest('form');
+                form.addEventListener('submit', (e) => {
+                    if (!validate()) {
+                        e.preventDefault();
+                        alert('Ghi chú quá dài! Vui lòng rút ngắn xuống dưới 500 ký tự.');
                     }
                 });
-
-                if (!isFormValid) {
-                    e.preventDefault();
-                }
-            });
-
-            // ── Login Modal ──
-            function openLoginModal() {
-                document.getElementById('loginModalOverlay').classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeLoginModal() {
-                document.getElementById('loginModalOverlay').classList.remove('active');
-                document.body.style.overflow = '';
-            }
-
-            // Close when clicking outside
-            function handleOverlayClick(e) {
-                if (e.target === document.getElementById('loginModalOverlay')) {
-                    closeLoginModal();
-                }
-            }
-
-            // Close when pressing Escape
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape')
-                    closeLoginModal();
             });
         </script>
-        <div class="login-modal-overlay" id="loginModalOverlay" onclick="handleOverlayClick(event)">
-            <div class="login-modal">
-                <button class="login-modal__close" onclick="closeLoginModal()">&#x2715;</button>
-                <span class="login-modal__icon">⭐</span>
-                <h3 class="login-modal__title">Vui lòng đăng nhập</h3>
-                <p class="login-modal__desc">
-                    Bạn cần đăng nhập để có thể thực hiện đánh giá dịch vụ này.
-                </p>
-                <div class="login-modal__actions">
-                    <a class="login-modal__btn-primary"
-                       href="${pageContext.request.contextPath}/login?redirect=${pageContext.request.contextPath}/review/write?type=SERVICE">
-                        Đăng nhập
-                    </a>
-                    <button class="login-modal__btn-secondary" onclick="closeLoginModal()">
-                        Để sau
-                    </button>
-                </div>
-            </div>
-        </div>
     </body>
 </html>
