@@ -8,7 +8,10 @@ import entity.Product;
 import entity.ProductModel;
 import entity.Review;
 import entity.Role;
+import entity.Order;
+import entity.OrderDetail;
 import java.sql.SQLException;
+import java.sql.Statement;
 import entity.User;
 import java.util.*;
 import java.lang.*;
@@ -1309,4 +1312,38 @@ public class DAO {
         }
         return list;
     }
+    public int addOrder(Order order) {
+    String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, CustomerNote, OrderStatus, PaymentMethod) "
+                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    try (Connection conn = new DBContext().getConnection();
+          PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+        
+        if (order.getUserId() != null) {
+            ps.setInt(1, order.getUserId());
+        } else {
+            ps.setNull(1, java.sql.Types.INTEGER);
+        }
+        ps.setDate(2, order.getOrderDate());
+        ps.setDouble(3, order.getTotalPrice());
+        ps.setString(4, order.getReceiverName());
+        ps.setString(5, order.getReceiverPhone());
+        ps.setString(6, order.getReceiverAddress());
+        ps.setString(7, order.getCustomerNote());
+        ps.setString(8, order.getOrderStatus());
+        ps.setString(9, order.getPaymentMethod());
+        
+        int affectedRows = ps.executeUpdate();
+        if (affectedRows > 0) {
+            // Lấy ID đơn hàng vừa tự động tăng trong SQL Server
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1); // Trả về ID của đơn hàng vừa tạo
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return -1; // Trả về -1 nếu có lỗi hoặc không thêm được
+}
 }
