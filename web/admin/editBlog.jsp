@@ -220,6 +220,7 @@
                                 <div class="upload-area">
                                     <i class="fa-solid fa-image"></i>
                                     <div style="font-weight: 700;">Thay đổi <span>ảnh bài viết</span></div>
+                                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 5px;">(Kích thước tối thiểu: 800x400px)</div>
                                     <input type="file" name="image" id="thumbInput" accept="image/*">
                                 </div>
                                 <div class="preview-img-box">
@@ -287,11 +288,31 @@
         document.getElementById('thumbInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(re) {
-                    document.getElementById('imgPreview').src = re.target.result;
-                }
-                reader.readAsDataURL(file);
+                // Validate dimensions
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = function() {
+                    const width = this.width;
+                    const height = this.height;
+                    const minWidth = 800;
+                    const minHeight = 400;
+
+                    if (width < minWidth || height < minHeight) {
+                        alert(`Ảnh quá nhỏ! Vui lòng chọn ảnh có kích thước tối thiểu ${minWidth}x${minHeight}px để tránh bị mờ/vỡ hình.\nKích thước hiện tại: ${width}x${height}px`);
+                        document.getElementById('thumbInput').value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(re) {
+                        document.getElementById('imgPreview').src = re.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                };
+                img.onerror = function() {
+                    alert('File không phải là ảnh hợp lệ!');
+                    document.getElementById('thumbInput').value = '';
+                };
             }
         });
 

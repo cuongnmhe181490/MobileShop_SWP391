@@ -62,10 +62,10 @@
         /* DATE RANGE FORM */
         .filter-form { display: flex; align-items: center; gap: 10px; background: white; padding: 8px 15px; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid #e9edf7; }
         .filter-form input[type="date"] { border: none; font-family: inherit; font-weight: 700; color: var(--text-main); outline: none; font-size: 0.85rem; }
-        .btn-filter { background: #4318ff; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
+        .btn-filter { background: #4318ff; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.8rem; transition: 0.2s; font-family: inherit; }
         .btn-filter:hover { background: #3311cc; }
         
-        .btn-refresh { background: #05cd99; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-refresh { background: #05cd99; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: inherit; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: white; padding: 25px; border-radius: 20px; box-shadow: var(--shadow); transition: 0.3s; }
