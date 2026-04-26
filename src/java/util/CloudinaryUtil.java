@@ -36,7 +36,7 @@ public class CloudinaryUtil {
             return null;
         }
 
-        Cloudinary cloudinary = buildClient();
+        // Sử dụng đối tượng cloudinary static đã khai báo ở trên với thông tin login chuẩn
         if (cloudinary == null) {
             return null;
         }

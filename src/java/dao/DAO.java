@@ -1354,54 +1354,5 @@ public class DAO {
         }
         return list;
     }
-    public int addOrder(Order order) {
-    String query = "INSERT INTO [Order] (UserId, OrderDate, TotalPrice, ReceiverName, ReceiverPhone, ReceiverAddress, CustomerNote, OrderStatus, PaymentMethod) "
-                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    try (Connection conn = new DBContext().getConnection();
-          PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-        
-        if (order.getUserId() != null) {
-            ps.setInt(1, order.getUserId());
-        } else {
-            ps.setNull(1, java.sql.Types.INTEGER);
-        }
-        ps.setDate(2, order.getOrderDate());
-        ps.setDouble(3, order.getTotalPrice());
-        ps.setString(4, order.getReceiverName());
-        ps.setString(5, order.getReceiverPhone());
-        ps.setString(6, order.getReceiverAddress());
-        ps.setString(7, order.getCustomerNote());
-        ps.setString(8, order.getOrderStatus());
-        ps.setString(9, order.getPaymentMethod());
-        
-        int affectedRows = ps.executeUpdate();
-        if (affectedRows > 0) {
-            // Lấy ID đơn hàng vừa tự động tăng trong SQL Server
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1); // Trả về ID của đơn hàng vừa tạo
-                }
-            }
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return -1; // Trả về -1 nếu có lỗi hoặc không thêm được
-}
-    public boolean addOrderDetail(OrderDetail detail) {
-    String query = "INSERT INTO OrderDetail (IdOrder, IdProduct, Quantity, UnitPrice) VALUES (?, ?, ?, ?)";
-    try (Connection conn = new DBContext().getConnection();
-          PreparedStatement ps = conn.prepareStatement(query)) {
-        
-        ps.setInt(1, detail.getIdOrder());
-        ps.setString(2, detail.getIdProduct());
-        ps.setInt(3, detail.getQuantity());
-        ps.setDouble(4, detail.getUnitPrice());
-        
-        return ps.executeUpdate() > 0;
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return false;
-}
+
 }

@@ -15,9 +15,9 @@ import java.util.List;
 import util.CloudinaryUtil;
 
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 500, // 2MB
-    maxFileSize = 1024 * 500,           // 500KB
-    maxRequestSize = 1024 * 1024 * 2    // 2MB
+    fileSizeThreshold = 1024 * 500, 
+    maxFileSize = 1024 * 500,           
+    maxRequestSize = 1024 * 500
 )
 @WebServlet(name = "BlogManageController", urlPatterns = {"/admin/blog"})
 public class BlogManageController extends HttpServlet {
