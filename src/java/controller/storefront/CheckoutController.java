@@ -62,7 +62,7 @@ public class CheckoutController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.sendRedirect(request.getContextPath() + "/checkout");
-    }
+    
         HttpSession session = request.getSession();
         DAO dao = new DAO();
         

@@ -117,39 +117,79 @@
             <div class="nav-section">
                 <span class="nav-label">TỔNG QUAN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link"><i class="fa-solid fa-chart-line"></i>Dashboard</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-link">
+                            <i class="fa-solid fa-chart-line"></i>Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <div class="nav-section">
                 <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/products" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/orders" class="menu-link">
+                            <i class="fa-solid fa-receipt"></i>Đơn hàng
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/products" class="menu-link">
+                            <i class="fa-solid fa-boxes-stacked"></i>Sản phẩm
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link">
+                            <i class="fa-solid fa-user-gear"></i>Tài khoản
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <div class="nav-section">
                 <span class="nav-label">TƯƠNG TÁC & NỘI DUNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link"><i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link"><i class="fa-solid fa-star"></i>Đánh giá</a></li>
-                    <li><a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active"><i class="fa-solid fa-newspaper"></i>Blog / Tin tức</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/contacts" class="menu-link">
+                            <i class="fa-solid fa-envelope-open-text"></i>Liên hệ / Tư vấn
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/reviews" class="menu-link">
+                            <i class="fa-solid fa-star"></i>Đánh giá
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin/blog" class="menu-link active">
+                            <i class="fa-solid fa-newspaper"></i>Blog / Tin tức
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <div class="nav-section">
                 <span class="nav-label">CẤU HÌNH GIAO DIỆN</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link"><i class="fa-solid fa-house-chimney-window"></i>Trang chủ</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/admin-home-config.jsp" class="menu-link">
+                            <i class="fa-solid fa-house-chimney-window"></i>Trang chủ
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <div style="margin-top: auto; padding-bottom: 24px;">
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/home" class="menu-link"><i class="fa-solid fa-globe"></i>Xem Website</a></li>
-                    <li><a href="${pageContext.request.contextPath}/logout" class="menu-link"><i class="fa-solid fa-power-off"></i>Đăng xuất</a></li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/home" class="menu-link">
+                            <i class="fa-solid fa-globe"></i>Xem Website
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="${pageContext.request.contextPath}/logout" class="menu-link">
+                            <i class="fa-solid fa-power-off"></i>Đăng xuất
+                        </a>
+                    </li>
                 </ul>
             </div>
         </aside>
@@ -247,7 +287,7 @@
                     <c:forEach begin="1" end="${totalPages}" var="i">
                         <a href="${pageContext.request.contextPath}/admin/blog?service=listAll&page=${i}&searchTitle=${searchTitle}&filterCat=${selectedCat}" 
                            class="btn-action ${currentPage == i ? 'active-page' : ''}" 
-                           style="width: 40px; height: 40px; font-weight: 700; ${currentPage == i ? 'background: var(--accent); color: white;' : ''}">
+                           style="width: 40px; height: 40px; font-weight: 700; ${currentPage == i ? 'background: #4318ff; color: white;' : ''}">
                             ${i}
                         </a>
                     </c:forEach>

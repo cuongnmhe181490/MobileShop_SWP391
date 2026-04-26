@@ -127,7 +127,7 @@
             <div class="nav-section">
                 <span class="nav-label">QUẢN LÝ BÁN HÀNG</span>
                 <ul class="sidebar-menu">
-                    <li><a href="${pageContext.request.contextPath}/admin/order-manage.jsp" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/orders" class="menu-link"><i class="fa-solid fa-receipt"></i>Đơn hàng</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/products" class="menu-link"><i class="fa-solid fa-boxes-stacked"></i>Sản phẩm</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/accounts" class="menu-link"><i class="fa-solid fa-user-gear"></i>Tài khoản</a></li>
                 </ul>
